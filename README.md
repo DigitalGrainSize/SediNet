@@ -1,4 +1,14 @@
 # SediNet
+
+ ______     ______     _____     __     __   __     ______     ______  
+/\  ___\   /\  ___\   /\  __-.  /\ \   /\ "-.\ \   /\  ___\   /\__  _\ 
+\ \___  \  \ \  __\   \ \ \/\ \ \ \ \  \ \ \-.  \  \ \  __\   \/_/\ \/ 
+ \/\_____\  \ \_____\  \ \____-  \ \_\  \ \_\\"\_\  \ \_____\    \ \_\ 
+  \/_____/   \/_____/   \/____/   \/_/   \/_/ \/_/   \/_____/     \/_/ 
+
+By Dr Daniel Buscombe
+daniel.buscombe@nau.edu
+
 Deep learning framework for optical granulometry (estimation of sedimentological variables from sediment imagery)
 
 Accompanies the paper:

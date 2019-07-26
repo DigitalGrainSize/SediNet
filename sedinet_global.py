@@ -1,6 +1,12 @@
 
-#https://sanjayasubedi.com.np/deeplearning/multioutput-keras/
-#https://github.com/jangedoo/age-gender-race-prediction/blob/master/notebook.ipynb
+# ______     ______     _____     __     __   __     ______     ______  
+#/\  ___\   /\  ___\   /\  __-.  /\ \   /\ "-.\ \   /\  ___\   /\__  _\ 
+#\ \___  \  \ \  __\   \ \ \/\ \ \ \ \  \ \ \-.  \  \ \  __\   \/_/\ \/ 
+# \/\_____\  \ \_____\  \ \____-  \ \_\  \ \_\\"\_\  \ \_____\    \ \_\ 
+#  \/_____/   \/_____/   \/____/   \/_/   \/_/ \/_/   \/_____/     \/_/ 
+#
+# By Dr Daniel Buscombe,
+# daniel.buscombe@nau.edu
 
 from glob import glob
 from sklearn.model_selection import train_test_split
