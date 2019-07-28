@@ -9,7 +9,7 @@
 By Dr Daniel Buscombe
 daniel.buscombe@nau.edu
 
-Deep learning framework for optical granulometry (estimation of sedimentological variables from sediment imagery)
+Deep learning framework for [optical granulometry](https://en.wikipedia.org/wiki/Optical_granulometry) (estimation of sedimentological variables from sediment imagery)
 
 Accompanies the paper:
 
@@ -17,23 +17,34 @@ Buscombe, D. (2019, in review). SediNet: a configurable deep learning model for 
 
 --------------------------------------------------------------------------------
 ## About SediNet
+A configurable machine-learning framework for estimating either (or both) continuous and categorical variables from a photographic image of clastic sediment.
 
-The motivating idea behind SediNet is community development of tools for information extraction from images of sediment. You ccan use SediNet "off-the-shelf", or other people's models, or configure it for your own purposes. You can even choose to contribute imagery back to the project, so we can build bigger and better models collaboratively. Within this package there are several examples of different ways it can be configured for estimating categorical variables and various numbers of continuous variables 
+SediNet can be configured and trained to estimate:
+* up to nine numeric grain-size metrics in pixels from a single input image. Grain size is then recovered using the physical size of a pixel (note that sedinet doesn't help you estimate that). Appropriate metrics include mean, median or any other percentile
+* equivalent sieve diameters directly from image features, without the need for area-to-mass conversion formulas and without even knowing the scale of one pixel. SediNet might be useful for other metrics such as sorting (standard deviation), skewness, etc
+* categorical variables such as grain shape, population, colour, etc
+
+The motivating idea behind SediNet is community development of tools for information extraction from images of sediment. You can use SediNet "off-the-shelf", or other people's models, or configure it for your own purposes. You can even choose to contribute imagery back to the project, so we can build bigger and better models collaboratively. Within this package there are several examples of different ways it can be configured for estimating categorical variables and various numbers of continuous variables 
+
+You can use the models in this repository for your purposes (and you might find them useful because they have been trained on large numbers of images). If that doesn't work for you:
 
 > You can train SediNet for your own purposes even on small datasets
 
-> However, you might also find any of these models useful for your purposes because they have been trained on large numbers of images
-
-> If you contribute your data, we can build bigger and better models
+> If you contribute your data, we can build bigger and better (more generic) models together
 
 
 ### How SediNet works
+
+Sedinet is a [deep learning](https://en.wikipedia.org/wiki/Deep_learning) model, which is a type of machine learning model that uses very large neural networks to automatically extract features from data to make predictions. For imagery, network layers typically use convolutions therefore the models are called [Convolutional Neural Networks](https://en.wikipedia.org/wiki/Convolutional_neural_network) or CNNs for short.
+
+CNNs have multiple processing layers (called [convolutional layers](https://machinelearningmastery.com/convolutional-layers-for-deep-learning-neural-networks/) or blocks) and nonlinear transformations (that include [batch normalization](https://en.wikipedia.org/wiki/Batch_normalization), [activation](https://en.wikipedia.org/wiki/Activation_function), and [dropout](https://en.wikipedia.org/wiki/Dropout_(neural_networks))), with the outputs from each layer passed as inputs to the next. The model architecture is summarised below:
+
 
 ![Fig3-sedinet_fig_ann2_v3](https://user-images.githubusercontent.com/3596509/61979684-59a79700-afa9-11e9-9605-4f893784f65b.png)
 
 --------------------------------------------------------------------------------
 ## Install
-You must have python 3, pip for python 3, git and conda. On Windows I recommend the latest Anaconda release. On Linux, git should come as standard and miniconda would be the way to go. Personally, I don't use conda but system builds (deb, yum, apt) within a virtual environment, but either way a VM of some description to contain SediNet would be a good idea. Mac users: ?
+You must have python 3, pip for python 3, git and conda. On Windows I recommend the latest [Anaconda](https://www.anaconda.com/distribution/) release. On Linux, git should come as standard and miniconda would be the way to go. Personally, I don't use conda but system builds (deb, yum, apt) within a virtual environment, but either way a VM of some description to contain SediNet would be a good idea. Mac users: ?
 
 Windows:
 ```
