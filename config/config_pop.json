@@ -1,0 +1,9 @@
+{
+  "base" : 20,
+  "N"  : 5,
+  "csvfile" : "dataset_population.csv",
+  "var"     : "pop", 
+  "numclass" : 6,
+  "res_folder": "grain_population",
+  "dropout": 0.2  
+}

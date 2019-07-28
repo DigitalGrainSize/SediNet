@@ -1,0 +1,9 @@
+{
+  "base" : 18,
+  "N"  : 3,
+  "csvfile" : "dataset_shape.csv",
+  "var"     : "shape", 
+  "numclass" : 4,
+  "res_folder": "grain_shape",
+  "dropout": 0.2    
+}

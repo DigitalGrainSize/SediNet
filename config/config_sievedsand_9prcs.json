@@ -1,0 +1,17 @@
+{
+  "base" : 24,
+  "csvfile" : "data_pescadero.csv",
+  "P5" : "P5",
+  "P10": "P10", 
+  "P16": "P16", 
+  "P25": "P25", 
+  "P50": "P50",
+  "P75": "P75", 
+  "P84": "P84", 
+  "P90": "P90", 
+  "P95": "P95",                  
+  "res_folder": "grain_size_sieved_sands",
+  "name"  : "sievesand_9prcs",
+  "dropout": 0.5,  
+  "add_bn": true  
+}
