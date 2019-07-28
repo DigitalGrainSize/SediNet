@@ -32,6 +32,8 @@ def estimate_continuous(vars, csvfile, base, name, res_folder, add_bn, dropout):
    df = pd.read_csv(csvfile)
    df['files'] = [k.strip() for k in df['files']]
    df['files'] = [os.getcwd()+os.sep+f.replace('\\',os.sep) for f in df['files']]    
+   
+   train_idx = np.arange(len(df))
 
    ##==============================================
    ## create training and testing file generators, set the weights path, plot the model, and create a callback list for model training   
@@ -70,7 +72,8 @@ def estimate_continuous(vars, csvfile, base, name, res_folder, add_bn, dropout):
       ##==============================================
       ## create a SediNet model to estimate sediment category
       model = make_cont_sedinet(base, vars, add_bn, dropout)
-      model.load_weights(weights_path)
+      model.load_weights(os.getcwd()+os.sep+'res'+os.sep+res_folder+os.sep+weights_path)
+      models.append(model)
 
    for v in vars:
       exec(v+'_PT = []')
@@ -85,8 +88,12 @@ def estimate_continuous(vars, csvfile, base, name, res_folder, add_bn, dropout):
       else:
          exec(vars[0]+'_PT.append(np.asarray(np.squeeze(tmp)))') #.argmax(axis=-1))')
           
-   for k in range(len(vars)):  
-      exec(vars[k]+'_predT = np.squeeze(np.mean(np.asarray('+vars[k]+'_PT), axis=0))')
+   if len(vars)>1:
+      for k in range(len(vars)):  
+         exec(vars[k]+'_predT = np.squeeze(np.mean(np.asarray('+vars[k]+'_PT), axis=0))')
+   else:   
+      exec(vars[0]+'_predT = np.squeeze(np.mean(np.asarray('+vars[0]+'_PT), axis=0))')
+       
 
    if len(vars)==9:    
       nrows = 3; ncols = 3
@@ -113,10 +120,10 @@ def estimate_continuous(vars, csvfile, base, name, res_folder, add_bn, dropout):
    for k in range(1,1+(nrows*ncols)):
       plt.subplot(nrows,ncols,k)
       plt.plot(eval(vars[k-1]+'_trueT'), eval(vars[k-1]+'_predT'), 'ko', markersize=3)
-      plt.plot(eval(vars[k-1]+'_true'), eval(vars[k-1]+'_pred'), 'bx', markersize=5)
+      #plt.plot(eval(vars[k-1]+'_true'), eval(vars[k-1]+'_pred'), 'bx', markersize=5)
       plt.plot([5, 1000], [5, 1000], 'k', lw=2)
       plt.xscale('log'); plt.yscale('log')
-      plt.text(11,700,'Test : '+str(np.mean(100*(np.abs(eval(vars[k-1]+'_pred') - eval(vars[k-1]+'_true')) / eval(vars[k-1]+'_true'))))[:5]+' %',  fontsize=8, color='b')
+      #plt.text(11,700,'Test : '+str(np.mean(100*(np.abs(eval(vars[k-1]+'_pred') - eval(vars[k-1]+'_true')) / eval(vars[k-1]+'_true'))))[:5]+' %',  fontsize=8, color='b')
       plt.text(11,1000,'Train : '+str(np.mean(100*(np.abs(eval(vars[k-1]+'_predT') - eval(vars[k-1]+'_trueT')) / eval(vars[k-1]+'_trueT'))))[:5]+' %', fontsize=8)
       plt.xlim(10,1300); plt.ylim(10,1300)
       plt.title(r''+labs[k-1]+') '+vars[k-1], fontsize=8, loc='left')
@@ -125,14 +132,6 @@ def estimate_continuous(vars, csvfile, base, name, res_folder, add_bn, dropout):
    plt.savefig(name+str(IM_HEIGHT)+'_batch'+str(batch_size)+'_xy-base'+str(base)+'_predict.png', dpi=300, bbox_inches='tight')
    plt.close()
    del fig   
-
-
-
-
-
-
-
-   
 
 ###===================================================
 def run_continuous_training(vars, csvfile, base, name, res_folder, dropout, add_bn):

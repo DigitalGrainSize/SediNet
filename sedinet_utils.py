@@ -13,7 +13,7 @@
 
 import gc, os, shutil
 ## use the first available GPU
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 ## to use the CPU (not recommended):
 #os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
@@ -238,10 +238,12 @@ def predict_test_train_cont(df, train_idx, test_idx, vars, models, weights_path,
        else:
           exec(vars[0]+'_PT.append(np.asarray(np.squeeze(tmp)))') #.argmax(axis=-1))')
           
-
-    for k in range(len(vars)):  
-       exec(vars[k]+'_predT = np.squeeze(np.mean(np.asarray('+vars[k]+'_PT), axis=0))')
-
+    if len(vars)>1:
+       for k in range(len(vars)):  
+          exec(vars[k]+'_predT = np.squeeze(np.mean(np.asarray('+vars[k]+'_PT), axis=0))')
+    else:   
+       exec(vars[0]+'_predT = np.squeeze(np.mean(np.asarray('+vars[0]+'_PT), axis=0))')
+       
     ## make predictions on testing data
     if len(vars)==1:    
        test_gen = get_data_generator_1vars(df, test_idx, False, vars, len(test_idx))

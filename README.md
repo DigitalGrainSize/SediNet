@@ -182,6 +182,77 @@ min_lr = 0.0001 #(minimum learning rate. lambda in the manuscript)
 factor = 0.8 #(the factor applied to the learning rate when the appropriate triggers are made - see paper)
 ```
 
+### Predict a set of images
+
+#### Continuous
+
+##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a small population of beach sands
+```
+python sedinet_predict_continuous.py -c config_sievedsand_sieve.json
+```
+
+![sievesand_sieve512_batch8_xy-base22_predict](https://user-images.githubusercontent.com/3596509/62002111-a4610600-b0b2-11e9-9feb-5c6e34fe517e.png)
+
+
+##### Sediment grain size prediction (sieve size plus 4 percentiles of the cumulative distribution) on a small population of beach sands
+
+```
+python sedinet_predict_continuous.py -c config_sievedsand_sieve_plus.json
+```
+
+![sievesand_sieve_plus512_batch8_xy-base18_predict](https://user-images.githubusercontent.com/3596509/62002149-3bc65900-b0b3-11e9-9049-7d39b7452e27.png)
+
+
+##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a small population of beach sands
+
+```
+python sedinet_predict_continuous.py -c config_sievedsand_9prcs.json
+```
+
+![sievesand_9prcs512_batch8_xy-base26_predict](https://user-images.githubusercontent.com/3596509/62002234-8c8a8180-b0b4-11e9-84d6-7bd46607f04a.png)
+
+##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on generic sands
+
+```
+python sedinet_predict_continuous.py -c config_sand.json
+```
+
+![sand_generic_9prcs512_batch8_xy-base16_predict](https://user-images.githubusercontent.com/3596509/62002419-6e268500-b0b8-11e9-8c1a-83fc54e9d66a.png)
+
+
+##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on generic gravels
+
+```
+python sedinet_predict_continuous.py -c config_gravel.json
+```
+
+![gravel_generic_9prcs512_batch8_xy-base16_predict](https://user-images.githubusercontent.com/3596509/62002214-46352280-b0b4-11e9-84fc-65e66116386b.png)
+
+
+##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a large 400 image dataset
+
+```
+python sedinet_predict_continuous.py -c config_9percentiles.json
+```
+
+
+#### Categorical
+
+##### Use SediNet to estimate sediment population 
+
+```
+python sedinet_predict_categorical.py -c config_pop.json
+```
+
+
+##### Use SediNet to estimate sediment shape 
+
+```
+python sedinet_predict_categorical.py -c config_shape.json
+```
+
+
+
 ### How to use on your own data
 
 #### Train your own SediNet for continuous variable prediction
