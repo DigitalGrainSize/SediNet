@@ -123,6 +123,7 @@ python sedinet_predict_continuous.py -c config_9percentiles.json
 ```
 python sedinet_predict_categorical.py -c config_pop.json
 ```
+
 ![pop_base22_model_checkpoint_cm_predict](https://user-images.githubusercontent.com/3596509/62009407-a1e2c880-b113-11e9-919b-60d57df65eb4.png)
 
 
@@ -299,10 +300,10 @@ factor = 0.8 #(the factor applied to the learning rate when the appropriate trig
 The SediNet training function ```train_sedinet_continuous.py``` is set up to predict arbitrary numbers of continuous variables. All your specific information (what data set to use, what to predict, etc) is contained in the config file and called the same way as above. For example:
 
 ```
-python train_sedinet_continuous.py -c config_custom.json
+python train_sedinet_continuous.py -c config_custom_4prcs.json
 ```
 
-where ```config_custom.json``` has ben put together by you in the config folder like the following example that would estimate the mean grain size and 4 arbitrary percentiles:
+where ```config_custom_4prcs.json``` has ben put together by you in the config folder like the following example that would estimate the mean grain size and 4 arbitrary percentiles:
 
 ```
 {
@@ -327,7 +328,7 @@ where ```config_custom.json``` has ben put together by you in the config folder 
 
 #### Train your own SediNet for categorical prediction
 
-Put together a config file in the config folder and populate it like this example:
+Put together a config file in the config folder (called, say ```config_custom_colour.json```) and populate it like this example:
 
 ```
 {
@@ -342,6 +343,21 @@ Put together a config file in the config folder and populate it like this exampl
 ```
 
 * Note that categories in the csvfile should be numeric integers increasing from zero
+
+
+#### Using your model
+
+Just the same way as the examples. For categorical ...
+
+```
+python sedinet_predict_categorical.py -c config_custom_colour.json
+```
+
+and continuous ...
+
+```
+python sedinet_predict_continuous.py -c config_custom_4prcs.json
+```
 
 --------------------------------------------------------------------------------
 
