@@ -38,14 +38,15 @@ if __name__ == '__main__':
     base    = int(config["base"]) #minimum number of convolutions in a sedinet convolutional block
     csvfile = config["csvfile"] #csvfile containing image names and class values
     res_folder = config["res_folder"] #folder containing csv file and that will contain model outputs
-    name = config["name"] #name prefix for output files
     var = config["var"] # column name in the csv you wish to estimate
-                    
+    numclass = config["numclass"] # number of classes
+    dropout = float(config["dropout"]) 
+                            
     ###==================================================
     ID_MAP = dict(zip(np.arange(numclass), [str(k) for k in range(numclass)]))
     csvfile = res_folder+os.sep+csvfile
 
-    estimate_categorical(var, csvfile, base, ID_MAP, res_folder)
+    estimate_categorical(var, csvfile, base, ID_MAP, res_folder, dropout)
 
 
       

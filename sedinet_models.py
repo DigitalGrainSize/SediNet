@@ -13,14 +13,54 @@
 from sedinet_utils import *
 
     
-####===================================================
-#def estimate_categorical(var, csvfile, base, ID_MAP, res_folder):
-#   """
-#   This function uses a SediNet model for categorical prediction
-#   """
-#   models = []
-#   for base in [base-2,base,base+2]:
+###===================================================
+def estimate_categorical(var, csvfile, base, ID_MAP, res_folder, dropout):
+   """
+   This function uses a SediNet model for categorical prediction
+   """
+   ###===================================================
+   ## read the data set in, clean and modify the pathnames so they are absolute
+   df = pd.read_csv(csvfile)
+   df['files'] = [k.strip() for k in df['files']]
+   df['files'] = [os.getcwd()+os.sep+f.replace('\\',os.sep) for f in df['files']]    
    
+   train_idx = np.arange(len(df))
+
+   train_gen = get_data_generator_1image(df, train_idx, True, ID_MAP, var, len(df))
+
+   models = []
+   for base in [base-2,base,base+2]:
+      weights_path = var+"_base"+str(base)+"_model_checkpoint.hdf5"
+      ##==============================================
+      ## create a SediNet model to estimate sediment category
+      model = make_cat_sedinet(base, ID_MAP, dropout)
+      model.load_weights(os.getcwd()+os.sep+'res'+os.sep+res_folder+os.sep+weights_path)
+      models.append(model)
+
+   x_train, (trueT)= next(train_gen) 
+   trueT = np.squeeze(np.asarray(trueT).argmax(axis=-1) )
+         
+   P = []; PT = []      
+   for model in models:   
+      predT = model.predict(x_train, batch_size=1) 
+      predT = np.asarray(predT).argmax(axis=-1)      
+      PT.append(predT)
+      
+   predT = np.squeeze(mode(np.asarray(PT), axis=0)[0])
+      
+   ##==============================================
+   ## print a classification report to screen, showing f1, precision, recall and accuracy
+   print("==========================================")
+   print("Classification report for "+var)
+   print(classification_report(trueT, predT))
+   
+   classes = np.arange(len(ID_MAP))
+   ##==============================================
+   ## create figures showing confusion matrices for data set
+   plot_confmat(predT, trueT, var+'T',classes)  
+   plt.savefig(weights_path.replace('.hdf5','_cm_predict.png'), dpi=300, bbox_inches='tight') 
+   plt.close('all')   
+
 
 ###===================================================
 def estimate_continuous(vars, csvfile, base, name, res_folder, add_bn, dropout):

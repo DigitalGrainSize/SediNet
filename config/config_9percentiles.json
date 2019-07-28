@@ -1,5 +1,5 @@
 {
-  "base" : 22,
+  "base" : 16,
   "csvfile" : "data_set_400images.csv",
   "P5" : "P5",
   "P10": "P10", 

@@ -1,4 +1,4 @@
-# SediNet
+# SediNet: Build your own sediment descriptor
 
 <!-- ______     ______     _____     __     __   __     ______     ______  -->
 <!--/\  ___\   /\  ___\   /\  __-.  /\ \   /\ "-.\ \   /\  ___\   /\__  _\ -->
@@ -15,17 +15,24 @@ Accompanies the paper:
 
 Buscombe, D. (2019, in review). SediNet: a configurable deep learning model for mixed qualitative and quantitative optical granulometry. Submitted to Earth Surface Processes and Landforms
 
-### About SediNet
+--------------------------------------------------------------------------------
+## About SediNet
 
-The idea behind SediNet is that you configure it for your own purposes, so there are several examples of different ways it can be configured for estimating categorical variables and various numbers of continuous variables 
+The motivating idea behind SediNet is community development of tools for information extraction from images of sediment. You ccan use SediNet "off-the-shelf", or other people's models, or configure it for your own purposes. You can even choose to contribute imagery back to the project, so we can build bigger and better models collaboratively. Within this package there are several examples of different ways it can be configured for estimating categorical variables and various numbers of continuous variables 
 
-However, you might also find any of these models useful for your purposes because they have been trained on large numbers of images
+> You can train SediNet for your own purposes even on small datasets
 
+> However, you might also find any of these models useful for your purposes because they have been trained on large numbers of images
+
+> If you contribute your data, we can build bigger and better models
+
+
+### How SediNet works
 
 ![Fig3-sedinet_fig_ann2_v3](https://user-images.githubusercontent.com/3596509/61979684-59a79700-afa9-11e9-9605-4f893784f65b.png)
 
-
-### Install
+--------------------------------------------------------------------------------
+## Install
 You must have python 3, pip for python 3, git and conda. On Windows I recommend the latest Anaconda release. On Linux, git should come as standard and miniconda would be the way to go. Personally, I don't use conda but system builds (deb, yum, apt) within a virtual environment, but either way a VM of some description to contain SediNet would be a good idea. Mac users: ?
 
 Windows:
@@ -53,13 +60,113 @@ conda activate sedinet
 (Later, when you're done ... ```conda deactivate sedinet```)
 
 
-### If you have an issue, comment or suggestion ...
-Please use the 'issues' tab so everyone can see the question and answer. Please do not email me directly. Thanks
+#### Install and instructions for developers
+If you wish to contribute to the development of this project (yes please!) it is better that you first fork this repository to your own github, then work on changes, and submit a pull request. Before submitting, please test your code changes by running a full set of tests:
+
+```
+python sedinet_predict_continuous.py -c config_sievedsand_sieve.json
+python sedinet_predict_continuous.py -c config_sievedsand_9prcs.json
+python sedinet_predict_continuous.py -c config_9percentiles.json
+python sedinet_predict_categorical.py -c config_pop.json
+python sedinet_predict_categorical.py -c config_shape.json
+python sedinet_predict_continuous.py -c config_sand.json
+python sedinet_predict_continuous.py -c config_gravel.json
+python sedinet_predict_continuous.py -c config_sievedsand_sieve_plus.json
+```
+
+then verifying they all executed wthout error. Please then delete all outputs from these tests
+
+You can also contribute imagery this way, but if you do so, also please provide a dataset (csv file) that goes along with the imagery, a file that describes the data with your name and contact details, (and you should also thank yourself in this README!)
 
 
-### Replicate the paper results
+--------------------------------------------------------------------------------
+## Replicate the paper results
 
 (Note that you may get slightly different results than in the paper because training and testing files are randomly selected with a randomness that can't fully be controlled with a seed)
+
+--------------------------------------------------------------------------------
+### Predict grain size/shape/population from a set of images
+
+--------------------------------------------------------------------------------
+#### Continuous
+
+##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a small population of beach sands
+```
+python sedinet_predict_continuous.py -c config_sievedsand_sieve.json
+```
+
+![sievesand_sieve512_batch8_xy-base22_predict](https://user-images.githubusercontent.com/3596509/62002111-a4610600-b0b2-11e9-9feb-5c6e34fe517e.png)
+
+
+##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a small population of beach sands
+
+```
+python sedinet_predict_continuous.py -c config_sievedsand_9prcs.json
+```
+
+![sievesand_9prcs512_batch8_xy-base26_predict](https://user-images.githubusercontent.com/3596509/62002234-8c8a8180-b0b4-11e9-84d6-7bd46607f04a.png)
+
+
+##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a large 400 image dataset
+
+```
+python sedinet_predict_continuous.py -c config_9percentiles.json
+```
+
+![global_9prcs512_batch8_xy-base18_predict](https://user-images.githubusercontent.com/3596509/62009719-4ca8b600-b117-11e9-87f0-4935b89d864c.png)
+
+--------------------------------------------------------------------------------
+#### Categorical
+
+##### Use SediNet to estimate sediment population 
+
+```
+python sedinet_predict_categorical.py -c config_pop.json
+```
+![pop_base22_model_checkpoint_cm_predict](https://user-images.githubusercontent.com/3596509/62009407-a1e2c880-b113-11e9-919b-60d57df65eb4.png)
+
+
+##### Use SediNet to estimate sediment shape 
+
+```
+python sedinet_predict_categorical.py -c config_shape.json
+```
+
+![shape_base20_model_checkpoint_cm_predict](https://user-images.githubusercontent.com/3596509/62009373-43b5e580-b113-11e9-8dc7-a3a5bf7d1969.png)
+
+
+--------------------------------------------------------------------------------
+## Other Examples
+
+##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on generic sands
+
+```
+python sedinet_predict_continuous.py -c config_sand.json
+```
+
+![sand_generic_9prcs512_batch8_xy-base16_predict](https://user-images.githubusercontent.com/3596509/62002419-6e268500-b0b8-11e9-8c1a-83fc54e9d66a.png)
+
+
+##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on generic gravels
+
+```
+python sedinet_predict_continuous.py -c config_gravel.json
+```
+
+![gravel_generic_9prcs512_batch8_xy-base16_predict](https://user-images.githubusercontent.com/3596509/62002214-46352280-b0b4-11e9-84fc-65e66116386b.png)
+
+
+##### Sediment grain size prediction (sieve size plus 4 percentiles of the cumulative distribution) on a small population of beach sands
+
+```
+python sedinet_predict_continuous.py -c config_sievedsand_sieve_plus.json
+```
+
+![sievesand_sieve_plus512_batch8_xy-base18_predict](https://user-images.githubusercontent.com/3596509/62002149-3bc65900-b0b3-11e9-9049-7d39b7452e27.png)
+
+
+--------------------------------------------------------------------------------
+## Train the models yourself
 
 #### Continuous
 
@@ -136,6 +243,9 @@ python train_sedinet_continuous.py -c config_sand.json
 
 ![sand_generic_9prcs512_batch8_xy-base16_log](https://user-images.githubusercontent.com/3596509/62001865-b80a6d80-b0ae-11e9-8dcd-0c3c3030c366.png)
 
+--------------------------------------------------------------------------------
+## More details about inputs and using this tool on your own data
+
 ### The config file
 
 A typical SediNet model configuration for predicting categorical variables is:
@@ -181,77 +291,6 @@ min_lr = 0.0001 #(minimum learning rate. lambda in the manuscript)
 
 factor = 0.8 #(the factor applied to the learning rate when the appropriate triggers are made - see paper)
 ```
-
-### Predict a set of images
-
-#### Continuous
-
-##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a small population of beach sands
-```
-python sedinet_predict_continuous.py -c config_sievedsand_sieve.json
-```
-
-![sievesand_sieve512_batch8_xy-base22_predict](https://user-images.githubusercontent.com/3596509/62002111-a4610600-b0b2-11e9-9feb-5c6e34fe517e.png)
-
-
-##### Sediment grain size prediction (sieve size plus 4 percentiles of the cumulative distribution) on a small population of beach sands
-
-```
-python sedinet_predict_continuous.py -c config_sievedsand_sieve_plus.json
-```
-
-![sievesand_sieve_plus512_batch8_xy-base18_predict](https://user-images.githubusercontent.com/3596509/62002149-3bc65900-b0b3-11e9-9049-7d39b7452e27.png)
-
-
-##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a small population of beach sands
-
-```
-python sedinet_predict_continuous.py -c config_sievedsand_9prcs.json
-```
-
-![sievesand_9prcs512_batch8_xy-base26_predict](https://user-images.githubusercontent.com/3596509/62002234-8c8a8180-b0b4-11e9-84d6-7bd46607f04a.png)
-
-##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on generic sands
-
-```
-python sedinet_predict_continuous.py -c config_sand.json
-```
-
-![sand_generic_9prcs512_batch8_xy-base16_predict](https://user-images.githubusercontent.com/3596509/62002419-6e268500-b0b8-11e9-8c1a-83fc54e9d66a.png)
-
-
-##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on generic gravels
-
-```
-python sedinet_predict_continuous.py -c config_gravel.json
-```
-
-![gravel_generic_9prcs512_batch8_xy-base16_predict](https://user-images.githubusercontent.com/3596509/62002214-46352280-b0b4-11e9-84fc-65e66116386b.png)
-
-
-##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a large 400 image dataset
-
-```
-python sedinet_predict_continuous.py -c config_9percentiles.json
-```
-
-
-#### Categorical
-
-##### Use SediNet to estimate sediment population 
-
-```
-python sedinet_predict_categorical.py -c config_pop.json
-```
-
-
-##### Use SediNet to estimate sediment shape 
-
-```
-python sedinet_predict_categorical.py -c config_shape.json
-```
-
-
 
 ### How to use on your own data
 
@@ -304,10 +343,20 @@ Put together a config file in the config folder and populate it like this exampl
 
 * Note that categories in the csvfile should be numeric integers increasing from zero
 
+--------------------------------------------------------------------------------
+
+## Other things
+
+### If you have an issue, comment or suggestion ...
+Please use the 'issues' tab so everyone can see the question and answer. Please do not email me directly. Thanks
 
 ### Contribute your data!
 If you have data (images and corresponding labels or grain size information) you would like to contribute, please submit a pull request or email me!
 
+### Please cite
+If you find this useful for your research please cite this paper:
+
+> Buscombe, D. (2019, in review). SediNet: a configurable deep learning model for mixed qualitative and quantitative optical granulometry. Submitted to Earth Surface Processes and Landforms
 
 ### Acknowledgements
 Thanks to the following individuals for donating imagery:
