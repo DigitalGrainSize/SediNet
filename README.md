@@ -69,6 +69,12 @@ conda env create -f conda_env/sedinet.yml
 conda activate sedinet
 ```
 
+then finally
+
+```
+pip install Image
+```
+
 (Later, when you're done ... ```conda deactivate sedinet```)
 
 
@@ -86,7 +92,7 @@ python sedinet_predict_continuous.py -c config_gravel.json
 python sedinet_predict_continuous.py -c config_sievedsand_sieve_plus.json
 ```
 
-then verifying they all executed wthout error. Please then delete all outputs from these tests
+then verifying they all executed without error. Please then delete all outputs from these tests
 
 You can also contribute imagery this way, but if you do so, also please provide a dataset (csv file) that goes along with the imagery, a file that describes the data with your name and contact details, (and you should also thank yourself in this README!)
 
