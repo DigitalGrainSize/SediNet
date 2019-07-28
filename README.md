@@ -162,24 +162,25 @@ A typical SediNet model configuration for predicting continuous variables is:
 
 Contains values for defaults that you may change. They are listed in order of likelihood that you might change them:
 
-TRAIN_TEST_SPLIT = 0.5  (the train/test split e.g. 0.5 = 50% train, 0.3 = 30% train, etc)
+```
+TRAIN_TEST_SPLIT = 0.5  #(the train/test split e.g. 0.5 = 50% train, 0.3 = 30% train, etc)
 
-IM_HEIGHT = 512 (size of image in pixels. keep this consistent in training and application)
+IM_HEIGHT = 512 #(size of image in pixels. keep this consistent in training and application)
 
 IM_WIDTH = IM_HEIGHT
 
-num_epochs = 100 (max. number of training epics)
+num_epochs = 100 #(max. number of training epics)
 
-batch_size = 8 (number of images to feed the network per step in epoch)
+batch_size = 8 #(number of images to feed the network per step in epoch)
  
 valid_batch_size = batch_size
 
-epsilon = 0.0001 (a tolerance for the training. Do not change until you've researched its effects)
+epsilon = 0.0001 #(a tolerance for the training. Do not change until you've researched its effects)
 
-min_lr = 0.0001 (minimum learning rate. lambda in the manuscript)
+min_lr = 0.0001 #(minimum learning rate. lambda in the manuscript)
 
-factor = 0.8 (the factor applied to the learning rate when the appropriate triggers are made - see paper)
-
+factor = 0.8 #(the factor applied to the learning rate when the appropriate triggers are made - see paper)
+```
 
 ### How to use on your own data
 
@@ -203,7 +204,9 @@ where ```config_custom.json``` has ben put together by you in the config folder 
   "P60": "P60", 
   "P80": "P80", 
   "res_folder": "my_custom_model",
-  "name"  : "custom_4prcs"
+  "name"  : "custom_4prcs",
+  "dropout": 0.5,
+  "apply_bn": true  
 }
 ```
 
@@ -214,17 +217,7 @@ where ```config_custom.json``` has ben put together by you in the config folder 
 
 #### Train your own SediNet for categorical prediction
 
-Put together a config file in the config folder and populate it with the following fields:
-
-* base:
-* N:
-* csvfile:
-* var:
-* numclass:
-* res_folder: 
-
-
-Example:
+Put together a config file in the config folder and populate it like this example:
 
 ```
 {
@@ -233,7 +226,8 @@ Example:
   "csvfile" : "dataset_colour.csv",
   "var"     : "colour", 
   "numclass" : 6,
-  "res_folder": "grain_colour"
+  "res_folder": "grain_colour",
+  "dropout": 0.5
 }
 ```
 
