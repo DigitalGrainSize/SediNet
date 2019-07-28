@@ -12,12 +12,133 @@
 # import libraries
 from sedinet_utils import *
 
+    
+####===================================================
+#def estimate_categorical(var, csvfile, base, ID_MAP, res_folder):
+#   """
+#   This function uses a SediNet model for categorical prediction
+#   """
+#   models = []
+#   for base in [base-2,base,base+2]:
+   
+
+###===================================================
+def estimate_continuous(vars, csvfile, base, name, res_folder, add_bn, dropout):
+   """
+   This function uses a SediNet model for continuous prediction
+   """
+   ###===================================================
+   ## read the data set in, clean and modify the pathnames so they are absolute
+   df = pd.read_csv(csvfile)
+   df['files'] = [k.strip() for k in df['files']]
+   df['files'] = [os.getcwd()+os.sep+f.replace('\\',os.sep) for f in df['files']]    
+
+   ##==============================================
+   ## create training and testing file generators, set the weights path, plot the model, and create a callback list for model training   
+   if len(vars)==1:        
+      train_gen = get_data_generator_1vars(df, train_idx, True, vars, len(df))
+   elif len(vars)==2:        
+      train_gen = get_data_generator_2vars(df, train_idx, True, vars, len(df))
+   elif len(vars)==3:        
+      train_gen = get_data_generator_3vars(df, train_idx, True, vars, len(df))
+   elif len(vars)==4:        
+      train_gen = get_data_generator_4vars(df, train_idx, True, vars, len(df))
+   elif len(vars)==5:        
+      train_gen = get_data_generator_5vars(df, train_idx, True, vars, len(df))
+   elif len(vars)==6:        
+      train_gen = get_data_generator_6vars(df, train_idx, True, vars, len(df))
+   elif len(vars)==7:        
+      train_gen = get_data_generator_7vars(df, train_idx, True, vars, len(df))
+   elif len(vars)==8:        
+      train_gen = get_data_generator_8vars(df, train_idx, True, vars, len(df))
+   elif len(vars)==9:        
+      train_gen = get_data_generator_9vars(df, train_idx, True, vars, len(df))
+
+
+   x_train, tmp = next(train_gen)   
+   if len(vars)>1:    
+      counter = 0
+      for v in vars:
+         exec(v+'_trueT = np.squeeze(tmp[counter])')
+         counter +=1
+   else:
+      exec(vars[0]+'_trueT = np.squeeze(tmp)')
+       
+   models = []
+   for base in [base-2,base,base+2]:
+      weights_path = name+"_base"+str(base)+"_model_checkpoint.hdf5"
+      ##==============================================
+      ## create a SediNet model to estimate sediment category
+      model = make_cont_sedinet(base, vars, add_bn, dropout)
+      model.load_weights(weights_path)
+
+   for v in vars:
+      exec(v+'_PT = []')
+   #PT = []      
+   for model in models:   
+      tmp = model.predict(x_train, batch_size=1)
+      if len(vars)>1:    
+         counter = 0
+         for v in vars:
+            exec(v+'_PT.append(np.squeeze(tmp[counter]))')
+            counter +=1
+      else:
+         exec(vars[0]+'_PT.append(np.asarray(np.squeeze(tmp)))') #.argmax(axis=-1))')
+          
+   for k in range(len(vars)):  
+      exec(vars[k]+'_predT = np.squeeze(np.mean(np.asarray('+vars[k]+'_PT), axis=0))')
+
+   if len(vars)==9:    
+      nrows = 3; ncols = 3
+   elif len(vars)==8:    
+      nrows = 4; ncols = 2
+   elif len(vars)==7:    
+      nrows = 4; ncols = 2           
+   elif len(vars)==6:    
+      nrows = 3; ncols = 2
+   elif len(vars)==5:    
+      nrows = 3; ncols = 2       
+   elif len(vars)==4:    
+      nrows = 2; ncols = 2       
+   elif len(vars)==3:    
+      nrows = 3; ncols = 1      
+   elif len(vars)==2:    
+      nrows = 2; ncols = 1      
+   elif len(vars)==1:    
+      nrows = 1; ncols = 1
+       
+   ## make a plot                  
+   fig = plt.figure(figsize=(4*nrows,4*ncols))
+   labs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+   for k in range(1,1+(nrows*ncols)):
+      plt.subplot(nrows,ncols,k)
+      plt.plot(eval(vars[k-1]+'_trueT'), eval(vars[k-1]+'_predT'), 'ko', markersize=3)
+      plt.plot(eval(vars[k-1]+'_true'), eval(vars[k-1]+'_pred'), 'bx', markersize=5)
+      plt.plot([5, 1000], [5, 1000], 'k', lw=2)
+      plt.xscale('log'); plt.yscale('log')
+      plt.text(11,700,'Test : '+str(np.mean(100*(np.abs(eval(vars[k-1]+'_pred') - eval(vars[k-1]+'_true')) / eval(vars[k-1]+'_true'))))[:5]+' %',  fontsize=8, color='b')
+      plt.text(11,1000,'Train : '+str(np.mean(100*(np.abs(eval(vars[k-1]+'_predT') - eval(vars[k-1]+'_trueT')) / eval(vars[k-1]+'_trueT'))))[:5]+' %', fontsize=8)
+      plt.xlim(10,1300); plt.ylim(10,1300)
+      plt.title(r''+labs[k-1]+') '+vars[k-1], fontsize=8, loc='left')
+                    
+   #plt.show()
+   plt.savefig(name+str(IM_HEIGHT)+'_batch'+str(batch_size)+'_xy-base'+str(base)+'_predict.png', dpi=300, bbox_inches='tight')
+   plt.close()
+   del fig   
+
+
+
+
+
+
+
+   
+
 ###===================================================
 def run_continuous_training(vars, csvfile, base, name, res_folder, dropout, add_bn):
    """
    This function generates, trains and evaluates a SediNet model for continuous prediction
    """
-
    # ensemble models tend to be more stable so below trains 3 models using different random
    # batches of images and slightly different base values
    models = []
@@ -50,7 +171,6 @@ def run_categorical_training(N, var, csvfile, base, ID_MAP, res_folder, dropout)
    """
    This function generates, trains and evaluates a SediNet model for categorical prediction
    """
-
    # ensemble models tend to be more stable so below trains 3 models using different random
    # batches of images and slightly different base values
    models = []
@@ -102,8 +222,7 @@ def train_sedinet_cont(model, df, train_idx, test_idx, base, name, vars):
     This function trains an implementation of SediNet
     """
     ##==============================================
-    ## create training and testing file generators, set the weights path, plot the model, and create a callback list for model training
-    
+    ## create training and testing file generators, set the weights path, plot the model, and create a callback list for model training   
     if len(vars)==1:        
        train_gen = get_data_generator_1vars(df, train_idx, True, vars, batch_size)
        valid_gen = get_data_generator_1vars(df, test_idx, True, vars, valid_batch_size)    

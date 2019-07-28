@@ -17,6 +17,11 @@ Buscombe, D. (2019, in review). SediNet: a configurable deep learning model for 
 
 ### About SediNet
 
+The idea behind SediNet is that you configure it for your own purposes, so there are several examples of different ways it can be configured for estimating categorical variables and various numbers of continuous variables 
+
+However, you might also find any of these models useful for your purposes because they have been trained on large numbers of images
+
+
 ![Fig3-sedinet_fig_ann2_v3](https://user-images.githubusercontent.com/3596509/61979684-59a79700-afa9-11e9-9605-4f893784f65b.png)
 
 
@@ -64,11 +69,15 @@ Please use the 'issues' tab so everyone can see the question and answer. Please 
 python train_sedinet_continuous.py -c config_sievedsand_9prcs.json
 ```
 
+![sievesand_9prcs512_batch8_xy-base26_log](https://user-images.githubusercontent.com/3596509/62001390-40374580-b0a4-11e9-8803-1aabce95dab9.png)
+
 ##### Train SediNet for sediment mid sieve size on a small population of beach sands
 
 ```
 python train_sedinet_continuous.py -c config_sievedsand_sieve.json
 ```
+
+![sievesand_sieve512_batch8_xy-base22_log](https://user-images.githubusercontent.com/3596509/62001432-5bef1b80-b0a5-11e9-9a74-c613b1ad85d5.png)
 
 ##### Train SediNet for sediment grain size prediction (9 percentiles of the cumulative distribution) on a large population of 400 images
 
@@ -76,6 +85,7 @@ python train_sedinet_continuous.py -c config_sievedsand_sieve.json
 python train_sedinet_continuous.py -c config_9percentiles.json
 ```
 
+![global_9prcs512_batch8_xy-base24_log](https://user-images.githubusercontent.com/3596509/62001561-64952100-b0a8-11e9-973b-b496f4e1dfee.png)
 
 #### Categorical
 
@@ -85,11 +95,19 @@ python train_sedinet_continuous.py -c config_9percentiles.json
 python train_sedinet_categorical.py -c config_pop.json
 ```
 
+![pop_base22_model_checkpoint_cmT](https://user-images.githubusercontent.com/3596509/62001568-8ee6de80-b0a8-11e9-8e13-634a614e979b.png)
+
+![pop_base22_model_checkpoint_cm](https://user-images.githubusercontent.com/3596509/62001571-927a6580-b0a8-11e9-89e1-10b88b760ceb.png)
+
 ##### Train SediNet for sediment shape prediction
 
 ```
 python train_sedinet_categorical.py -c config_shape.json
 ```
+
+![shape_base20_model_checkpoint_cmT](https://user-images.githubusercontent.com/3596509/62001821-d885f800-b0ad-11e9-9082-dca57913f8f8.png)
+
+![shape_base20_model_checkpoint_cm](https://user-images.githubusercontent.com/3596509/62001822-da4fbb80-b0ad-11e9-846e-aa4d7cbd1256.png)
 
 
 ### Other examples
@@ -100,11 +118,15 @@ python train_sedinet_categorical.py -c config_shape.json
 python train_sedinet_continuous.py -c config_sievedsand_sieve_plus.json
 ```
 
+![sievesand_sieve_plus512_batch8_xy-base18_log](https://user-images.githubusercontent.com/3596509/62001639-817e2400-b0a9-11e9-920e-9b729873a41c.png)
+
 ##### Train SediNet for sediment grain size prediction (9 percentiles of the cumulative distribution) on gravel images
 
 ```
 python train_sedinet_continuous.py -c config_gravel.json
 ```
+
+![gravel_generic_9prcs512_batch8_xy-base16_log](https://user-images.githubusercontent.com/3596509/62001702-00c02780-b0ab-11e9-93d5-6d586e960b03.png)
 
 ##### Train SediNet for sediment grain size prediction (9 percentiles of the cumulative distribution) on sand images
 
@@ -112,6 +134,7 @@ python train_sedinet_continuous.py -c config_gravel.json
 python train_sedinet_continuous.py -c config_sand.json
 ```
 
+![sand_generic_9prcs512_batch8_xy-base16_log](https://user-images.githubusercontent.com/3596509/62001865-b80a6d80-b0ae-11e9-8dcd-0c3c3030c366.png)
 
 ### The config file
 
@@ -142,6 +165,7 @@ Contains values for defaults that you may change. They are listed in order of li
 TRAIN_TEST_SPLIT = 0.5  (the train/test split e.g. 0.5 = 50% train, 0.3 = 30% train, etc)
 
 IM_HEIGHT = 512 (size of image in pixels. keep this consistent in training and application)
+
 IM_WIDTH = IM_HEIGHT
 
 num_epochs = 100 (max. number of training epics)
@@ -169,6 +193,7 @@ python train_sedinet_continuous.py -c config_custom.json
 
 where ```config_custom.json``` has ben put together by you in the config folder like the following example that would estimate the mean grain size and 4 arbitrary percentiles:
 
+```
 {
   "base" : 32,
   "csvfile" : "your_dataset.csv",
@@ -180,6 +205,7 @@ where ```config_custom.json``` has ben put together by you in the config folder 
   "res_folder": "my_custom_model",
   "name"  : "custom_4prcs"
 }
+```
 
 * The program will still expect your images to reside inside the 'images' folder
 
@@ -200,6 +226,7 @@ Put together a config file in the config folder and populate it with the followi
 
 Example:
 
+```
 {
   "base" : 20,
   "N"  : 5,
@@ -208,8 +235,13 @@ Example:
   "numclass" : 6,
   "res_folder": "grain_colour"
 }
+```
 
 * Note that categories in the csvfile should be numeric integers increasing from zero
+
+
+### Contribute your data!
+If you have data (images and corresponding labels or grain size information) you would like to contribute, please submit a pull request or email me!
 
 
 ### Acknowledgements
