@@ -7,7 +7,8 @@
 <!--  \/_____/   \/_____/   \/____/   \/_/   \/_/ \/_/   \/_____/     \/_/ -->
 
 By Dr Daniel Buscombe
-daniel.buscombe@nau.edu
+MARDA Science
+daniel.mardascience@com
 
 Deep learning framework for [optical granulometry](https://en.wikipedia.org/wiki/Optical_granulometry) (estimation of sedimentological variables from sediment imagery)
 
