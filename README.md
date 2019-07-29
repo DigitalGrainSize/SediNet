@@ -10,11 +10,11 @@ By Dr Daniel Buscombe, MARDA Science
 
 daniel.mardascience@com
 
-Deep learning framework for [optical granulometry](https://en.wikipedia.org/wiki/Optical_granulometry) (estimation of sedimentological variables from sediment imagery)
-
-Accompanies the paper:
+Deep learning framework for [optical granulometry](https://en.wikipedia.org/wiki/Optical_granulometry) (estimation of sedimentological variables from sediment imagery). This repository contains all data and code to reproduce the following paper:
 
 Buscombe, D. (2019, in review). SediNet: a configurable deep learning model for mixed qualitative and quantitative optical granulometry. Submitted to Earth Surface Processes and Landforms
+
+as well as additional examples and jupyter notebooks that you can run on the cloud and use as examples to build your own Sedinet sediment descriptor
 
 --------------------------------------------------------------------------------
 ## About SediNet
@@ -43,8 +43,99 @@ CNNs have multiple processing layers (called [convolutional layers](https://mach
 
 ![Fig3-sedinet_fig_ann2_v3](https://user-images.githubusercontent.com/3596509/61979684-59a79700-afa9-11e9-9605-4f893784f65b.png)
 
+
 --------------------------------------------------------------------------------
-## Install
+## Run in your browser!
+
+The following links will open jupyter notebooks in Google Colab, which is a free cloud computing service
+
+### Categorical
+
+##### Use SediNet to estimate sediment population 
+
+[Open this link](https://colab.research.google.com/drive/1M-hX5oBS2K0hof4oVG15oN_vNSi9AD2E)
+
+##### Use SediNet to estimate sediment shape 
+
+[Open this link](https://colab.research.google.com/drive/1mSxuJzto6QReAddGZ6A0fZ_g1o9qLljN)
+
+which is equivalent to the following respective commands from the command line using an installed SediNet (see below):
+
+```
+python sedinet_predict_categorical.py -c config_pop.json
+```
+
+and
+
+```
+python sedinet_predict_categorical.py -c config_shape.json
+```
+
+#### Continuous
+
+##### Sediment grain size prediction (sieve size) on a small population of beach sands
+
+[Open this link](https://colab.research.google.com/drive/1CFkE4meWHQ7ylmWSN01BO8qJu2fcpvcS)
+
+##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a small population of beach sands
+
+[Open this link](https://colab.research.google.com/drive/1GYZUVkLLQQhJygwsrkR11dDWAlLCy5aJ)
+
+##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a large 400 image dataset
+
+[Open this link](https://colab.research.google.com/drive/11sm53rkS-dYjanBPVAAUM7VnjEBWH59v)
+
+
+which is equivalent to the following respective commands from the command line using an installed SediNet (see below):
+
+```
+python sedinet_predict_continuous.py -c config_sievedsand_sieve.json
+```
+
+```
+python sedinet_predict_continuous.py -c config_sievedsand_9prcs.json
+```
+
+and
+
+```
+python sedinet_predict_continuous.py -c config_9percentiles.json
+```
+
+
+#### Other Continuous Examples
+
+##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on generic sands
+
+[Open this link](https://colab.research.google.com/drive/1kQoWmyUOOQFYNebTi6t9VZP5HRkgjxLa)
+
+##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on generic gravels
+
+[Open this link](https://colab.research.google.com/drive/1VHciGSyp4wsgo8w6mSbxlP_A228rScQ_)
+
+##### Sediment grain size prediction (sieve size plus 4 percentiles of the cumulative distribution) on a small population of beach sands
+
+[Open this link](https://colab.research.google.com/drive/1oXtYZJ3niDm3XOeKG1xikOZSjqIBVbQD)
+
+which is equivalent to the following respective commands from the command line using an installed SediNet (see below):
+
+```
+python sedinet_predict_continuous.py -c config_sand.json
+```
+
+```
+python sedinet_predict_continuous.py -c config_gravel.json
+```
+
+and
+
+```
+python sedinet_predict_continuous.py -c config_sievedsand_sieve_plus.json
+```
+
+
+--------------------------------------------------------------------------------
+## Install and run on your computer
 You must have python 3, pip for python 3, git and conda. On Windows I recommend the latest [Anaconda](https://www.anaconda.com/distribution/) release. On Linux, git should come as standard and miniconda would be the way to go. Personally, I don't use conda but system builds (deb, yum, apt) within a virtual environment, but either way a VM of some description to contain SediNet would be a good idea. Mac users: ?
 
 Windows:
@@ -105,10 +196,22 @@ You can also contribute imagery this way, but if you do so, also please provide 
 --------------------------------------------------------------------------------
 ### Predict grain size/shape/population from a set of images
 
+
+The ipynb files in the ```notebooks``` directory are the same jupyter notebooks as in the Colab notebook links above. You can run them by 
+
+```
+conda activate sedinet
+jupyter notebook
+```
+
+then in your browser you should be able to navigate to the notebooks you wish to execute
+
+The following instructions are for running the provided python scripts on your computer
+
 --------------------------------------------------------------------------------
 #### Continuous
 
-##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a small population of beach sands
+##### Sediment grain size prediction (sieve size) on a small population of beach sands
 ```
 python sedinet_predict_continuous.py -c config_sievedsand_sieve.json
 ```
