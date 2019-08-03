@@ -133,7 +133,6 @@ and
 python sedinet_predict_continuous.py -c config_sievedsand_sieve_plus.json
 ```
 
-
 --------------------------------------------------------------------------------
 ## Install and run on your computer
 You must have python 3, pip for python 3, git and conda. On Windows I recommend the latest [Anaconda](https://www.anaconda.com/distribution/) release. On Linux, git should come as standard and miniconda would be the way to go. Personally, I don't use conda but system builds (deb, yum, apt) within a virtual environment, but either way a VM of some description to contain SediNet would be a good idea. Mac users: ?
@@ -187,6 +186,15 @@ then verifying they all executed without error. Please then delete all outputs f
 
 You can also contribute imagery this way, but if you do so, also please provide a dataset (csv file) that goes along with the imagery, a file that describes the data with your name and contact details, (and you should also thank yourself in this README!)
 
+
+--------------------------------------------------------------------------------
+## Run the interactive applications in your web browser
+
+```
+bokeh serve RunSediNet.ipynb
+```
+
+which should open a web application to run through your browser at http://localhost:60339/
 
 --------------------------------------------------------------------------------
 ## Replicate the paper results
