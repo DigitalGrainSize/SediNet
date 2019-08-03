@@ -163,7 +163,7 @@ conda activate sedinet
 then finally
 
 ```
-pip install Image
+pip install Image panel 
 ```
 
 (Later, when you're done ... ```conda deactivate sedinet```)
