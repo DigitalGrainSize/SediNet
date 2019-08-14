@@ -139,12 +139,12 @@ You must have python 3, pip for python 3, git and conda. On Windows I recommend 
 
 Windows:
 ```
-git clone --depth 1 https://github.com/dbuscombe-usgs/SediNet.git
+git clone --depth 1 https://github.com/MARDAScience/SediNet.git
 ```
 
 Linux/Mac:
 ```
-git clone --depth 1 git@github.com:dbuscombe-usgs/SediNet.git
+git clone --depth 1 git@github.com:MARDAScience/SediNet.git
 ```
 
 Anaconda/miniconda:
