@@ -1,9 +1,9 @@
 
-# ______     ______     _____     __     __   __     ______     ______  
-#/\  ___\   /\  ___\   /\  __-.  /\ \   /\ "-.\ \   /\  ___\   /\__  _\ 
-#\ \___  \  \ \  __\   \ \ \/\ \ \ \ \  \ \ \-.  \  \ \  __\   \/_/\ \/ 
-# \/\_____\  \ \_____\  \ \____-  \ \_\  \ \_\\"\_\  \ \_____\    \ \_\ 
-#  \/_____/   \/_____/   \/____/   \/_/   \/_/ \/_/   \/_____/     \/_/ 
+# ______     ______     _____     __     __   __     ______     ______
+#/\  ___\   /\  ___\   /\  __-.  /\ \   /\ "-.\ \   /\  ___\   /\__  _\
+#\ \___  \  \ \  __\   \ \ \/\ \ \ \ \  \ \ \-.  \  \ \  __\   \/_/\ \/
+# \/\_____\  \ \_____\  \ \____-  \ \_\  \ \_\\"\_\  \ \_____\    \ \_\
+#  \/_____/   \/_____/   \/____/   \/_/   \/_/ \/_/   \/_____/     \/_/
 #
 # By Dr Daniel Buscombe,
 # daniel@mardascience.com
@@ -21,7 +21,7 @@ num_epochs = 100
 # number of images to feed the network per step in epoch
 batch_size = 8
 
-# number of images 
+# number of images
 valid_batch_size = batch_size
 
 # proportion of neurons to drop in the dropout layer
@@ -35,4 +35,3 @@ min_lr = 0.0001
 
 # the factor applied to the learning rate when the appropriate triggers are made
 factor = 0.8
-

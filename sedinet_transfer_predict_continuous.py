@@ -24,7 +24,7 @@ if __name__ == '__main__':
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('Example usage: python sedinet_predict_continuous.py -c config_9percentiles.json')
+            print('Example usage: python sedinet_predict_continuous.py -c config_usace_sand_generic.json')
             sys.exit()
         elif opt in ("-c"):
             configfile = arg
@@ -37,17 +37,17 @@ if __name__ == '__main__':
     ## user defined variables: proportion of data to use for training (a.k.a. the "train/test split")
     base    = int(config["base"]) #minimum number of convolutions in a sedinet convolutional block
     csvfile = config["csvfile"] #csvfile containing image names and class values
-    res_folder = config["res_folder"] #folder containing csv file and that will contain model outputs
+    res_folder = config["res_folder"] #folder containing csv file
     name = config["name"] #name prefix for output files
     dropout = float(config["dropout"])
     add_bn = bool(config["add_bn"])
+    model_folder = config["model_folder"] #folder containing model files
 
-    vars = [k for k in config.keys() if not np.any([k.startswith('base'), k.startswith('res_folder'), k.startswith('csvfile'), k.startswith('name'), k.startswith('dropout'), k.startswith('add_bn')])]
+    vars = [k for k in config.keys() if not np.any([k.startswith('base'), k.startswith('model_folder'), k.startswith('res_folder'), k.startswith('csvfile'), k.startswith('name'), k.startswith('dropout'), k.startswith('add_bn')])]
 
     vars = sorted(vars)
 
     ###==================================================
-
     csvfile = res_folder+os.sep+csvfile
 
-    estimate_continuous(vars, csvfile, base, name, res_folder, add_bn, dropout)
+    estimate_transfer_continuous(vars, csvfile, base, name, model_folder, res_folder, add_bn, dropout)
