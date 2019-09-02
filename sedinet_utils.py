@@ -6,7 +6,7 @@
 #  \/_____/   \/_____/   \/____/   \/_/   \/_/ \/_/   \/_____/     \/_/ 
 #
 # By Dr Daniel Buscombe,
-# daniel.buscombe@nau.edu
+# daniel@mardascience.com
 
 ###===================================================
 # import libraries
