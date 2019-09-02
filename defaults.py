@@ -6,7 +6,7 @@
 #  \/_____/   \/_____/   \/____/   \/_/   \/_/ \/_/   \/_____/     \/_/ 
 #
 # By Dr Daniel Buscombe,
-# daniel.buscombe@nau.edu
+# daniel@mardascience.com
 
 # train/test split (0.5 = 50% train, 0.3 = 30% train, etc)
 TRAIN_TEST_SPLIT = 0.5
