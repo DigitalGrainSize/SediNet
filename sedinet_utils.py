@@ -13,7 +13,7 @@
 
 import gc, os, shutil
 ## use the first available GPU
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 ## to use the CPU (not recommended):
 #os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
