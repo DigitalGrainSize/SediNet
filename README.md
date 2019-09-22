@@ -133,6 +133,57 @@ and
 python sedinet_predict_continuous.py -c config_sievedsand_sieve_plus.json
 ```
 
+
+--------------------------------------------------------------------------------
+## Fork this repo and run on Google Cloud Platform (GCP)
+
+First, follow instructions [here](https://tudip.com/blog-post/run-jupyter-notebook-on-google-cloud-platform/) for how to set up an instance to run in GCP. Make sure to set a static IP address, as per the instructions, and make a note of that because you'll need it later
+
+Then open a shell into the VM and set it up to 
+
+```
+ssh-keygen -t rsa -b 4096 -C "yourname@youremail.com"
+
+eval "$(ssh-agent -s)"
+
+ssh-add ~/.ssh/id_rsa
+
+cat ~/.ssh/id_rsa.pub
+```
+
+Then copy the key into your github profile keys. For more information about how to do that, see [here](https://help.github.com/en/articles/adding-a-new-ssh-key-to-your-github-account). xclip likely won't work, but you can simply copy (Ctrl-C) the text printed to screen
+
+
+You will be cloning your fork of the main repo, so replace ```YOURUSERNAME``` in the below code to clone the repo and set up a conda environment to run in 
+
+```
+git clone --depth 1 git@github.com:YOURUSERNAME/SediNet.git
+cd SediNet
+
+pip install --upgrade pip
+
+conda env create -f conda_env/sedinet.yml
+
+source activate sedinet
+```
+
+Now you can run sedinet on the cloud.
+
+To run the jupyter notebooks, run the following command to run the jupyter notebook server 
+
+```
+jupyter notebook --NotebookApp.iopub_data_rate_limit=10000000
+```
+
+The jupyterlab server will be displayed at
+
+```
+http://IP:8888
+```
+
+where ```IP``` is the static IP of the VM that you noted earlier.
+
+
 --------------------------------------------------------------------------------
 ## Install and run on your computer
 You must have python 3, pip for python 3, git and conda. On Windows I recommend the latest [Anaconda](https://www.anaconda.com/distribution/) release. On Linux, git should come as standard and miniconda would be the way to go. Personally, I don't use conda but system builds (deb, yum, apt) within a virtual environment, but either way a VM of some description to contain SediNet would be a good idea. Mac users: ?
