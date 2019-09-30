@@ -10,6 +10,8 @@ By Dr Daniel Buscombe
 
 daniel@mardascience.com
 
+[![DOI](https://zenodo.org/badge/199072106.svg)](https://zenodo.org/badge/latestdoi/199072106)
+
 Deep learning framework for [optical granulometry](https://en.wikipedia.org/wiki/Optical_granulometry) (estimation of sedimentological variables from sediment imagery). This repository contains all data and code to reproduce the following paper:
 
 Buscombe, D. (2019, in review). SediNet: a configurable deep learning model for mixed qualitative and quantitative optical granulometry. Submitted to Earth Surface Processes and Landforms. Earth ArXiv preprint [here](https://eartharxiv.org/fwsnp/)
