@@ -27,13 +27,14 @@ SediNet can be configured and trained to estimate:
 * equivalent sieve diameters directly from image features, without the need for area-to-mass conversion formulas and without even knowing the scale of one pixel. SediNet might be useful for other metrics such as sorting (standard deviation), skewness, etc
 * categorical variables such as grain shape, population, colour, etc
 
-The motivating idea behind SediNet is community development of tools for information extraction from images of sediment. You can use SediNet "off-the-shelf", or other people's models, or configure it for your own purposes. You can even choose to contribute imagery back to the project, so we can build bigger and better models collaboratively. Within this package there are several examples of different ways it can be configured for estimating categorical variables and various numbers of continuous variables 
+The motivating idea behind SediNet is community development of tools for information extraction from images of sediment. You can use SediNet "off-the-shelf", or other people's models, or configure it for your own purposes. 
 
-You can use the models in this repository for your purposes (and you might find them useful because they have been trained on large numbers of images). If that doesn't work for you:
+You can even choose to contribute imagery back to the project, so we can build bigger and better models collaboratively. If that sounds like something you would like to do, there is a [special repo](https://github.com/MARDAScience/SediNet-Contrib) for you wonderful people
 
-> You can train SediNet for your own purposes even on small datasets
+Within this package there are several examples of different ways it can be configured for estimating categorical variables and various numbers of continuous variables 
 
-> If you contribute your data, we can build bigger and better (more generic) models together
+You can use the models in this repository for your purposes (and you might find them useful because they have been trained on large numbers of images). If that doesn't work for you, you can train SediNet for your own purposes even on small datasets
+
 
 
 ### How SediNet works
@@ -549,7 +550,7 @@ python sedinet_predict_continuous.py -c config_custom_4prcs.json
 Please use the 'issues' tab so everyone can see the question and answer. Please do not email me directly. Thanks
 
 ### Contribute your data!
-If you have data (images and corresponding labels or grain size information) you would like to contribute, please submit a pull request or email me!
+Please see the [SediNet-Contrib repo](https://github.com/MARDAScience/SediNet-Contrib)
 
 ### Please cite
 If you find this useful for your research please cite this paper:
