@@ -12,15 +12,19 @@ daniel@mardascience.com
 
 [![DOI](https://zenodo.org/badge/199072106.svg)](https://zenodo.org/badge/latestdoi/199072106)
 
-Deep learning framework for [optical granulometry](https://en.wikipedia.org/wiki/Optical_granulometry) (estimation of sedimentological variables from sediment imagery). This repository contains all data and code to reproduce the following paper:
-
-Buscombe, D. (2019, in review). SediNet: a configurable deep learning model for mixed qualitative and quantitative optical granulometry. Submitted to Earth Surface Processes and Landforms. Earth ArXiv preprint [here](https://eartharxiv.org/fwsnp/)
-
-as well as additional examples and jupyter notebooks that you can run on the cloud and use as examples to build your own Sedinet sediment descriptor
+Deep learning framework for [optical granulometry](https://en.wikipedia.org/wiki/Optical_granulometry) (estimation of sedimentological variables from sediment imagery). 
 
 --------------------------------------------------------------------------------
 ## About SediNet
 A configurable machine-learning framework for estimating either (or both) continuous and categorical variables from a photographic image of clastic sediment.
+
+For more details, please see the paper:
+
+Buscombe, D. (2019). SediNet: a configurable deep learning model for mixed qualitative and quantitative optical granulometry. Earth Surface Processes and Landforms. https://onlinelibrary.wiley.com/doi/abs/10.1002/esp.4760
+
+Free Earth ArXiv preprint [here](https://eartharxiv.org/fwsnp/)
+
+This repository contaisn code and data to reproduce the above paper, as well as additional examples and jupyter notebooks that you can run on the cloud and use as examples to build your own Sedinet sediment descriptor
 
 SediNet can be configured and trained to estimate:
 * up to nine numeric grain-size metrics in pixels from a single input image. Grain size is then recovered using the physical size of a pixel (note that sedinet doesn't help you estimate that). Appropriate metrics include mean, median or any other percentile
@@ -555,7 +559,7 @@ Please see the [SediNet-Contrib repo](https://github.com/MARDAScience/SediNet-Co
 ### Please cite
 If you find this useful for your research please cite this paper:
 
-> Buscombe, D. (2019, in review). SediNet: a configurable deep learning model for mixed qualitative and quantitative optical granulometry. Submitted to Earth Surface Processes and Landforms
+> Buscombe, D. (2019). SediNet: a configurable deep learning model for mixed qualitative and quantitative optical granulometry. Earth Surface Processes and Landforms
 
 ### Acknowledgements
 Thanks to the following individuals for donating imagery:
@@ -564,4 +568,12 @@ Thanks to the following individuals for donating imagery:
 * Jon Warrick (US Geological Survey)
 * Brian Romans (Virginia Tech)
 * Christopher Heuberk (Freie Universitat Berlin) 
+
+### Release notes
+
+> Release v1.0 (Sep 30 2019): initial submission of SediNet paper to journal
+
+> Release v1.1 (Nov 5 2019): upgrade from keras with Tensorflow 1.X backend to Tensorflow 2.0 native keras. Enforce TF==2.0 in conda yml file 
+
+
 

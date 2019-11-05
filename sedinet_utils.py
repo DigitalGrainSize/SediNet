@@ -18,29 +18,42 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 ## to use the CPU (not recommended):
 #os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
-import itertools
-from sklearn.metrics import confusion_matrix, classification_report
-from keras.layers import Input, Dense, BatchNormalization, Conv2D, MaxPool2D, GlobalMaxPool2D, Dropout
-from keras.models import Model
-from keras.layers.core import Activation
-from keras.layers.convolutional import MaxPooling2D
+
+#from keras.layers import Input, Dense, BatchNormalization, Conv2D, MaxPool2D, GlobalMaxPool2D, Dropout
+#from keras.models import Model
+#from keras.layers.core import Activation
+#from keras.layers.convolutional import MaxPooling2D
+#from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
+
+#try:
+#    from keras.utils import plot_model
+#except:
+#    pass
+
+#from keras.utils import to_categorical
+#import keras.backend as K
+
+from tensorflow.keras.layers import Input, Dense, BatchNormalization, Conv2D, MaxPool2D, GlobalMaxPool2D, Dropout, Activation, MaxPooling2D
+from tensorflow.keras.models import Model
+from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
+
+try:
+    from tensorflow.keras.utils import plot_model
+except:
+    pass
+
+from tensorflow.keras.utils import to_categorical
+import tensorflow.keras.backend as K
+
+from PIL import Image
+from glob import glob
+from scipy.stats import mode
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
-
-try:
-    from keras.utils import plot_model
-except:
-    pass
-
-from keras.utils import to_categorical
-from PIL import Image
-from glob import glob
-import keras.backend as K
-
-from scipy.stats import mode
+import itertools
+from sklearn.metrics import confusion_matrix, classification_report
 
 ###===================================================
 # import and set global variables from defaults.py
@@ -59,8 +72,12 @@ def plot_train_history_9var(history, varuse):
     """
     fig, axes = plt.subplots(1, 10, figsize=(30, 5))
     for k in range(9):
-       axes[k].plot(history.history[varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Train MAE')
-       axes[k].plot(history.history['val_'+varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Val MAE')
+       try:
+          axes[k].plot(history.history[varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Train MAE')
+          axes[k].plot(history.history['val_'+varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Val MAE')
+       except:
+          axes[k].plot(history.history[varuse[k]+'_output_mae'], label=varuse[k]+' Train MAE')
+          axes[k].plot(history.history['val_'+varuse[k]+'_output_mae'], label=varuse[k]+' Val MAE')       
        axes[k].set_xlabel('Epochs')
        axes[k].legend()
 
@@ -76,8 +93,12 @@ def plot_train_history_8var(history, varuse):
     """
     fig, axes = plt.subplots(1, 9, figsize=(30, 5))
     for k in range(8):
-       axes[k].plot(history.history[varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Train MAE')
-       axes[k].plot(history.history['val_'+varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Val MAE')
+       try:
+          axes[k].plot(history.history[varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Train MAE')
+          axes[k].plot(history.history['val_'+varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Val MAE')
+       except:
+          axes[k].plot(history.history[varuse[k]+'_output_mae'], label=varuse[k]+' Train MAE')
+          axes[k].plot(history.history['val_'+varuse[k]+'_output_mae'], label=varuse[k]+' Val MAE')      
        axes[k].set_xlabel('Epochs')
        axes[k].legend()
 
@@ -94,8 +115,12 @@ def plot_train_history_7var(history, varuse):
     """
     fig, axes = plt.subplots(1, 8, figsize=(25, 5))
     for k in range(7):
-       axes[k].plot(history.history[varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Train MAE')
-       axes[k].plot(history.history['val_'+varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Val MAE')
+       try:
+          axes[k].plot(history.history[varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Train MAE')
+          axes[k].plot(history.history['val_'+varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Val MAE')
+       except:
+          axes[k].plot(history.history[varuse[k]+'_output_mae'], label=varuse[k]+' Train MAE')
+          axes[k].plot(history.history['val_'+varuse[k]+'_output_mae'], label=varuse[k]+' Val MAE')       
        axes[k].set_xlabel('Epochs')
        axes[k].legend()
 
@@ -111,8 +136,12 @@ def plot_train_history_6var(history, varuse):
     """
     fig, axes = plt.subplots(1, 7, figsize=(25, 5))
     for k in range(6):
-       axes[k].plot(history.history[varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Train MAE')
-       axes[k].plot(history.history['val_'+varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Val MAE')
+       try:
+          axes[k].plot(history.history[varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Train MAE')
+          axes[k].plot(history.history['val_'+varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Val MAE')
+       except:
+          axes[k].plot(history.history[varuse[k]+'_output_mae'], label=varuse[k]+' Train MAE')
+          axes[k].plot(history.history['val_'+varuse[k]+'_output_mae'], label=varuse[k]+' Val MAE')       
        axes[k].set_xlabel('Epochs')
        axes[k].legend()
 
@@ -128,8 +157,12 @@ def plot_train_history_5var(history, varuse):
     """
     fig, axes = plt.subplots(1, 6, figsize=(20, 5))
     for k in range(5):
-       axes[k].plot(history.history[varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Train MAE')
-       axes[k].plot(history.history['val_'+varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Val MAE')
+       try:
+          axes[k].plot(history.history[varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Train MAE')
+          axes[k].plot(history.history['val_'+varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Val MAE')
+       except:
+          axes[k].plot(history.history[varuse[k]+'_output_mae'], label=varuse[k]+' Train MAE')
+          axes[k].plot(history.history['val_'+varuse[k]+'_output_mae'], label=varuse[k]+' Val MAE')       
        axes[k].set_xlabel('Epochs')
        axes[k].legend()
 
@@ -145,8 +178,12 @@ def plot_train_history_4var(history, varuse):
     """
     fig, axes = plt.subplots(1, 5, figsize=(20, 5))
     for k in range(4):
-       axes[k].plot(history.history[varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Train MAE')
-       axes[k].plot(history.history['val_'+varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Val MAE')
+       try:
+          axes[k].plot(history.history[varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Train MAE')
+          axes[k].plot(history.history['val_'+varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Val MAE')
+       except:
+          axes[k].plot(history.history[varuse[k]+'_output_mae'], label=varuse[k]+' Train MAE')
+          axes[k].plot(history.history['val_'+varuse[k]+'_output_mae'], label=varuse[k]+' Val MAE')       
        axes[k].set_xlabel('Epochs')
        axes[k].legend()
 
@@ -162,8 +199,12 @@ def plot_train_history_3var(history, varuse):
     """
     fig, axes = plt.subplots(1, 5, figsize=(15, 5))
     for k in range(3):
-       axes[k].plot(history.history[varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Train MAE')
-       axes[k].plot(history.history['val_'+varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Val MAE')
+       try:
+          axes[k].plot(history.history[varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Train MAE')
+          axes[k].plot(history.history['val_'+varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Val MAE')
+       except:
+          axes[k].plot(history.history[varuse[k]+'_output_mae'], label=varuse[k]+' Train MAE')
+          axes[k].plot(history.history['val_'+varuse[k]+'_output_mae'], label=varuse[k]+' Val MAE')        
        axes[k].set_xlabel('Epochs')
        axes[k].legend()
 
@@ -179,8 +220,12 @@ def plot_train_history_2var(history, varuse):
     """
     fig, axes = plt.subplots(1, 5, figsize=(15, 5))
     for k in range(2):
-       axes[k].plot(history.history[varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Train MAE')
-       axes[k].plot(history.history['val_'+varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Val MAE')
+       try:
+          axes[k].plot(history.history[varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Train MAE')
+          axes[k].plot(history.history['val_'+varuse[k]+'_output_mean_absolute_error'], label=varuse[k]+' Val MAE')
+       except:
+          axes[k].plot(history.history[varuse[k]+'_output_mae'], label=varuse[k]+' Train MAE')
+          axes[k].plot(history.history['val_'+varuse[k]+'_output_mae'], label=varuse[k]+' Val MAE')        
        axes[k].set_xlabel('Epochs')
        axes[k].legend()
 
@@ -616,7 +661,7 @@ def  plot_train_history_1var_mae(history):
    """
    This function plots loss and accuracy curves from the model training
    """
-   #print(history.history.keys())
+   print(history.history.keys())
 
    fig, axes = plt.subplots(1, 2, figsize=(10, 10))
 
@@ -625,8 +670,13 @@ def  plot_train_history_1var_mae(history):
    axes[0].set_xlabel('Epochs')
    axes[0].legend()
 
-   axes[1].plot(history.history['mean_absolute_error'], label='pop train MAE')
-   axes[1].plot(history.history['val_mean_absolute_error'], label='pop test MAE')
+   try:
+      axes[1].plot(history.history['mean_absolute_error'], label='pop train MAE')
+      axes[1].plot(history.history['val_mean_absolute_error'], label='pop test MAE')
+   except:
+      axes[1].plot(history.history['mae'], label='pop train MAE')
+      axes[1].plot(history.history['val_mae'], label='pop test MAE')
+      
    axes[1].set_xlabel('Epochs')
    axes[1].legend()
 
@@ -636,14 +686,19 @@ def  plot_train_history_1var(history):
    This function plots loss and accuracy curves from the model training
    """
    fig, axes = plt.subplots(1, 2, figsize=(10, 10))
+   
+   print(history.history.keys())
 
    axes[0].plot(history.history['loss'], label='Training loss')
    axes[0].plot(history.history['val_loss'], label='Validation loss')
    axes[0].set_xlabel('Epochs')
    axes[0].legend()
-
-   axes[1].plot(history.history['acc'], label='pop train accuracy')
-   axes[1].plot(history.history['val_acc'], label='pop test accuracy')
+   try:
+      axes[1].plot(history.history['acc'], label='pop train accuracy')
+      axes[1].plot(history.history['val_acc'], label='pop test accuracy')
+   except:
+      axes[1].plot(history.history['accuracy'], label='pop train accuracy')
+      axes[1].plot(history.history['val_accuracy'], label='pop test accuracy')   
    axes[1].set_xlabel('Epochs')
    axes[1].legend()
 

@@ -9,12 +9,11 @@ dependencies:
   - scipy
   - matplotlib
   - h5py
-  - keras
   - pandas
   - pip
   - scikit-learn
   - requests
-  - tensorflow
+  - tensorflow-gpu==2.0
   - jupyter
   - ipywidgets
   - pip:
