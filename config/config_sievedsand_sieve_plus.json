@@ -1,6 +1,6 @@
 {
-  "base" : 16,
-  "csvfile" : "data_pescadero_sieve.csv",
+  "train_csvfile" : "data_pescadero_sieve_train.csv",
+  "test_csvfile" : "data_pescadero_sieve_test.csv",
   "sieve" : "sieve", 
   "P16" : "P16", 
   "P25" : "P25", 
@@ -10,5 +10,5 @@
   "res_folder": "grain_size_sieved_sands",
   "name"  : "sievesand_sieve_plus",
   "dropout": 0.25,  
-  "add_bn": true    
+  "greyscale": true
 }

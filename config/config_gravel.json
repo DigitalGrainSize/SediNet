@@ -1,6 +1,6 @@
 {
-  "base" : 14,
-  "csvfile" : "data_generic_gravel.csv",
+  "train_csvfile" : "data_generic_gravel_train.csv",
+  "test_csvfile" : "data_generic_gravel_test.csv",  
   "P5" : "P5",
   "P10": "P10", 
   "P16": "P16", 
@@ -12,6 +12,6 @@
   "P95": "P95",                  
   "res_folder": "grain_size_gravel_generic",
   "name"  : "gravel_generic_9prcs",
-  "dropout": 0.25,
-  "add_bn": true
+  "greyscale": true,  
+  "dropout": 0.25
 }

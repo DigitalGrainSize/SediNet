@@ -1,372 +1,50 @@
 
-# ______     ______     _____     __     __   __     ______     ______
-#/\  ___\   /\  ___\   /\  __-.  /\ \   /\ "-.\ \   /\  ___\   /\__  _\
-#\ \___  \  \ \  __\   \ \ \/\ \ \ \ \  \ \ \-.  \  \ \  __\   \/_/\ \/
-# \/\_____\  \ \_____\  \ \____-  \ \_\  \ \_\\"\_\  \ \_____\    \ \_\
-#  \/_____/   \/_____/   \/____/   \/_/   \/_/ \/_/   \/_____/     \/_/
-#
-# By Dr Daniel Buscombe,
-# daniel@mardascience.com
+## Written by Daniel Buscombe,
+## MARDA Science
+## daniel@mardascience.com
+
+##> Release v1.2 (Feb 4 2020)
 
 ###===================================================
 # import libraries
 from sedinet_utils import *
 
 ###===================================================
-def estimate_transfer_continuous(vars, csvfile, base, name, model_folder, res_folder, add_bn, dropout):
+def make_mlp(dim): #dense_neurons
+	# define our MLP network
+	dense_neurons = 4
+	mlp = Sequential()
+	mlp.add(Dense(8, input_dim=dim, activation="relu"))
+	mlp.add(Dense(dense_neurons, activation="relu"))
+	return mlp
+	
+###===================================================
+def conv_block(x, filters=32):
    """
-   This function uses a SediNet model for continuous prediction
+   This function generates a custom sedinet convolutional block
    """
-   ###===================================================
-   ## read the data set in, clean and modify the pathnames so they are absolute
-   df = pd.read_csv(csvfile)
-   df['files'] = [k.strip() for k in df['files']]
-   df['files'] = [os.getcwd()+os.sep+f.replace('\\',os.sep) for f in df['files']]
-
-   train_idx = np.arange(len(df))
-
-   ##==============================================
-   ## create training and testing file generators, set the weights path, plot the model, and create a callback list for model training
-   if len(vars)==1:
-      train_gen = get_data_generator_1vars(df, train_idx, True, vars, len(df))
-   elif len(vars)==2:
-      train_gen = get_data_generator_2vars(df, train_idx, True, vars, len(df))
-   elif len(vars)==3:
-      train_gen = get_data_generator_3vars(df, train_idx, True, vars, len(df))
-   elif len(vars)==4:
-      train_gen = get_data_generator_4vars(df, train_idx, True, vars, len(df))
-   elif len(vars)==5:
-      train_gen = get_data_generator_5vars(df, train_idx, True, vars, len(df))
-   elif len(vars)==6:
-      train_gen = get_data_generator_6vars(df, train_idx, True, vars, len(df))
-   elif len(vars)==7:
-      train_gen = get_data_generator_7vars(df, train_idx, True, vars, len(df))
-   elif len(vars)==8:
-      train_gen = get_data_generator_8vars(df, train_idx, True, vars, len(df))
-   elif len(vars)==9:
-      train_gen = get_data_generator_9vars(df, train_idx, True, vars, len(df))
-
-
-   x_train, tmp = next(train_gen)
-   if len(vars)>1:
-      counter = 0
-      for v in vars:
-         exec(v+'_trueT = np.squeeze(tmp[counter])')
-         counter +=1
-   else:
-      exec(vars[0]+'_trueT = np.squeeze(tmp)')
-
-   models = []
-   for base in [base-2,base,base+2]:
-      print(base)
-      weights_path = name+"_base"+str(base)+"_model_checkpoint.hdf5"
-      ##==============================================
-      ## create a SediNet model to estimate sediment category
-      model = make_cont_sedinet(base, vars, add_bn, dropout)
-      model.load_weights(os.getcwd()+os.sep+model_folder+os.sep+weights_path)
-      models.append(model)
-
-   for v in vars:
-      exec(v+'_PT = []')
-   #PT = []
-   for model in models:
-      tmp = model.predict(x_train, batch_size=1)
-      if len(vars)>1:
-         counter = 0
-         for v in vars:
-            exec(v+'_PT.append(np.squeeze(tmp[counter]))')
-            counter +=1
-      else:
-         exec(vars[0]+'_PT.append(np.asarray(np.squeeze(tmp)))') #.argmax(axis=-1))')
-
-   if len(vars)>1:
-      for k in range(len(vars)):
-         exec(vars[k]+'_predT = np.squeeze(np.mean(np.asarray('+vars[k]+'_PT), axis=0))')
-   else:
-      exec(vars[0]+'_predT = np.squeeze(np.mean(np.asarray('+vars[0]+'_PT), axis=0))')
-
-
-   if len(vars)==9:
-      nrows = 3; ncols = 3
-   elif len(vars)==8:
-      nrows = 4; ncols = 2
-   elif len(vars)==7:
-      nrows = 4; ncols = 2
-   elif len(vars)==6:
-      nrows = 3; ncols = 2
-   elif len(vars)==5:
-      nrows = 3; ncols = 2
-   elif len(vars)==4:
-      nrows = 2; ncols = 2
-   elif len(vars)==3:
-      nrows = 1; ncols = 3
-   elif len(vars)==2:
-      nrows = 2; ncols = 1
-   elif len(vars)==1:
-      nrows = 1; ncols = 1
-
-   ## make a plot
-   if nrows==1:
-      fig = plt.figure()
-   else:
-      fig = plt.figure(figsize=(2*nrows,2*ncols))
-
-   labs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-   for k in range(1,1+(nrows*ncols)):
-      if nrows==1:
-         plt.subplot(2,ncols,k)
-      else:
-         plt.subplot(nrows,ncols,k)
-      x = eval(vars[k-1]+'_trueT')
-      y = eval(vars[k-1]+'_predT')
-      plt.plot(x, y, 'ko', markersize=2)
-      #plt.plot(eval(vars[k-1]+'_true'), eval(vars[k-1]+'_pred'), 'bx', markersize=5)
-      plt.plot([ np.min(np.hstack((x,y))),  np.max(np.hstack((x,y)))], [ np.min(np.hstack((x,y))),  np.max(np.hstack((x,y)))], 'r', lw=2)
-      #plt.xscale('log'); plt.yscale('log')
-      plt.text(1, 2+np.max(np.hstack((x,y))),'Test : '+str(np.mean(100*(np.abs(eval(vars[k-1]+'_predT') - eval(vars[k-1]+'_trueT')) / eval(vars[k-1]+'_trueT'))))[:5]+' %', fontsize=8)
-      plt.xlim(np.min(np.hstack((x,y)))-2,np.max(np.hstack((x,y)))+2);
-      plt.ylim(np.min(np.hstack((x,y)))-2,np.max(np.hstack((x,y)))+2)
-      plt.title(r''+labs[k-1]+') '+vars[k-1], fontsize=8, loc='left')
-
-   #plt.show()
-   plt.savefig(name+str(IM_HEIGHT)+'_batch'+str(batch_size)+'_xy-base'+str(base)+'_predict.png', dpi=300, bbox_inches='tight')
-   plt.close()
-   del fig
+   x = Conv2D(filters=filters, kernel_size=3, activation='relu', kernel_initializer='he_uniform')(x)
+   #x = BatchNormalization()(x)
+   x = MaxPool2D()(x)
+   #x = Dropout(0.2)(x)
+   return x
 
 ###===================================================
-def estimate_categorical(var, csvfile, base, ID_MAP, res_folder, dropout):
+def conv_block_mbn(x, filters=32, alpha=1):
    """
-   This function uses a SediNet model for categorical prediction
-   """
-   ###===================================================
-   ## read the data set in, clean and modify the pathnames so they are absolute
-   df = pd.read_csv(csvfile)
-   df['files'] = [k.strip() for k in df['files']]
-   df['files'] = [os.getcwd()+os.sep+f.replace('\\',os.sep) for f in df['files']]
-
-   train_idx = np.arange(len(df))
-
-   train_gen = get_data_generator_1image(df, train_idx, True, ID_MAP, var, len(df))
-
-   models = []
-   for base in [base-2,base,base+2]:
-      weights_path = var+"_base"+str(base)+"_model_checkpoint.hdf5"
-      ##==============================================
-      ## create a SediNet model to estimate sediment category
-      model = make_cat_sedinet(base, ID_MAP, dropout)
-      model.load_weights(os.getcwd()+os.sep+'res'+os.sep+res_folder+os.sep+weights_path)
-      models.append(model)
-
-   x_train, (trueT)= next(train_gen)
-   trueT = np.squeeze(np.asarray(trueT).argmax(axis=-1) )
-
-   P = []; PT = []
-   for model in models:
-      predT = model.predict(x_train, batch_size=1)
-      predT = np.asarray(predT).argmax(axis=-1)
-      PT.append(predT)
-
-   predT = np.squeeze(mode(np.asarray(PT), axis=0)[0])
-
-   ##==============================================
-   ## print a classification report to screen, showing f1, precision, recall and accuracy
-   print("==========================================")
-   print("Classification report for "+var)
-   print(classification_report(trueT, predT))
-
-   classes = np.arange(len(ID_MAP))
-   ##==============================================
-   ## create figures showing confusion matrices for data set
-   plot_confmat(predT, trueT, var+'T',classes)
-   plt.savefig(weights_path.replace('.hdf5','_cm_predict.png'), dpi=300, bbox_inches='tight')
-   plt.close('all')
+   This function generates a sedinet convolutional block based on a mobilenet base model
+   """	
+   x = DepthwiseConv2D((3, 3), strides=(1, 1), padding='same', use_bias=False)(x)
+   x = BatchNormalization()(x)
+   x = Activation('relu')(x)
+   x = Conv2D(int(filters * alpha), (1, 1), strides=(1, 1), padding='same', use_bias=False)(x)
+   x = BatchNormalization()(x)
+   x = Activation('relu')(x)
+   return x
 
 
 ###===================================================
-def estimate_continuous(vars, csvfile, base, name, res_folder, add_bn, dropout):
-   """
-   This function uses a SediNet model for continuous prediction
-   """
-   ###===================================================
-   ## read the data set in, clean and modify the pathnames so they are absolute
-   df = pd.read_csv(csvfile)
-   df['files'] = [k.strip() for k in df['files']]
-   df['files'] = [os.getcwd()+os.sep+f.replace('\\',os.sep) for f in df['files']]
-
-   train_idx = np.arange(len(df))
-
-   ##==============================================
-   ## create training and testing file generators, set the weights path, plot the model, and create a callback list for model training
-   if len(vars)==1:
-      train_gen = get_data_generator_1vars(df, train_idx, True, vars, len(df))
-   elif len(vars)==2:
-      train_gen = get_data_generator_2vars(df, train_idx, True, vars, len(df))
-   elif len(vars)==3:
-      train_gen = get_data_generator_3vars(df, train_idx, True, vars, len(df))
-   elif len(vars)==4:
-      train_gen = get_data_generator_4vars(df, train_idx, True, vars, len(df))
-   elif len(vars)==5:
-      train_gen = get_data_generator_5vars(df, train_idx, True, vars, len(df))
-   elif len(vars)==6:
-      train_gen = get_data_generator_6vars(df, train_idx, True, vars, len(df))
-   elif len(vars)==7:
-      train_gen = get_data_generator_7vars(df, train_idx, True, vars, len(df))
-   elif len(vars)==8:
-      train_gen = get_data_generator_8vars(df, train_idx, True, vars, len(df))
-   elif len(vars)==9:
-      train_gen = get_data_generator_9vars(df, train_idx, True, vars, len(df))
-
-
-   x_train, tmp = next(train_gen)
-   if len(vars)>1:
-      counter = 0
-      for v in vars:
-         exec(v+'_trueT = np.squeeze(tmp[counter])')
-         counter +=1
-   else:
-      exec(vars[0]+'_trueT = np.squeeze(tmp)')
-
-   models = []
-   for base in [base-2,base,base+2]:
-      print(base)
-      weights_path = name+"_base"+str(base)+"_model_checkpoint.hdf5"
-      ##==============================================
-      ## create a SediNet model to estimate sediment category
-      model = make_cont_sedinet(base, vars, add_bn, dropout)
-      model.load_weights(os.getcwd()+os.sep+'res'+os.sep+res_folder+os.sep+weights_path)
-      models.append(model)
-
-   for v in vars:
-      exec(v+'_PT = []')
-   #PT = []
-   for model in models:
-      tmp = model.predict(x_train, batch_size=1)
-      if len(vars)>1:
-         counter = 0
-         for v in vars:
-            exec(v+'_PT.append(np.squeeze(tmp[counter]))')
-            counter +=1
-      else:
-         exec(vars[0]+'_PT.append(np.asarray(np.squeeze(tmp)))') #.argmax(axis=-1))')
-
-   if len(vars)>1:
-      for k in range(len(vars)):
-         exec(vars[k]+'_predT = np.squeeze(np.mean(np.asarray('+vars[k]+'_PT), axis=0))')
-   else:
-      exec(vars[0]+'_predT = np.squeeze(np.mean(np.asarray('+vars[0]+'_PT), axis=0))')
-
-
-   if len(vars)==9:
-      nrows = 3; ncols = 3
-   elif len(vars)==8:
-      nrows = 4; ncols = 2
-   elif len(vars)==7:
-      nrows = 4; ncols = 2
-   elif len(vars)==6:
-      nrows = 3; ncols = 2
-   elif len(vars)==5:
-      nrows = 3; ncols = 2
-   elif len(vars)==4:
-      nrows = 2; ncols = 2
-   elif len(vars)==3:
-      nrows = 1; ncols = 3
-   elif len(vars)==2:
-      nrows = 2; ncols = 1
-   elif len(vars)==1:
-      nrows = 1; ncols = 1
-
-   ## make a plot
-   fig = plt.figure()#figsize=(4*nrows,4*ncols))
-   labs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-   for k in range(1,1+(nrows*ncols)):
-      plt.subplot(nrows,ncols,k)
-      x = eval(vars[k-1]+'_trueT')
-      y = eval(vars[k-1]+'_predT')
-      plt.plot(x, y, 'ko', markersize=3)
-      #plt.plot(eval(vars[k-1]+'_true'), eval(vars[k-1]+'_pred'), 'bx', markersize=5)
-      plt.plot([ np.min(np.hstack((x,y))),  np.max(np.hstack((x,y)))], [ np.min(np.hstack((x,y))),  np.max(np.hstack((x,y)))], 'k', lw=2)
-      #plt.xscale('log'); plt.yscale('log')
-      #plt.text(11,700,'Test : '+str(np.mean(100*(np.abs(eval(vars[k-1]+'_pred') - eval(vars[k-1]+'_true')) / eval(vars[k-1]+'_true'))))[:5]+' %',  fontsize=8, color='b')
-      plt.text(1, 2+np.max(np.hstack((x,y))),'Train : '+str(np.mean(100*(np.abs(eval(vars[k-1]+'_predT') - eval(vars[k-1]+'_trueT')) / eval(vars[k-1]+'_trueT'))))[:5]+' %', fontsize=8)
-      plt.xlim(np.min(np.hstack((x,y)))-2,np.max(np.hstack((x,y)))+2);
-      plt.ylim(np.min(np.hstack((x,y)))-2,np.max(np.hstack((x,y)))+2)
-      plt.title(r''+labs[k-1]+') '+vars[k-1], fontsize=8, loc='left')
-
-   #plt.show()
-   plt.savefig(name+str(IM_HEIGHT)+'_batch'+str(batch_size)+'_xy-base'+str(base)+'_predict.png', dpi=300, bbox_inches='tight')
-   plt.close()
-   del fig
-
-###===================================================
-def run_continuous_training(vars, csvfile, base, name, res_folder, dropout, add_bn):
-   """
-   This function generates, trains and evaluates a SediNet model for continuous prediction
-   """
-   # ensemble models tend to be more stable so below trains 3 models using different random
-   # batches of images and slightly different base values
-   models = []
-   for base in [base-2,base,base+2]:
-      print(base)
-      ##======================================
-      ## this randomly selects imagery for training and testing imagery sets
-      ## while also making sure that both training and tetsing sets have at least 3 examples of each category
-      train_idx, test_idx, df = random_sample(csvfile)
-
-      ##==============================================
-      ## create a SediNet model to estimate sediment category
-      model = make_cont_sedinet(base, vars, add_bn, dropout)
-
-      ##==============================================
-      ## train model
-      model, weights_path = train_sedinet_cont(model, df, train_idx, test_idx, base, name, vars)
-      models.append(model)
-
-   # test model
-   predict_test_train_cont(df, train_idx, test_idx, vars, models, weights_path, name, base)
-
-   K.clear_session()
-
-   ##==============================================
-   ## move model files and plots to the results folder
-   tidy(res_folder, name, base)
-
-###===================================================
-def run_categorical_training(N, var, csvfile, base, ID_MAP, res_folder, dropout):
-   """
-   This function generates, trains and evaluates a SediNet model for categorical prediction
-   """
-   # ensemble models tend to be more stable so below trains 3 models using different random
-   # batches of images and slightly different base values
-   models = []
-   for base in [base-2,base,base+2]:
-      ##======================================
-      ## this randomly selects imagery for training and testing imagery sets
-      ## while also making sure that both training and tetsing sets have at least 3 examples of each category
-      train_idx, test_idx, df = stratify_random_sample(N, var, csvfile)
-
-      ##==============================================
-      ## create a SediNet model to estimate sediment category
-      model = make_cat_sedinet(base, ID_MAP, dropout)
-
-      ##==============================================
-      ## train model
-      model, weights_path = train_sedinet_cat(model, df, train_idx, test_idx, ID_MAP, base, var)
-      models.append(model)
-
-   classes = np.arange(len(ID_MAP))
-
-   # test model
-   # predicts using all 3 models and uses the mode as the prediction
-   predict_test_train_cat(df, train_idx, test_idx, var, models, classes, weights_path)
-
-   K.clear_session()
-
-   ##==============================================
-   ## move model files and plots to the results folder
-   tidy(res_folder, '', '')
-
-###===================================================
-def conv_block(inp, filters=32, bn=True, pool=True, drop=True):
+def conv_block2(inp, filters=32, bn=True, pool=True, drop=True):
    """
    This function generates a SediNet convolutional block
    """
@@ -379,198 +57,19 @@ def conv_block(inp, filters=32, bn=True, pool=True, drop=True):
        _ = Dropout(0.2)(_)
    return _
 
-
 ###===================================================
-def train_sedinet_cont(model, df, train_idx, test_idx, base, name, vars):
-    """
-    This function trains an implementation of SediNet
-    """
-    ##==============================================
-    ## create training and testing file generators, set the weights path, plot the model, and create a callback list for model training
-    if len(vars)==1:
-       train_gen = get_data_generator_1vars(df, train_idx, True, vars, batch_size)
-       valid_gen = get_data_generator_1vars(df, test_idx, True, vars, valid_batch_size)
-    elif len(vars)==2:
-       train_gen = get_data_generator_2vars(df, train_idx, True, vars, batch_size)
-       valid_gen = get_data_generator_2vars(df, test_idx, True, vars, valid_batch_size)
-    elif len(vars)==3:
-       train_gen = get_data_generator_3vars(df, train_idx, True, vars, batch_size)
-       valid_gen = get_data_generator_3vars(df, test_idx, True, vars, valid_batch_size)
-    elif len(vars)==4:
-       train_gen = get_data_generator_4vars(df, train_idx, True, vars, batch_size)
-       valid_gen = get_data_generator_4vars(df, test_idx, True, vars, valid_batch_size)
-    elif len(vars)==5:
-       train_gen = get_data_generator_5vars(df, train_idx, True, vars, batch_size)
-       valid_gen = get_data_generator_5vars(df, test_idx, True, vars, valid_batch_size)
-    elif len(vars)==6:
-       train_gen = get_data_generator_6vars(df, train_idx, True, vars, batch_size)
-       valid_gen = get_data_generator_6vars(df, test_idx, True, vars, valid_batch_size)
-    elif len(vars)==7:
-       train_gen = get_data_generator_7vars(df, train_idx, True, vars, batch_size)
-       valid_gen = get_data_generator_7vars(df, test_idx, True, vars, valid_batch_size)
-    elif len(vars)==8:
-       train_gen = get_data_generator_8vars(df, train_idx, True, vars, batch_size)
-       valid_gen = get_data_generator_8vars(df, test_idx, True, vars, valid_batch_size)
-    elif len(vars)==9:
-       train_gen = get_data_generator_9vars(df, train_idx, True, vars, batch_size)
-       valid_gen = get_data_generator_9vars(df, test_idx, True, vars, valid_batch_size)
-
-    weights_path = name+"_base"+str(base)+"_model_checkpoint.hdf5"
-
-    try:
-        plot_model(model, weights_path.replace('.hdf5', '_model.png'), show_shapes=True, show_layer_names=True)
-    except:
-        pass
-
-    callbacks_list = [
-         ModelCheckpoint(weights_path, monitor='val_loss', verbose=1, save_best_only=True, mode='min', save_weights_only = True)
-     ]
-
-    print("==========================================")
-    print("[INFORMATION] schematic of the model has been written out to: "+weights_path.replace('.hdf5', '_model.png'))
-    print("[INFORMATION] weights will be written out to: "+weights_path)
-
-    ##==============================================
-    ## set checkpoint file and parameters that control early stopping,
-    ## and reduction of learning rate if and when validation scores plateau upon successive epochs
-    reduceloss_plat = ReduceLROnPlateau(monitor='val_loss', factor=factor, patience=5, verbose=1, mode='auto', epsilon=epsilon, cooldown=5, min_lr=min_lr)
-
-    earlystop = EarlyStopping(monitor="val_loss", mode="min", patience=15)
-
-    model_checkpoint = ModelCheckpoint(weights_path, monitor='val_loss', verbose=1, save_best_only=True, mode='min', save_weights_only = True)
-
-    callbacks_list = [model_checkpoint, reduceloss_plat, earlystop]
-
-    ##==============================================
-    ## train the model
-    history = model.fit_generator(train_gen,
-                    steps_per_epoch=len(train_idx)//batch_size,
-                    epochs=num_epochs,
-                    callbacks=callbacks_list,
-                    validation_data=valid_gen,
-                    validation_steps=len(test_idx)//valid_batch_size)
-
-    ###===================================================
-    ## Plot the loss and accuracy as a function of epoch
-    if len(vars)==9:
-       plot_train_history_9var(history, vars)
-       plt.savefig(name+'_'+str(IM_HEIGHT)+'_batch'+str(batch_size)+'_history-base'+str(base)+'.png', dpi=300, bbox_inches='tight')
-       plt.close('all')
-    elif len(vars)==8:
-       plot_train_history_8var(history, vars)
-       plt.savefig(name+'_'+str(IM_HEIGHT)+'_batch'+str(batch_size)+'_history-base'+str(base)+'.png', dpi=300, bbox_inches='tight')
-       plt.close('all')
-    elif len(vars)==7:
-       plot_train_history_7var(history, vars)
-       plt.savefig(name+'_'+str(IM_HEIGHT)+'_batch'+str(batch_size)+'_history-base'+str(base)+'.png', dpi=300, bbox_inches='tight')
-       plt.close('all')
-    elif len(vars)==6:
-       plot_train_history_6var(history, vars)
-       plt.savefig(name+'_'+str(IM_HEIGHT)+'_batch'+str(batch_size)+'_history-base'+str(base)+'.png', dpi=300, bbox_inches='tight')
-       plt.close('all')
-    elif len(vars)==5:
-       plot_train_history_5var(history, vars)
-       plt.savefig(name+'_'+str(IM_HEIGHT)+'_batch'+str(batch_size)+'_history-base'+str(base)+'.png', dpi=300, bbox_inches='tight')
-       plt.close('all')
-    elif len(vars)==4:
-       plot_train_history_4var(history, vars)
-       plt.savefig(name+'_'+str(IM_HEIGHT)+'_batch'+str(batch_size)+'_history-base'+str(base)+'.png', dpi=300, bbox_inches='tight')
-       plt.close('all')
-    elif len(vars)==3:
-       plot_train_history_3var(history, vars)
-       plt.savefig(name+'_'+str(IM_HEIGHT)+'_batch'+str(batch_size)+'_history-base'+str(base)+'.png', dpi=300, bbox_inches='tight')
-       plt.close('all')
-    elif len(vars)==2:
-       plot_train_history_2var(history, vars)
-       plt.savefig(name+'_'+str(IM_HEIGHT)+'_batch'+str(batch_size)+'_history-base'+str(base)+'.png', dpi=300, bbox_inches='tight')
-       plt.close('all')
-    elif len(vars)==1:
-       plot_train_history_1var_mae(history)
-       plt.savefig(name+'_'+str(IM_HEIGHT)+'_batch'+str(batch_size)+'_history-base'+str(base)+'.png', dpi=300, bbox_inches='tight')
-       plt.close('all')
-
-    # serialize model to JSON to use later to predict
-    model_json = model.to_json()
-    with open(weights_path.replace('.hdf5','.json'), "w") as json_file:
-       json_file.write(model_json)
-
-    ## do some garbage collection
-    gc.collect()
-
-    return model, weights_path
-
-
-###===================================================
-def train_sedinet_cat(model, df, train_idx, test_idx, ID_MAP, base, var):
-    """
-    This function trains an implementation of SediNet
-    """
-    ##==============================================
-    ## create training and testing file generators, set the weights path, plot the model, and create a callback list for model training
-    train_gen = get_data_generator_1image(df, train_idx, True, ID_MAP, var, batch_size)
-    valid_gen = get_data_generator_1image(df, test_idx, True, ID_MAP, var, valid_batch_size)
-
-    weights_path = var+"_base"+str(base)+"_model_checkpoint.hdf5"
-
-    try:
-       plot_model(model, weights_path.replace('.hdf5', '_model.png'), show_shapes=True, show_layer_names=True)
-    except:
-       pass
-
-    callbacks_list = [
-         ModelCheckpoint(weights_path, monitor='val_loss', verbose=1, save_best_only=True, mode='min', save_weights_only = True)
-     ]
-
-    print("==========================================")
-    print("[INFORMATION] schematic of the model has been written out to: "+weights_path.replace('.hdf5', '_model.png'))
-    print("[INFORMATION] weights will be written out to: "+weights_path)
-
-    ##==============================================
-    ## set checkpoint file and parameters that control early stopping,
-    ## and reduction of learning rate if and when validation scores plateau upon successive epochs
-    reduceloss_plat = ReduceLROnPlateau(monitor='val_loss', factor=factor, patience=5, verbose=1, mode='auto', epsilon=epsilon, cooldown=5, min_lr=min_lr)
-
-    earlystop = EarlyStopping(monitor="val_loss", mode="min", patience=15)
-
-    model_checkpoint = ModelCheckpoint(weights_path, monitor='val_loss', verbose=1, save_best_only=True, mode='min', save_weights_only = True)
-
-    callbacks_list = [model_checkpoint, reduceloss_plat, earlystop]
-
-    ##==============================================
-    ## train the model
-    history = model.fit_generator(train_gen,
-                    steps_per_epoch=len(train_idx)//batch_size,
-                    epochs=num_epochs,
-                    callbacks=callbacks_list,
-                    validation_data=valid_gen,
-                    validation_steps=len(test_idx)//valid_batch_size)
-
-    ###===================================================
-    ## Plot the loss and accuracy as a function of epoch
-    plot_train_history_1var(history)
-    plt.savefig(var+'_'+str(IM_HEIGHT)+'_batch'+str(batch_size)+'_history-base'+str(base)+'.png', dpi=300, bbox_inches='tight')
-    plt.close('all')
-
-    # serialize model to JSON to use later to predict
-    model_json = model.to_json()
-    with open(weights_path.replace('.hdf5','.json'), "w") as json_file:
-       json_file.write(model_json)
-
-    ## do some garbage collection
-    gc.collect()
-
-    return model, weights_path
-
-###===================================================
-def make_cat_sedinet(base, ID_MAP, dropout):
+def make_cat_sedinet(ID_MAP, dropout):
     """
     This function creates an implementation of SediNet for estimating sediment category
     """
+    
+    base = 30
+    
     input_layer = Input(shape=(IM_HEIGHT, IM_WIDTH, 3))
-    _ = conv_block(input_layer, filters=base, bn=False, pool=False, drop=False)
-    _ = conv_block(_, filters=base*2, bn=False, pool=True,drop=False)
-    _ = conv_block(_, filters=base*3, bn=False, pool=True,drop=False)
-    _ = conv_block(_, filters=base*4, bn=False, pool=True,drop=False)
+    _ = conv_block2(input_layer, filters=base, bn=False, pool=False, drop=False)
+    _ = conv_block2(_, filters=base*2, bn=False, pool=True,drop=False)
+    _ = conv_block2(_, filters=base*3, bn=False, pool=True,drop=False)
+    _ = conv_block2(_, filters=base*4, bn=False, pool=True,drop=False)
 
     bottleneck = GlobalMaxPool2D()(_)
     bottleneck = Dropout(dropout)(bottleneck)
@@ -591,22 +90,30 @@ def make_cat_sedinet(base, ID_MAP, dropout):
 
 
 ###===================================================
-def make_cont_sedinet(base, vars, add_bn, dropout):
+def make_sedinet_siso_simo(vars, greyscale, dropout): 
     """
     This function creates an implementation of SediNet for estimating sediment metric on a continuous scale
     """
-    input_layer = Input(shape=(IM_HEIGHT, IM_WIDTH*2, 1))
-    _ = conv_block(input_layer, filters=base, bn=False, pool=False, drop=False)
-    _ = conv_block(_, filters=base*2, bn=False, pool=True,drop=False)
-    _ = conv_block(_, filters=base*3, bn=False, pool=True,drop=False)
-    _ = conv_block(_, filters=base*4, bn=False, pool=True,drop=False)
 
-    if add_bn == True:
-       _ = BatchNormalization(axis=-1)(_)
+    base = 30 ## suggested range = 20 -- 40
+    if greyscale==True:
+       input_layer = Input(shape=(IM_HEIGHT, IM_WIDTH, 1))
+    else:
+       input_layer = Input(shape=(IM_HEIGHT, IM_WIDTH, 3))    
+
+    _ = conv_block2(input_layer, filters=base, bn=False, pool=False, drop=False)
+    _ = conv_block2(_, filters=base*2, bn=False, pool=True,drop=False)
+    _ = conv_block2(_, filters=base*3, bn=False, pool=True,drop=False)
+    _ = conv_block2(_, filters=base*4, bn=False, pool=True,drop=False)
+    
+    if not shallow:
+       _ = conv_block2(_, filters=base*5, bn=False, pool=True,drop=False)
+    
+    _ = BatchNormalization(axis=-1)(_)
     bottleneck = GlobalMaxPool2D()(_)
     bottleneck = Dropout(dropout)(bottleneck)
 
-    units = 512
+    units = 1024 ## suggested range 512 -- 1024
     _ = Dense(units=units, activation='relu')(bottleneck)
 
     outputs = []
@@ -617,8 +124,180 @@ def make_cont_sedinet(base, vars, add_bn, dropout):
     metrics = dict(zip([k+"_output" for k in vars], ['mae' for k in vars]))
 
     model = Model(inputs=input_layer, outputs=outputs)
-    model.compile(optimizer='adam',loss=loss, metrics=metrics)
+    model.compile(optimizer=opt,loss=loss, metrics=metrics)
     print("==========================================")
     print('[INFORMATION] Model summary:')
-    model.summary()
+    #model.summary()
     return model
+
+	
+###===================================================
+def make_sedinet_miso_mimo(greyscale, dropout): 
+    """
+    This function creates a mobilenetv1 style implementation of sedinet for estimating metric on a continuous scale
+    """	
+
+    # create the sedinet model
+    if greyscale==True:
+       input_layer = Input(shape=(IM_HEIGHT, IM_WIDTH, 1))
+    else:
+       input_layer = Input(shape=(IM_HEIGHT, IM_WIDTH, 3))   
+
+    img_input = BatchNormalization(axis=-1)(input_layer)
+    ##shallow = False #True
+    alpha=1
+    
+    x = Conv2D(int(32 * alpha), (3, 3), strides=(2, 2), padding='same', use_bias=False)(img_input)
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    
+    for k in [64,128,128,256,256,512]:
+       x = conv_block_mbn(x, filters=k, alpha=alpha)
+
+    if not shallow:
+        for i in range(5):
+            x = conv_block_mbn(x, filters=512, alpha=alpha)
+
+    for k in [1024,1024]:
+       x = conv_block_mbn(x, filters=k, alpha=alpha)
+       
+    x = MaxPool2D()(x)   
+    
+    x = BatchNormalization(axis=-1)(x)
+    bottleneck = GlobalMaxPool2D()(x)
+    bottleneck = Dropout(dropout)(bottleneck)
+
+    model = Model(input_layer, bottleneck)
+    
+    return model
+
+
+
+
+
+
+
+
+
+#########
+
+####===================================================
+#def make_sedinet_custom_siso_simo(vars, greyscale): 
+#    """
+#    This function creates a custom implementation of sedinet 
+#    for estimating metric on a continuous scale
+#    """
+#    
+#    base = 16
+
+#    if greyscale==True:
+#       input_layer = Input(shape=(IM_HEIGHT, IM_WIDTH, 1))
+#    else:
+#       input_layer = Input(shape=(IM_HEIGHT, IM_WIDTH, 3))    
+
+#    input_layer = BatchNormalization(axis=-1)(input_layer)
+#       
+#    x = conv_block(input_layer, filters=base) 
+#    x = conv_block(x, filters=base*2) 
+#    x = conv_block(x, filters=base*3)
+#    x = conv_block(x, filters=base*4)
+#    
+#    x = BatchNormalization(axis=-1)(x)
+#    bottleneck = GlobalMaxPool2D()(x)
+#    bottleneck = Dropout(dropout)(bottleneck)
+
+#    units = 1024
+#    x = Dense(units=units, activation='relu')(bottleneck)
+
+#    outputs = []
+#    for var in vars:
+#       outputs.append(Dense(units=1, activation='linear', name=var+'_output')(x) )
+
+#    loss = dict(zip([k+"_output" for k in vars], ['mse' for k in vars]))
+#    metrics = dict(zip([k+"_output" for k in vars], ['mae' for k in vars]))
+
+#    model = Model(inputs=input_layer, outputs=outputs)
+#    model.compile(optimizer=opt, loss=loss, metrics=metrics)
+#    #print("==========================================")
+#    #print('[INFORMATION] Model summary:')
+#    #model.summary()
+#    return model
+	
+####===================================================
+#def make_sedinet_siso_simo(vars, greyscale, dropout): 
+#    """
+#    This function creates a mobilenetv1 style implementation of sedinet 
+#    for estimating metric on a continuous scale
+#    """	
+
+#    if greyscale==True:
+#       input_layer = Input(shape=(IM_HEIGHT, IM_WIDTH, 1))
+#    else:
+#       input_layer = Input(shape=(IM_HEIGHT, IM_WIDTH, 3))    
+#    
+#    img_input = BatchNormalization(axis=-1)(input_layer)
+#    alpha=1
+#    
+#    x = Conv2D(int(32 * alpha), (3, 3), strides=(2, 2), padding='same', use_bias=False)(img_input)
+#    x = BatchNormalization()(x)
+#    x = Activation('relu')(x)
+#    
+#    for k in [64,128,128,256,256,512]:
+#       x = conv_block_mbn(x, filters=k, alpha=alpha)
+
+#    if not shallow:
+#        for i in range(5):
+#            x = conv_block_mbn(x, filters=512, alpha=alpha)
+
+#    for k in [1024,1024]:
+#       x = conv_block_mbn(x, filters=k, alpha=alpha)
+#       
+#    x = MaxPool2D()(x)   
+#    
+#    x = BatchNormalization(axis=-1)(x)
+#    bottleneck = GlobalMaxPool2D()(x)
+#    bottleneck = Dropout(dropout)(bottleneck)
+
+#    units = 1024
+#    x = Dense(units=units, activation='relu')(bottleneck)
+
+#    outputs = []
+#    for var in vars:
+#       outputs.append(Dense(units=1, activation='linear', name=var+'_output')(x) )
+
+#    loss = dict(zip([k+"_output" for k in vars], ['mse' for k in vars]))
+#    metrics = dict(zip([k+"_output" for k in vars], ['mae' for k in vars]))
+
+#    model = Model(inputs=input_layer, outputs=outputs)
+#    model.compile(optimizer=opt, loss=loss, metrics=metrics) 
+#    #print("==========================================")
+#    #print('[INFORMATION] Model summary:')
+#    #model.summary()
+#    return model
+   
+####===================================================
+#def make_sedinet_custom_miso_mimo(vars, greyscale): 
+#    """
+#    This function creates a custom implementation of sedinet for estimating metric on a continuous scale
+#    """
+#    
+#    base = 16
+#    if greyscale==True:
+#       input_layer = Input(shape=(IM_HEIGHT, IM_WIDTH, 1))
+#    else:
+#       input_layer = Input(shape=(IM_HEIGHT, IM_WIDTH, 3))    
+#    
+#    input_layer = BatchNormalization(axis=-1)(input_layer)
+#       
+#    x = conv_block(input_layer, filters=base) 
+#    x = conv_block(x, filters=base*2) 
+#    x = conv_block(x, filters=base*3)
+#    x = conv_block(x, filters=base*4)
+#    
+#    x = BatchNormalization(axis=-1)(x)
+#    bottleneck = GlobalMaxPool2D()(x)
+#    bottleneck = Dropout(dropout)(bottleneck)
+
+#    model = Model(input_layer, bottleneck)
+#    return model
+#	

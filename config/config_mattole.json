@@ -1,0 +1,15 @@
+{
+  "train_csvfile" : "mattole_percentiles_train.csv",
+  "test_csvfile" : "mattole_percentiles_test.csv",
+  "p10": "p10", 
+  "p16": "p16",
+  "p25": "p25",  
+  "p50": "p50", 
+  "p75": "p75",
+  "p84": "p84",  
+  "p90": "p90", 
+  "res_folder": "mattole",
+  "name"  : "mattole",
+  "greyscale" : true,
+  "dropout": 0.5
+}

@@ -1,9 +1,10 @@
 {
-  "base" : 18,
-  "N"  : 3,
-  "csvfile" : "dataset_shape.csv",
-  "var"     : "shape", 
+  "train_csvfile" : "data_shape_train.csv",
+  "test_csvfile" : "data_shape_test.csv",
+  "shape"     : "shape", 
   "numclass" : 4,
   "res_folder": "grain_shape",
-  "dropout": 0.2    
+  "name": "grain_shape",
+  "dropout": 0.25,
+  "greyscale": false        
 }

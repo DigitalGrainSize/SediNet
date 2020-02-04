@@ -1,6 +1,6 @@
 {
-  "base" : 16,
-  "csvfile" : "data_set_400images.csv",
+  "train_csvfile" : "data_set_400images_train.csv",
+  "test_csvfile" : "data_set_400images_test.csv",  
   "P5" : "P5",
   "P10": "P10", 
   "P16": "P16", 
@@ -12,6 +12,6 @@
   "P95": "P95",                  
   "res_folder": "grain_size_global",
   "name"  : "global_9prcs",
-  "dropout": 0.5,  
-  "add_bn": true  
+  "greyscale": true,
+  "dropout": 0.25
 }

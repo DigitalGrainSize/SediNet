@@ -1,0 +1,13 @@
+{
+  "csvfile" : "data_pescadero_sieve.csv",
+  "sieve" : "sieve", 
+  "P16" : "P16", 
+  "P25" : "P25", 
+  "P50" : "P50", 
+  "P75" : "P75", 
+  "P84" : "P84",                      
+  "res_folder": "grain_size_sieved_sands",
+  "name"  : "sievesand_sieve_plus",
+  "dropout": 0.25,  
+  "greyscale": true
+}

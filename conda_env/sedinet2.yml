@@ -1,0 +1,22 @@
+#conda env create -f conda_env/owg-custom.yml
+name: owg
+channels:
+  - conda
+  - defaults
+dependencies:  
+  - python
+  - ipython
+  - numpy
+  - scipy
+  - matplotlib
+  - h5py
+  - pandas
+  - pip
+  - requests
+  - tensorflow-gpu==2.0
+  - jupyter
+  - scikit-learn
+  - pip:
+    - Image
+    - pydot
+    - graphviz    

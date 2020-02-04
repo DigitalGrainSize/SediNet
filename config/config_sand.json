@@ -1,6 +1,6 @@
 {
-  "base" : 14,
-  "csvfile" : "data_generic_sand.csv",
+  "train_csvfile" : "data_generic_sand_train.csv",
+  "test_csvfile" : "data_generic_sand_test.csv",  
   "P5" : "P5",
   "P10": "P10", 
   "P16": "P16", 
@@ -13,5 +13,5 @@
   "res_folder": "grain_size_sand_generic",
   "name"  : "sand_generic_9prcs",
   "dropout": 0.25,
-  "add_bn": true    
+  "greyscale": true
 }
