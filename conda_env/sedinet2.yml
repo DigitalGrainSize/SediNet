@@ -1,5 +1,5 @@
-#conda env create -f conda_env/owg-custom.yml
-name: owg
+#conda env create -f conda_env/sedinet2.yml
+name: sedinet
 channels:
   - conda
   - defaults
