@@ -531,7 +531,7 @@ def  plot_train_history_1var_mae(history):
 
 
 ###===================================================
-def get_data_generator_Nvars_siso_simo(df, indices, for_training, vars, batch_size, greyscale):
+def get_data_generator_Nvars_siso_simo(df, indices, for_training, vars, batch_size, greyscale, CS):
     """
     This function generates data for a batch of images and N associated metrics
     """
