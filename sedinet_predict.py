@@ -29,18 +29,23 @@ if __name__ == '__main__':
         elif opt in ("-w"):
             weights_path = arg
     
-    #weights_path = 'grain_size_sieved_sands/sievesand_sieve_siso_batch8_sieve__checkpoint.hdf5'
-    #configfile = 'config/config_sievedsand_sieve_predict.json'  
+    #weights_path = 'mattole/res/color/mattole_simo_batch8_p10_p16_p25_p50_p75_p84_p90__checkpoint.hdf5'
+    #configfile = '/home/filfy/Desktop/mattole_predict/config_mattole_predict_samples.json'  
     
     if not os.path.isfile(os.getcwd()+os.sep+weights_path):
         if not os.path.isfile(weights_path):
            print("Weights path does not exist ... exiting")
            sys.exit()
     
-    # load the user configs
-    with open(os.getcwd()+os.sep+configfile) as f:
-        config = json.load(f)
-
+    try:
+       # load the user configs
+       with open(os.getcwd()+os.sep+configfile) as f:
+          config = json.load(f)
+    except:
+       # load the user configs
+       with open(configfile) as f:
+          config = json.load(f)    
+    
     ###===================================================
     ## user defined variables: proportion of data to use for training (a.k.a. the "train/test split")
     csvfile = config["csvfile"] #csvfile containing image names and class values

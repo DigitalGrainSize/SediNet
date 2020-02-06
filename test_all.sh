@@ -30,3 +30,7 @@ python sedinet_predict.py -c config/config_mattole_predict.json -w mattole/res/g
 python sedinet_predict.py -c config/config_pop_predict.json -w grain_population/res/color/pop_model_checkpoint.hdf5
 python sedinet_predict.py -c config/config_shape_predict.json -w grain_shape/res/color/shape_model_checkpoint.hdf5
 
+
+### predict on "unseen" samples
+
+python sedinet_predict.py -c config/config_9percentiles_predict_samples.json -w grain_size_global/res/grey/global_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint.hdf5
