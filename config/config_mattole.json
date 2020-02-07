@@ -11,5 +11,5 @@
   "res_folder": "mattole",
   "name"  : "mattole",
   "greyscale" : true,
-  "dropout": 0.5
+  "dropout": 0.25
 }
