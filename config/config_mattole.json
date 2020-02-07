@@ -10,6 +10,6 @@
   "p90": "p90", 
   "res_folder": "mattole",
   "name"  : "mattole",
-  "greyscale" : true,
-  "dropout": 0.25
+  "greyscale" : false,
+  "dropout": 0.5
 }
