@@ -179,6 +179,7 @@ Now you can run sedinet on the cloud.
 To run the jupyter notebooks, run the following command to run the jupyter notebook server 
 
 ```
+python -m ipykernel install --user
 jupyter notebook --NotebookApp.iopub_data_rate_limit=10000000
 ```
 
@@ -217,12 +218,6 @@ conda env create -f conda_env/sedinet.yml
 conda activate sedinet
 ```
 
-then finally
-
-```
-pip install Image panel 
-```
-
 (Later, when you're done ... ```conda deactivate sedinet```)
 
 
@@ -230,17 +225,42 @@ pip install Image panel
 If you wish to contribute to the development of this project (yes please!) it is better that you first fork this repository to your own github, then work on changes, and submit a pull request. Before submitting, please test your code changes by running a full set of tests:
 
 ```
-python sedinet_predict.py -c config/config_sievedsand_sieve.json
-python sedinet_predict.py -c config/config_sievedsand_9prcs.json
-python sedinet_predict.py -c config/config_9percentiles.json
-python sedinet_predict.py -c config/config_pop.json
-python sedinet_predict.py -c config/config_shape.json
-python sedinet_predict.py -c config/config_sand.json
-python sedinet_predict.py -c config/config_gravel.json
-python sedinet_predict.py -c config/config_sievedsand_sieve_plus.json
+python sedinet_predict.py -c config/config_sievedsand_sieve_predict.json -w grain_size_sieved_sands/res/color/sievesand_sieve_siso_batch8_sieve__checkpoint.hdf5
+```
+```
+python sedinet_predict.py -c config/config_sievedsand_sieve_plus_predict.json -w grain_size_sieved_sands/res/grey/sievesand_sieve_plus_simo_batch8_P16_P25_P50_P75_P84_sieve__checkpoint.hdf5
 ```
 
-then verifying they all executed without error. Please then delete all outputs from these tests
+```
+python sedinet_predict.py -c config/config_9percentiles_predict.json -w grain_size_global/res/grey/global_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint.hdf5
+```
+
+```
+python sedinet_predict.py -c config/config_sand_3prcs_predict.json -w grain_size_sand_generic/res/grey/sand_generic_3prcs_simo_batch8_P10_P50_P90__checkpoint.hdf5
+```
+
+```
+python sedinet_predict.py -c config/config_sand_predict.json -w grain_size_sand_generic/res/grey/sand_generic_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint.hdf5
+```
+
+```
+python sedinet_predict.py -c config/config_gravel_predict.json -w grain_size_gravel_generic/res/grey/gravel_generic_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint.hdf5
+```
+
+```
+python sedinet_predict.py -c config/config_pop_predict.json -w grain_population/res/color/pop_model_checkpoint.hdf5
+```
+
+```
+python sedinet_predict.py -c config/config_shape_predict.json -w grain_shape/res/color/shape_model_checkpoint.hdf5
+```
+
+```
+python sedinet_predict.py -c config/config_mattole_predict.json -w mattole/res/color/mattole_simo_batch8_p10_p16_p25_p50_p75_p84_p90__checkpoint.hdf5
+```
+
+
+then verifying they all executed without error. 
 
 You can also contribute imagery this way, but if you do so, also please provide a dataset (csv file) that goes along with the imagery, a file that describes the data with your name and contact details, (and you should also thank yourself in this README!)
 
@@ -267,6 +287,7 @@ The ipynb files in the ```notebooks``` directory are the same jupyter notebooks 
 
 ```
 conda activate sedinet
+python -m ipykernel install --user
 jupyter notebook
 ```
 
@@ -279,7 +300,7 @@ The following instructions are for running the provided python scripts on your c
 
 ##### Sediment grain size prediction (sieve size) on a small population of beach sands
 ```
-python sedinet_predict.py -c config/config_sievedsand_sieve.json
+python sedinet_predict.py -c config/config_sievedsand_sieve_predict.json -w grain_size_sieved_sands/res/color/sievesand_sieve_siso_batch8_sieve__checkpoint.hdf5
 ```
 
 ![sievesand_sieve_siso_batch8_sieve__checkpoint_skill](https://user-images.githubusercontent.com/53406404/73790480-ca501d00-475d-11ea-8fca-60b6fdc5efa1.png)
@@ -288,7 +309,7 @@ python sedinet_predict.py -c config/config_sievedsand_sieve.json
 ##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a small population of beach sands
 
 ```
-python sedinet_predict.py -c config/config_sievedsand_9prcs.json
+python sedinet_predict.py -c config/config_sievedsand_sieve_plus_predict.json -w grain_size_sieved_sands/res/grey/sievesand_sieve_plus_simo_batch8_P16_P25_P50_P75_P84_sieve__checkpoint.hdf5
 ```
 
 ![sand_generic_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint_skill](https://user-images.githubusercontent.com/53406404/73790362-970d8e00-475d-11ea-8a8d-aae8504de15c.png)
@@ -297,7 +318,7 @@ python sedinet_predict.py -c config/config_sievedsand_9prcs.json
 ##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a large 400 image dataset
 
 ```
-python sedinet_predict.py -c config/config_9percentiles.json
+python sedinet_predict.py -c config/config_9percentiles_predict.json -w grain_size_global/res/grey/global_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint.hdf5
 ```
 
 ![global_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint_skill](https://user-images.githubusercontent.com/53406404/73790415-a8569a80-475d-11ea-96fa-a31d207d25ad.png)
@@ -308,7 +329,7 @@ python sedinet_predict.py -c config/config_9percentiles.json
 ##### Use SediNet to estimate sediment population 
 
 ```
-python sedinet_predict.py -c config/config_pop.json
+python sedinet_predict.py -c config/config_pop.json -w grain_population/res/color/pop_model_checkpoint.hdf5
 ```
 
 ![pop_model_checkpoint_cmT](https://user-images.githubusercontent.com/53406404/73790144-39794180-475d-11ea-8236-ecc7edf5bece.png)
@@ -316,7 +337,7 @@ python sedinet_predict.py -c config/config_pop.json
 ##### Use SediNet to estimate sediment shape 
 
 ```
-python sedinet_predict.py -c config/config_shape.json
+python sedinet_predict.py -c config/config_shape_predict.json -w grain_shape/res/color/shape_model_checkpoint.hdf5
 ```
 
 ![shape_model_checkpoint_cmT](https://user-images.githubusercontent.com/53406404/73790124-2f574300-475d-11ea-9584-dcf4723cd1db.png)
@@ -329,7 +350,7 @@ python sedinet_predict.py -c config/config_shape.json
 ##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on generic sands
 
 ```
-python sedinet_predict.py -c config/config_sand.json
+python sedinet_predict.py -c config/config_sand_predict.json -w grain_size_sand_generic/res/grey/sand_generic_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint.hdf5
 ```
 
 ![sand_generic_9prcs512_batch8_xy-base16_predict](https://user-images.githubusercontent.com/3596509/62002419-6e268500-b0b8-11e9-8c1a-83fc54e9d66a.png)
@@ -338,7 +359,7 @@ python sedinet_predict.py -c config/config_sand.json
 ##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on generic gravels
 
 ```
-python sedinet_predict.py -c config/config_gravel.json
+python sedinet_predict.py -c config/config_gravel_predict.json -w grain_size_gravel_generic/res/grey/gravel_generic_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint.hdf5
 ```
 
 ![gravel_generic_9prcs512_batch8_xy-base16_predict](https://user-images.githubusercontent.com/3596509/62002214-46352280-b0b4-11e9-84fc-65e66116386b.png)
@@ -603,4 +624,12 @@ Thanks to the following individuals for donating imagery:
 10) Color as well as greyscale imagery (user optional)
 11) Simpler workflow of ```train``` followed by ```predict``` - no longer any separate scripts for continous and categorical variables. Adding ```numclasses``` to the config file tells the project to use a categorical variable workflow
 12) Use of GPU is controlled by ```use_gpu``` = True\False in the ```defaults.py``` script
+
+
+> Update 26 June 2020:
+1) updated yml file 
+2) updated README
+3) switched from deprecated `from sklearn.externals import joblib` to `joblib` 
+4) added a folder of jupyter notebooks
+
 

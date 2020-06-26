@@ -1,10 +1,10 @@
-#conda env create -f conda_env/sedinet2.yml
+#conda env create -f conda_env/sedinet.yml
 name: sedinet
 channels:
-  - conda
+  - conda-forge
   - defaults
 dependencies:  
-  - python
+  - python=3.6
   - ipython
   - numpy
   - scipy
@@ -13,10 +13,15 @@ dependencies:
   - pandas
   - pip
   - requests
-  - tensorflow-gpu==2.0
   - jupyter
   - scikit-learn
+  - tqdm
+  - joblib
+  - bokeh
   - pip:
     - Image
     - pydot
-    - graphviz    
+    - graphviz
+    - panel
+    - tensorflow 
+    - tensorflow-addons    

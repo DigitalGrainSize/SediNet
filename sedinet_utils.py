@@ -46,10 +46,29 @@ import pandas as pd
 import numpy as np
 import itertools
 from sklearn.preprocessing import RobustScaler #MinMaxScaler
-from sklearn.externals import joblib 
+#from sklearn.externals import joblib 
+import joblib
 from tensorflow.keras.utils import to_categorical
 import itertools
 from sklearn.metrics import confusion_matrix, classification_report
+
+# import tensorflow_addons as tfa
+# import tqdm
+
+# # quietly deep-reload tqdm
+# import sys
+# from IPython.lib import deepreload 
+
+# stdout = sys.stdout
+# sys.stdout = open('junk','w')
+# deepreload.reload(tqdm)
+# sys.stdout = stdout
+
+# tqdm.__version__
+
+# tqdm_callback = tfa.callbacks.TQDMProgressBar()
+
+
 
 #normalizer = rescaled independently of other samples so that its norm (l2) equals one. The Normalizer rescales the vector for each sample to have unit norm, independently of the distribution of the samples. 
 #minmaxsacler = MinMaxScaler rescales the data set such that all feature values are in the range [0, 1] as shown in the right panel below. However, this scaling compress all inliers in the narrow range 
