@@ -630,6 +630,6 @@ Thanks to the following individuals for donating imagery:
 1) updated yml file 
 2) updated README
 3) switched from deprecated `from sklearn.externals import joblib` to `joblib` 
-4) added a folder of jupyter notebooks
+4) added a folder of updated jupyter notebooks
 
 
