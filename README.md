@@ -392,7 +392,7 @@ python sedinet_predict.py -c config/config_mattole.json
 ##### Train SediNet for sediment grain size prediction (9 percentiles of the cumulative distribution) on a small population of beach sands
 
 ```
-python sedinet_train.py -c config/config_sievedsand_9prcs.json
+python sedinet_train.py -c config/config_sievedsand_sieve_plus.json
 ```
 
 ![sievesand_9prcs512_batch8_xy-base26_log](https://user-images.githubusercontent.com/3596509/62001390-40374580-b0a4-11e9-8803-1aabce95dab9.png)

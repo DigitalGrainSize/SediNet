@@ -66,7 +66,8 @@ def make_cat_sedinet(ID_MAP, dropout):
     base = 30
     
     input_layer = Input(shape=(IM_HEIGHT, IM_WIDTH, 3))
-    _ = conv_block2(input_layer, filters=base, bn=False, pool=False, drop=False)
+    x = FourierFeatureProjection(gaussian_projection = 256, gaussian_scale = 1.0)(input_layer)	
+    _ = conv_block2(x, filters=base, bn=False, pool=False, drop=False) #input_layer
     _ = conv_block2(_, filters=base*2, bn=False, pool=True,drop=False)
     _ = conv_block2(_, filters=base*3, bn=False, pool=True,drop=False)
     _ = conv_block2(_, filters=base*4, bn=False, pool=True,drop=False)
@@ -101,7 +102,9 @@ def make_sedinet_siso_simo(vars, greyscale, dropout):
     else:
        input_layer = Input(shape=(IM_HEIGHT, IM_WIDTH, 3))    
 
-    _ = conv_block2(input_layer, filters=base, bn=False, pool=False, drop=False)
+    x = FourierFeatureProjection(gaussian_projection = 256, gaussian_scale = 1.0)(input_layer)	
+
+    _ = conv_block2(x, filters=base, bn=False, pool=False, drop=False) #input_layer
     _ = conv_block2(_, filters=base*2, bn=False, pool=True,drop=False)
     _ = conv_block2(_, filters=base*3, bn=False, pool=True,drop=False)
     _ = conv_block2(_, filters=base*4, bn=False, pool=True,drop=False)
@@ -143,7 +146,9 @@ def make_sedinet_miso_mimo(greyscale, dropout):
     else:
        input_layer = Input(shape=(IM_HEIGHT, IM_WIDTH, 3))   
 
-    img_input = BatchNormalization(axis=-1)(input_layer)
+    x = FourierFeatureProjection(gaussian_projection = 256, gaussian_scale = 1.0)(input_layer)	
+
+    img_input = BatchNormalization(axis=-1)(x) #input_layer
     ##shallow = False #True
     alpha=1
     

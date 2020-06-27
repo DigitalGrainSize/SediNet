@@ -102,11 +102,12 @@ def train_sedinet_cat(SM, train_df, test_df, train_idx, test_idx, ID_MAP, vars, 
 
     ##==============================================
     ## train the model
-    history = SM.fit_generator(train_gen,
+    history = SM.fit(train_gen,
                     steps_per_epoch=len(train_idx)//batch_size,
                     epochs=num_epochs,
                     callbacks=callbacks_list,
                     validation_data=valid_gen,
+					use_multiprocessing=True,
                     validation_steps=len(test_idx)//valid_batch_size,
                     max_queue_size=10)
 
@@ -188,11 +189,11 @@ def train_sedinet_siso_simo(SM, train_df, test_df, train_idx, test_idx, name, va
 
     ##==============================================
     ## train the model
-    history = SM.fit_generator(train_gen,
+    history = SM.fit(train_gen,
                     steps_per_epoch=len(train_idx)//batch_size,
                     epochs=num_epochs,
                     callbacks=callbacks_list,
-                    validation_data=valid_gen,
+                    validation_data=valid_gen,					
                     validation_steps=len(test_idx)//valid_batch_size,
                     use_multiprocessing=True)
 
@@ -348,11 +349,12 @@ def train_sedinet_miso_mimo(cnn, train_df, test_df, train_idx, test_idx, name, v
 
     ##==============================================
     ## train the model
-    history = SM.fit_generator(train_gen,
+    history = SM.fit(train_gen,
                     steps_per_epoch=len(train_idx)//batch_size,
                     epochs=num_epochs,
                     callbacks=callbacks_list,
                     validation_data=valid_gen,
+					use_multiprocessing=True,					
                     validation_steps=len(test_idx)//valid_batch_size)
                     
     ###===================================================

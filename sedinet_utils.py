@@ -52,6 +52,8 @@ from tensorflow.keras.utils import to_categorical
 import itertools
 from sklearn.metrics import confusion_matrix, classification_report
 
+from tf_fourier_features import FourierFeatureProjection
+
 # import tensorflow_addons as tfa
 # import tqdm
 
