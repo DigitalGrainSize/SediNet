@@ -32,6 +32,8 @@ def run_training_siso_simo(vars, train_csvfile, test_csvfile, name, res_folder,
    else:
       SM = make_sedinet_siso_simo(vars, greyscale, dropout)
 
+     ## scale each variable by 1 common CS rather than separate CS per variable?
+
       CS = []
       for var in vars:
          cs = RobustScaler() #MinMaxScaler()
@@ -50,7 +52,8 @@ def run_training_siso_simo(vars, train_csvfile, test_csvfile, name, res_folder,
             sm, wp = train_sedinet_siso_simo(SM, train_df, test_df,
                                                   train_idx, test_idx, name,
                                                   vars, mode, greyscale, CS,
-                                                  dropout, batch_size, valid_batch_size)
+                                                  dropout, batch_size, valid_batch_size,
+                                                  res_folder)
             SMs.append(sm)
             weights_path.append(wp)
             gc.collect()
@@ -59,7 +62,8 @@ def run_training_siso_simo(vars, train_csvfile, test_csvfile, name, res_folder,
          SM, weights_path = train_sedinet_siso_simo(SM, train_df, test_df,
                                                   train_idx, test_idx, name,
                                                   vars, mode, greyscale, CS,
-                                                  dropout, batch_size, valid_batch_size)
+                                                  dropout, batch_size, valid_batch_size,
+                                                  res_folder)
    else:
       if type(BATCH_SIZE)==list:
          SMs = []; weights_path = []
@@ -119,8 +123,6 @@ def train_sedinet_cat(SM, train_df, test_df, train_idx, test_idx,
     valid_gen = get_data_generator_1image(test_df, test_idx, True, ID_MAP,
                 vars[0], valid_batch_size, greyscale) ##VALID_BATCH_SIZE
 
-    #weights_path = vars[0]+"_model_checkpoint.hdf5"
-
     if SHALLOW is True:
        weights_path = name+"_"+mode+"_batch"+str(batch_size)+"_im"+str(IM_HEIGHT)+\
                    "_shallow_"+vars[0]+"_checkpoint.hdf5" ##BATCH_SIZE
@@ -128,69 +130,82 @@ def train_sedinet_cat(SM, train_df, test_df, train_idx, test_idx,
        weights_path = name+"_"+mode+"_batch"+str(batch_size)+"_im"+str(IM_HEIGHT)+\
                    "_"+vars[0]+"_checkpoint.hdf5" ##BATCH_SIZE
 
-    try:
-       plot_model(SM, weights_path.replace('.hdf5', '_model.png'),
-                  show_shapes=True, show_layer_names=True)
-    except:
-       pass
+    if os.path.exists(weights_path):
+        SM.load_weights(weights_path)
+        print("==========================================")
+        print("Loading weights that already exist: %s" % (weights_path)  )
+        print("Skipping model training")
 
-    callbacks_list = [
-         ModelCheckpoint(weights_path, monitor='val_loss', verbose=1,
-                         save_best_only=True, mode='min',
-                         save_weights_only = True)
-     ]
+    elif os.path.exists(res_folder+os.sep+weights_path):
+        weights_path = res_folder+os.sep+weights_path
+        SM.load_weights(weights_path)
+        print("==========================================")
+        print("Loading weights that already exist: %s" % (weights_path)  )
+        print("Skipping model training")
 
-    print("=========================================")
-    print("[INFORMATION] schematic of the model has been written out to: "+\
-          weights_path.replace('.hdf5', '_model.png'))
-    print("[INFORMATION] weights will be written out to: "+weights_path)
+    else:
 
-    ##==============================================
-    ## set checkpoint file and parameters that control early stopping,
-    ## and reduction of learning rate if and when validation
-    ## scores plateau upon successive epochs
-    reduceloss_plat = ReduceLROnPlateau(monitor='val_loss', factor=FACTOR,
-                      patience=STOP_PATIENCE, verbose=1, mode='auto', min_delta=MIN_DELTA,
-                      cooldown=STOP_PATIENCE, min_lr=MIN_LR)
+        try:
+           plot_model(SM, weights_path.replace('.hdf5', '_model.png'),
+                      show_shapes=True, show_layer_names=True)
+        except:
+           pass
 
-    earlystop = EarlyStopping(monitor="val_loss", mode="min", patience=STOP_PATIENCE)
+        callbacks_list = [
+             ModelCheckpoint(weights_path, monitor='val_loss', verbose=1,
+                             save_best_only=True, mode='min',
+                             save_weights_only = True)
+         ]
 
-    model_checkpoint = ModelCheckpoint(weights_path, monitor='val_loss',
-                       verbose=1, save_best_only=True, mode='min',
-                       save_weights_only = True)
+        print("=========================================")
+        print("[INFORMATION] schematic of the model has been written out to: "+\
+              weights_path.replace('.hdf5', '_model.png'))
+        print("[INFORMATION] weights will be written out to: "+weights_path)
 
-    #tqdm_callback = tfa.callbacks.TQDMProgressBar()
-    callbacks_list = [model_checkpoint, reduceloss_plat, earlystop] #, tqdm_callback]
+        ##==============================================
+        ## set checkpoint file and parameters that control early stopping,
+        ## and reduction of learning rate if and when validation
+        ## scores plateau upon successive epochs
+        reduceloss_plat = ReduceLROnPlateau(monitor='val_loss', factor=FACTOR,
+                          patience=STOP_PATIENCE, verbose=1, mode='auto', min_delta=MIN_DELTA,
+                          cooldown=STOP_PATIENCE, min_lr=MIN_LR)
 
-    ##==============================================
-    ## train the model
-    history = SM.fit(train_gen,
-                    steps_per_epoch=len(train_idx)//batch_size, ##BATCH_SIZE
-                    epochs=NUM_EPOCHS,
-                    callbacks=callbacks_list,
-                    validation_data=valid_gen, #use_multiprocessing=True,
-                    validation_steps=len(test_idx)//valid_batch_size) #max_queue_size=10 ##VALID_BATCH_SIZE
+        earlystop = EarlyStopping(monitor="val_loss", mode="min", patience=STOP_PATIENCE)
 
-    ###===================================================
-    ## Plot the loss and accuracy as a function of epoch
-    plot_train_history_1var(history)
-    plt.savefig(vars[0]+'_'+str(IM_HEIGHT)+'_batch'+str(batch_size)+'_history.png', ##BATCH_SIZE
-                dpi=300, bbox_inches='tight')
-    plt.close('all')
+        model_checkpoint = ModelCheckpoint(weights_path, monitor='val_loss',
+                           verbose=1, save_best_only=True, mode='min',
+                           save_weights_only = True)
 
-    # serialize model to JSON to use later to predict
-    model_json = SM.to_json()
-    with open(weights_path.replace('.hdf5','.json'), "w") as json_file:
-       json_file.write(model_json)
+        #tqdm_callback = tfa.callbacks.TQDMProgressBar()
+        callbacks_list = [model_checkpoint, reduceloss_plat, earlystop] #, tqdm_callback]
 
-    ## do some garbage collection
-    #gc.collect()
+        ##==============================================
+        ## train the model
+        history = SM.fit(train_gen,
+                        steps_per_epoch=len(train_idx)//batch_size, ##BATCH_SIZE
+                        epochs=NUM_EPOCHS,
+                        callbacks=callbacks_list,
+                        validation_data=valid_gen, #use_multiprocessing=True,
+                        validation_steps=len(test_idx)//valid_batch_size) #max_queue_size=10 ##VALID_BATCH_SIZE
+
+        ###===================================================
+        ## Plot the loss and accuracy as a function of epoch
+        plot_train_history_1var(history)
+        plt.savefig(vars[0]+'_'+str(IM_HEIGHT)+'_batch'+str(batch_size)+'_history.png', ##BATCH_SIZE
+                    dpi=300, bbox_inches='tight')
+        plt.close('all')
+
+        # serialize model to JSON to use later to predict
+        model_json = SM.to_json()
+        with open(weights_path.replace('.hdf5','.json'), "w") as json_file:
+           json_file.write(model_json)
 
     return SM, weights_path
 
 ###===================================================
 def train_sedinet_siso_simo(SM, train_df, test_df, train_idx, test_idx, name,
-                            vars, mode, greyscale, CS, dropout, batch_size, valid_batch_size):
+                            vars, mode, greyscale, CS, dropout, batch_size, valid_batch_size,
+                            res_folder):
     """
     This function trains an implementation of sedinet
     """
@@ -213,85 +228,96 @@ def train_sedinet_siso_simo(SM, train_df, test_df, train_idx, test_idx, name,
        weights_path = name+"_"+mode+"_batch"+str(batch_size)+"_im"+str(IM_HEIGHT)+\
                    "_"+varstring+"_checkpoint.hdf5" ##BATCH_SIZE
 
-    joblib.dump(CS, weights_path.replace('.hdf5','_scaler.pkl'))
+    if os.path.exists(weights_path):
+        SM.load_weights(weights_path)
+        print("==========================================")
+        print("Loading weights that already exist: %s" % (weights_path)  )
+        print("Skipping model training")
 
-    try:
-        plot_model(SM, weights_path.replace('.hdf5', '_model.png'),
-                   show_shapes=True, show_layer_names=True)
-        print("[INFORMATION] model schematic written to: "+\
-              weights_path.replace('.hdf5', '_model.png'))
-    except:
-        pass
+    elif os.path.exists(res_folder+os.sep+weights_path):
+        weights_path = res_folder+os.sep+weights_path
+        SM.load_weights(weights_path)
+        print("==========================================")
+        print("Loading weights that already exist: %s" % (weights_path)  )
+        print("Skipping model training")
 
-    print("==========================================")
-    print("[INFORMATION] weights will be written out to: "+weights_path)
-
-    ##==============================================
-    ## set checkpoint file and parameters that control early stopping,
-    ## and reduction of learning rate if and when validation scores plateau upon successive epochs
-    reduceloss_plat = ReduceLROnPlateau(monitor='val_loss', factor=FACTOR,
-                                        patience=STOP_PATIENCE, verbose=1, mode='auto',
-                                        min_delta=MIN_DELTA, cooldown=5,
-                                        min_lr=MIN_LR)
-
-    earlystop = EarlyStopping(monitor="val_loss", mode="min",
-                              patience=STOP_PATIENCE)
-
-    model_checkpoint = ModelCheckpoint(weights_path, monitor='val_loss', verbose=1,
-                                       save_best_only=True, mode='min',
-                                       save_weights_only = True)
-
-
-    #tqdm_callback = tfa.callbacks.TQDMProgressBar()
-    callbacks_list = [model_checkpoint, reduceloss_plat, earlystop] #, tqdm_callback]
-
-
-    try:
-        with open(weights_path.replace('.hdf5','') + '_report.txt','w') as fh:
-            # Pass the file handle in as a lambda function to make it callable
-            SM.summary(print_fn=lambda x: fh.write(x + '\n'))
-        fh.close()
-        print("[INFORMATION] model summary written to: "+ \
-              weights_path.replace('.hdf5','') + '_report.txt')
-        with open(weights_path.replace('.hdf5','') + '_report.txt','r') as fh:
-            tmp = fh.readlines()
-        print("===============================================")
-        print("Total parameters: %s" %\
-             (''.join(tmp).split('Total params:')[-1].split('\n')[0]))
-        fh.close()
-        print("===============================================")
-    except:
-        pass
-
-    ##==============================================
-    ## train the model
-    history = SM.fit(train_gen,
-                    steps_per_epoch=len(train_idx)//batch_size, ##BATCH_SIZE
-                    epochs=NUM_EPOCHS,
-                    callbacks=callbacks_list,
-                    validation_data=valid_gen,
-                    validation_steps=len(test_idx)//valid_batch_size) ##VALID_BATCH_SIZE
-                    #use_multiprocessing=True
-
-    ###===================================================
-    ## Plot the loss and accuracy as a function of epoch
-    if len(vars)==1:
-       plot_train_history_1var_mae(history)
     else:
-       plot_train_history_Nvar(history, vars, len(vars))
 
-    varstring = ''.join([str(k)+'_' for k in vars])
-    plt.savefig(weights_path.replace('.hdf5', '_history.png'), dpi=300,
-                bbox_inches='tight')
-    plt.close('all')
+        joblib.dump(CS, weights_path.replace('.hdf5','_scaler.pkl'))
 
-    # serialize model to JSON to use later to predict
-    model_json = SM.to_json()
-    with open(weights_path.replace('.hdf5','.json'), "w") as json_file:
-       json_file.write(model_json)
+        try:
+            plot_model(SM, weights_path.replace('.hdf5', '_model.png'),
+                       show_shapes=True, show_layer_names=True)
+            print("[INFORMATION] model schematic written to: "+\
+                  weights_path.replace('.hdf5', '_model.png'))
+        except:
+            pass
 
-    ## do some garbage collection
-    #gc.collect()
+        print("==========================================")
+        print("[INFORMATION] weights will be written out to: "+weights_path)
+
+        ##==============================================
+        ## set checkpoint file and parameters that control early stopping,
+        ## and reduction of learning rate if and when validation scores plateau upon successive epochs
+        reduceloss_plat = ReduceLROnPlateau(monitor='val_loss', factor=FACTOR,
+                                            patience=STOP_PATIENCE, verbose=1, mode='auto',
+                                            min_delta=MIN_DELTA, cooldown=5,
+                                            min_lr=MIN_LR)
+
+        earlystop = EarlyStopping(monitor="val_loss", mode="min",
+                                  patience=STOP_PATIENCE)
+
+        model_checkpoint = ModelCheckpoint(weights_path, monitor='val_loss', verbose=1,
+                                           save_best_only=True, mode='min',
+                                           save_weights_only = True)
+
+
+        #tqdm_callback = tfa.callbacks.TQDMProgressBar()
+        callbacks_list = [model_checkpoint, reduceloss_plat, earlystop] #, tqdm_callback]
+
+        try:
+            with open(weights_path.replace('.hdf5','') + '_report.txt','w') as fh:
+                # Pass the file handle in as a lambda function to make it callable
+                SM.summary(print_fn=lambda x: fh.write(x + '\n'))
+            fh.close()
+            print("[INFORMATION] model summary written to: "+ \
+                  weights_path.replace('.hdf5','') + '_report.txt')
+            with open(weights_path.replace('.hdf5','') + '_report.txt','r') as fh:
+                tmp = fh.readlines()
+            print("===============================================")
+            print("Total parameters: %s" %\
+                 (''.join(tmp).split('Total params:')[-1].split('\n')[0]))
+            fh.close()
+            print("===============================================")
+        except:
+            pass
+
+        ##==============================================
+        ## train the model
+        history = SM.fit(train_gen,
+                        steps_per_epoch=len(train_idx)//batch_size, ##BATCH_SIZE
+                        epochs=NUM_EPOCHS,
+                        callbacks=callbacks_list,
+                        validation_data=valid_gen,
+                        validation_steps=len(test_idx)//valid_batch_size) ##VALID_BATCH_SIZE
+                        #use_multiprocessing=True
+
+        ###===================================================
+        ## Plot the loss and accuracy as a function of epoch
+        if len(vars)==1:
+           plot_train_history_1var_mae(history)
+        else:
+           plot_train_history_Nvar(history, vars, len(vars))
+
+        varstring = ''.join([str(k)+'_' for k in vars])
+        plt.savefig(weights_path.replace('.hdf5', '_history.png'), dpi=300,
+                    bbox_inches='tight')
+        plt.close('all')
+
+        # serialize model to JSON to use later to predict
+        model_json = SM.to_json()
+        with open(weights_path.replace('.hdf5','.json'), "w") as json_file:
+           json_file.write(model_json)
 
     return SM, weights_path
 

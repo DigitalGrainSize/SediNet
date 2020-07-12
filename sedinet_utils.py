@@ -116,8 +116,6 @@ def get_data_generator_1image(df, indices, for_training, ID_MAP,
 
             if np.ndim(im)==2:
                im = np.dstack((im, im , im)) ##np.expand_dims(im[:,:,0], axis=2)
-            #print(file)
-            #print(im.shape)
             im = im[:,:,:3]
 
             if greyscale==True:
@@ -220,11 +218,10 @@ def predict_test_train_cat(train_df, test_df, train_idx, test_idx, var, SM,
            exec('del tmp'+str(counter))
 
        PT = np.median(PT, axis=0)
-       #K.clear_session()
-       #gc.collect()
-
        predT = np.squeeze(np.asarray(PT))
        del PT
+       K.clear_session()
+       gc.collect()
 
    else:
      predT = SM.predict(x_train, batch_size=32)
@@ -249,10 +246,10 @@ def predict_test_train_cat(train_df, test_df, train_idx, test_idx, var, SM,
            exec('del tmp'+str(counter))
 
        PT = np.median(PT, axis=0)
-       # K.clear_session()
-       # gc.collect()
-
        pred = np.squeeze(np.asarray(PT))
+       del PT
+       K.clear_session()
+       gc.collect()
 
    else:
 

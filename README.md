@@ -14,8 +14,6 @@ By Dr Daniel Buscombe
 
 daniel@mardascience.com
 
-[![DOI](https://zenodo.org/badge/199072106.svg)](https://zenodo.org/badge/latestdoi/199072106)
-
 Deep learning framework for [optical granulometry](https://en.wikipedia.org/wiki/Optical_granulometry) (estimation of sedimentological variables from sediment imagery).
 
 --------------------------------------------------------------------------------
@@ -634,56 +632,55 @@ CONT_DENSE_UNITS = 1024
 
 #### Global (400 images), 9 percentiles
 
-* Mean percent error for D50
+* Mean percent error for D50 (train / test)
 
 | Batch/Image size| 768   | 1024  |
-| ------ | ------ | ------| ------|
-| 4      | X      |X      |X      |
-| 6      | X      |X      |X      |
-| 8      | X      |X      |X      |
-| 4,6,8      | X      |X      |X      |
+| ------ | ------ | ------|
+| 6,8,12      | X      |X      |
+| 2,4,6      | 36 / 30      |X      |
+| 4,6,8      | 34 / 25      |X      |
+
 
 
 #### Pesacdero Sand Sieve Sizes
 
-* Mean percent error for sieve size (sediment that lands on a sieve of mesh size)
+* Mean percent error for sieve size (sediment that lands on a sieve of mesh size) (train / test)
 
 | Batch/Image size| 768   | 1024  |
-| ------ | ------ | ------| ------|
-| 4      | X      |X      |X      |
-| 6      | X      |X      |X      |
-| 8      | X      |X      |X      |
-| 4,6,8      | X      |X      |X      |
+| ------ | ------ | ------|
+| 4      | X      |X      |
+| 2,4,6      | X      |X      |
+| 4,6,8      | X      |X      |
 
 
 
 #### Grain shape
 
-* Mean percent error for grain shape
+* Mean accuracy for grain shape (train / test)
 
 | Batch/Image size| 768   | 1024  |
-| ------ | ------ | ------| ------|
-| 4      | X      |X      |X      |
-| 6      | X      |X      |X      |
-| 8      | X      |X      |X      |
-| 4,6,8      | X      |X      |X      |
-
+| ------ | ------ | ------|
+| 4      | X      |X      |
+| 2,4,6      | X     |X      |
+| 4,6,8      | 0.95 / 0.68      |X      |
 
 #### Grain population
 
-* Mean percent error for grain population
+* Mean accuracy for grain population (train / test)
 
 | Batch/Image size| 768   | 1024  |
-| ------ | ------ | ------| ------|
-| 4      | X      |X      |X      |
-| 6      | X      |X      |X      |
-| 8      | X      |X      |X      |
-| 4,6,8      | X      |X      |X      |
+| ------ | ------ | ------|
+| 4      | X      |X      |
+| 2,4,6      | X     |X      |
+| 4,6,8      | X     |X      |
 
 
 ### Release notes
 
 > Release v1.0 (Sep 30 2019): initial submission of SediNet paper to journal
+
+[![DOI](https://zenodo.org/badge/199072106.svg)](https://zenodo.org/badge/latestdoi/199072106)
+
 
 > Release v1.1 (Nov 5 2019): upgrade from keras with Tensorflow 1.X backend to Tensorflow 2.0 native keras. Enforce TF==2.0 in conda yml file
 

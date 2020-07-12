@@ -19,7 +19,7 @@ IM_WIDTH = IM_HEIGHT
 NUM_EPOCHS = 50 #100
 
 # number of images to feed the network per step in epoch
-BATCH_SIZE =  [2,4,6] #suggested: 4 --16
+BATCH_SIZE =  [6,8,12] #suggested: 4 --16
 
 # if True, use a smaller (shallower) network architecture
 SHALLOW = False ##False=larger network
@@ -31,7 +31,7 @@ OPT = 'rmsprop'
 CONT_LOSS = 'pinball'
 ## CONT_LOSS = 'mse'
 
-## loss function for continuous models (2 choices)
+## loss function for categorical (disrete) models (2 choices)
 CAT_LOSS = 'focal'
 #CAT_LOSS = 'categorical_crossentropy'
 
