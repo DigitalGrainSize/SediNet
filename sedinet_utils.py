@@ -323,38 +323,90 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
                 vars, len(train_idx), greyscale, CS)
     x_train, tmp = next(train_gen)
 
-    if len(vars)>1:
-       counter = 0
-       for v in vars:
-          exec(
-          v+\
-          '_trueT = np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1)))'
-          )
-          counter +=1
+    if SCALE == True:
+
+        if len(vars)>1:
+           counter = 0
+           for v in vars:
+              exec(
+              v+\
+              '_trueT = np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1)))'
+              )
+              counter +=1
+        else:
+           exec(
+           vars[0]+\
+           '_trueT = np.squeeze(CS[0].inverse_transform(tmp.reshape(-1,1)))'
+           )
+
     else:
-       exec(
-       vars[0]+\
-       '_trueT = np.squeeze(CS[0].inverse_transform(tmp[0].reshape(-1,1)))'
-       )
+        if len(vars)>1:
+           counter = 0
+           for v in vars:
+              exec(
+              v+\
+              '_trueT = np.squeeze(tmp[counter])'
+              )
+              counter +=1
+        else:
+           exec(
+           vars[0]+\
+           '_trueT = np.squeeze(tmp)'
+           )
 
     del tmp
 
     for v in vars:
        exec(v+'_PT = []')
 
-    if type(SM) == list:
-        counter = 0
-        for s in SM:
-            tmp=s.predict(x_train, batch_size=32)
+    if SCALE == True:
+
+        if type(SM) == list:
+            counter = 0
+            for s in SM:
+                tmp=s.predict(x_train, batch_size=32)
+
+                if len(vars)>1:
+                   counter2 = 0
+                   for v in vars:
+                      exec(
+                      v+\
+                      '_PT.append(np.squeeze(CS[counter].inverse_transform(tmp[counter2].reshape(-1,1))))'
+                      )
+                      counter2 +=1
+                else:
+                   exec(
+                   vars[0]+\
+                   '_PT.append(np.asarray(np.squeeze(CS[0].inverse_transform(tmp.reshape(-1,1)))))'
+                   )
+
+                del tmp
 
             if len(vars)>1:
-               counter2 = 0
+               counter = 0
+               for v in vars:
+                  exec(
+                  v+\
+                  '_PT = np.median('+v+'_PT, axis=0)'
+                  )
+                  counter +=1
+            else:
+               exec(
+               vars[0]+\
+               '_PT = np.median('+v+'_PT, axis=0)'
+               )
+
+        else:
+            tmp = SM.predict(x_train, batch_size=32) #128)
+
+            if len(vars)>1:
+               counter = 0
                for v in vars:
                   exec(
                   v+\
                   '_PT.append(np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1))))'
                   )
-                  counter2 +=1
+                  counter +=1
             else:
                exec(
                vars[0]+\
@@ -363,38 +415,64 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
 
             del tmp
 
-        if len(vars)>1:
-           counter = 0
-           for v in vars:
-              exec(
-              v+\
-              '_PT = np.median('+v+'_PT, axis=0)'
-              )
-              counter +=1
-        else:
-           exec(
-           vars[0]+\
-           '_PT = np.median('+v+'_PT, axis=0)'
-           )
 
     else:
-        tmp = SM.predict(x_train, batch_size=32) #128)
 
-        if len(vars)>1:
-           counter = 0
-           for v in vars:
-              exec(
-              v+\
-              '_PT.append(np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1))))'
-              )
-              counter +=1
+        if type(SM) == list:
+            #counter = 0
+            for s in SM:
+                tmp=s.predict(x_train, batch_size=32)
+
+                if len(vars)>1:
+                   counter2 = 0
+                   for v in vars:
+                      exec(
+                      v+\
+                      '_PT.append(np.squeeze(tmp[counter2]))'
+                      )
+                      counter2 +=1
+                else:
+                   exec(
+                   vars[0]+\
+                   '_PT.append(np.asarray(tmp))'
+                   )
+
+                del tmp
+
+            if len(vars)>1:
+               counter = 0
+               for v in vars:
+                  exec(
+                  v+\
+                  '_PT = np.median('+v+'_PT, axis=0)'
+                  )
+                  counter +=1
+            else:
+               exec(
+               vars[0]+\
+               '_PT = np.median('+v+'_PT, axis=0)'
+               )
+
         else:
-           exec(
-           vars[0]+\
-           '_PT.append(np.asarray(np.squeeze(CS[0].inverse_transform(tmp.reshape(-1,1)))))'
-           )
+            tmp = SM.predict(x_train, batch_size=32) #128)
 
-        del tmp
+            if len(vars)>1:
+               counter = 0
+               for v in vars:
+                  exec(
+                  v+\
+                  '_PT.append(np.squeeze(tmp))'
+                  )
+                  counter +=1
+            else:
+               exec(
+               vars[0]+\
+               '_PT.append(np.asarray(np.squeeze(tmp)))'
+               )
+
+            del tmp
+
+
 
     if len(vars)>1:
        for k in range(len(vars)):
@@ -414,31 +492,85 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
                vars, len(test_idx), greyscale, CS)
 
     x_test, tmp = next(test_gen)
-    if len(vars)>1:
-       counter = 0
-       for v in vars:
-          exec(
-          v+\
-          '_true = np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1)))'
-          )
-          counter +=1
+
+
+    if SCALE == True:
+
+        if len(vars)>1:
+           counter = 0
+           for v in vars:
+              exec(
+              v+\
+              '_true = np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1)))'
+              )
+              counter +=1
+        else:
+           exec(
+           vars[0]+\
+           '_true = np.squeeze(CS[0].inverse_transform(tmp[0].reshape(-1,1)))'
+           )
+
     else:
-       exec(
-       vars[0]+\
-       '_true = np.squeeze(CS[0].inverse_transform(tmp[0].reshape(-1,1)))'
-       )
+        if len(vars)>1:
+           counter = 0
+           for v in vars:
+              exec(
+              v+\
+              '_true = np.squeeze(tmp)'
+              )
+              counter +=1
+        else:
+           exec(
+           vars[0]+\
+           '_true = np.squeeze(tmp)'
+           )
+
+
+    del tmp
 
     for v in vars:
        exec(v+'_P = []')
 
-    del tmp
+    if SCALE == True:
 
+        if type(SM) == list:
+            counter = 0
+            for s in SM:
+                tmp=s.predict(x_test, batch_size=32)
 
-    if type(SM) == list:
-        counter = 0
-        for s in SM:
-            tmp=s.predict(x_test, batch_size=32)
+                if len(vars)>1:
+                   counter = 0
+                   for v in vars:
+                      exec(
+                      v+\
+                      '_P.append(np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1))))'
+                      )
+                      counter +=1
+                else:
+                   exec(
+                   vars[0]+\
+                   '_P.append(np.asarray(np.squeeze(CS[0].inverse_transform(tmp.reshape(-1,1)))))'
+                   )
 
+                del tmp
+
+            if len(vars)>1:
+               counter = 0
+               for v in vars:
+                  exec(
+                  v+\
+                  '_P = np.median('+v+'_P, axis=0)'
+                  )
+                  counter +=1
+            else:
+               exec(
+               vars[0]+\
+               '_P = np.median('+v+'_P, axis=0)'
+               )
+
+        else:
+
+            tmp = SM.predict(x_test, batch_size=32) #128)
             if len(vars)>1:
                counter = 0
                for v in vars:
@@ -455,38 +587,62 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
 
             del tmp
 
-        if len(vars)>1:
-           counter = 0
-           for v in vars:
-              exec(
-              v+\
-              '_P = np.median('+v+'_P, axis=0)'
-              )
-              counter +=1
-        else:
-           exec(
-           vars[0]+\
-           '_P = np.median('+v+'_P, axis=0)'
-           )
 
     else:
+        if type(SM) == list:
+            counter = 0
+            for s in SM:
+                tmp=s.predict(x_test, batch_size=32)
 
-        tmp = SM.predict(x_test, batch_size=32) #128)
-        if len(vars)>1:
-           counter = 0
-           for v in vars:
-              exec(
-              v+\
-              '_P.append(np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1))))'
-              )
-              counter +=1
+                if len(vars)>1:
+                   counter = 0
+                   for v in vars:
+                      exec(
+                      v+\
+                      '_P.append(np.squeeze(tmp))'
+                      )
+                      counter +=1
+                else:
+                   exec(
+                   vars[0]+\
+                   '_P.append(np.asarray(np.squeeze(tmp)))'
+                   )
+
+                del tmp
+
+            if len(vars)>1:
+               counter = 0
+               for v in vars:
+                  exec(
+                  v+\
+                  '_P = np.median('+v+'_P, axis=0)'
+                  )
+                  counter +=1
+            else:
+               exec(
+               vars[0]+\
+               '_P = np.median('+v+'_P, axis=0)'
+               )
+
         else:
-           exec(
-           vars[0]+\
-           '_P.append(np.asarray(np.squeeze(CS[0].inverse_transform(tmp.reshape(-1,1)))))'
-           )
 
-        del tmp
+            tmp = SM.predict(x_test, batch_size=32) #128)
+            if len(vars)>1:
+               counter = 0
+               for v in vars:
+                  exec(
+                  v+\
+                  '_P.append(np.squeeze(tmp[counter]))'
+                  )
+                  counter +=1
+            else:
+               exec(
+               vars[0]+\
+               '_P.append(np.asarray(np.squeeze(tmp.reshape)))'
+               )
+
+            del tmp
+
 
     del test_gen, x_test
 
@@ -535,8 +691,8 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
          y = np.polyval(z,y)
          y = np.abs(y)
 
-         #plt.plot(x, y, 'rs', markersize=5)
          plt.plot(x, y, 'ko', markersize=5)
+         # plt.plot(x, y, 'ko', markersize=5)
          plt.plot([ np.min(np.hstack((x,y))),  np.max(np.hstack((x,y)))],
                   [ np.min(np.hstack((x,y))),  np.max(np.hstack((x,y)))],
                   'k', lw=2)
@@ -822,84 +978,147 @@ def get_data_generator_Nvars_siso_simo(df, indices, for_training, vars,
 
             if len(images) >= batch_size:
                if len(vars)==1:
-                  p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
+                  if len(CS)==0:
+                      p1s = np.squeeze(np.array(p1s))
+                  else:
+                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
                   yield np.array(images), [np.array(p1s)]
                   images, p1s = [], []
                elif len(vars)==2:
-                  p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
-                  p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
+                  if len(CS)==0:
+                      p1s = np.squeeze(np.array(p1s))
+                      p2s = np.squeeze(np.array(p2s))
+                  else:
+                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
+                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
                   yield np.array(images), [np.array(p1s), np.array(p2s)]
                   images, p1s, p2s = [], [], []
                elif len(vars)==3:
-                  p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
-                  p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
-                  p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
+                  if len(CS)==0:
+                      p1s = np.squeeze(np.array(p1s))
+                      p2s = np.squeeze(np.array(p2s))
+                      p3s = np.squeeze(np.array(p3s))
+                  else:
+                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
+                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
+                      p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
                   yield np.array(images),[np.array(p1s), np.array(p2s), np.array(p3s)]
                   images, p1s, p2s, p3s = [], [], [], []
                elif len(vars)==4:
-                  p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
-                  p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
-                  p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
-                  p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
+                  if len(CS)==0:
+                      p1s = np.squeeze(np.array(p1s))
+                      p2s = np.squeeze(np.array(p2s))
+                      p3s = np.squeeze(np.array(p3s))
+                      p4s = np.squeeze(np.array(p4s))
+                  else:
+                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
+                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
+                      p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
+                      p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
                   yield np.array(images),[np.array(p1s), np.array(p2s),
                         np.array(p3s), np.array(p4s)]
                   images, p1s, p2s, p3s, p4s = [], [], [], [], []
                elif len(vars)==5:
-                  p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
-                  p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
-                  p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
-                  p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
-                  p5s = np.squeeze(CS[4].transform(np.array(p5s).reshape(-1, 1)))
+                  if len(CS)==0:
+                      p1s = np.squeeze(np.array(p1s))
+                      p2s = np.squeeze(np.array(p2s))
+                      p3s = np.squeeze(np.array(p3s))
+                      p4s = np.squeeze(np.array(p4s))
+                      p5s = np.squeeze(np.array(p5s))
+                  else:
+                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
+                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
+                      p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
+                      p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
+                      p5s = np.squeeze(CS[4].transform(np.array(p5s).reshape(-1, 1)))
                   yield np.array(images),[np.array(p1s), np.array(p2s), np.array(p3s),
                         np.array(p4s), np.array(p5s)]
                   images, p1s, p2s, p3s, p4s, p5s = [], [], [], [], [], []
                elif len(vars)==6:
-                  p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
-                  p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
-                  p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
-                  p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
-                  p5s = np.squeeze(CS[4].transform(np.array(p5s).reshape(-1, 1)))
-                  p6s = np.squeeze(CS[5].transform(np.array(p6s).reshape(-1, 1)))
+                  if len(CS)==0:
+                      p1s = np.squeeze(np.array(p1s))
+                      p2s = np.squeeze(np.array(p2s))
+                      p3s = np.squeeze(np.array(p3s))
+                      p4s = np.squeeze(np.array(p4s))
+                      p5s = np.squeeze(np.array(p5s))
+                      p6s = np.squeeze(np.array(p6s))
+                  else:
+                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
+                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
+                      p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
+                      p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
+                      p5s = np.squeeze(CS[4].transform(np.array(p5s).reshape(-1, 1)))
+                      p6s = np.squeeze(CS[5].transform(np.array(p6s).reshape(-1, 1)))
                   yield np.array(images),[np.array(p1s), np.array(p2s), np.array(p3s),
                         np.array(p4s), np.array(p5s), np.array(p6s)]
                   images, p1s, p2s, p3s, p4s, p5s, p6s = \
                   [], [], [], [], [], [], []
                elif len(vars)==7:
-                  p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
-                  p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
-                  p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
-                  p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
-                  p5s = np.squeeze(CS[4].transform(np.array(p5s).reshape(-1, 1)))
-                  p6s = np.squeeze(CS[5].transform(np.array(p6s).reshape(-1, 1)))
-                  p7s = np.squeeze(CS[6].transform(np.array(p7s).reshape(-1, 1)))
+                  if len(CS)==0:
+                      p1s = np.squeeze(np.array(p1s))
+                      p2s = np.squeeze(np.array(p2s))
+                      p3s = np.squeeze(np.array(p3s))
+                      p4s = np.squeeze(np.array(p4s))
+                      p5s = np.squeeze(np.array(p5s))
+                      p6s = np.squeeze(np.array(p6s))
+                      p7s = np.squeeze(np.array(p7s))
+                  else:
+                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
+                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
+                      p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
+                      p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
+                      p5s = np.squeeze(CS[4].transform(np.array(p5s).reshape(-1, 1)))
+                      p6s = np.squeeze(CS[5].transform(np.array(p6s).reshape(-1, 1)))
+                      p7s = np.squeeze(CS[6].transform(np.array(p7s).reshape(-1, 1)))
                   yield np.array(images),[np.array(p1s), np.array(p2s), np.array(p3s),
                         np.array(p4s), np.array(p5s), np.array(p6s), np.array(p7s)]
                   images, p1s, p2s, p3s, p4s, p5s, p6s, p7s = \
                   [], [], [], [], [], [], [], []
                elif len(vars)==8:
-                  p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
-                  p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
-                  p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
-                  p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
-                  p5s = np.squeeze(CS[4].transform(np.array(p5s).reshape(-1, 1)))
-                  p6s = np.squeeze(CS[5].transform(np.array(p6s).reshape(-1, 1)))
-                  p7s = np.squeeze(CS[6].transform(np.array(p7s).reshape(-1, 1)))
-                  p8s = np.squeeze(CS[7].transform(np.array(p8s).reshape(-1, 1)))
+                  if len(CS)==0:
+                      p1s = np.squeeze(np.array(p1s))
+                      p2s = np.squeeze(np.array(p2s))
+                      p3s = np.squeeze(np.array(p3s))
+                      p4s = np.squeeze(np.array(p4s))
+                      p5s = np.squeeze(np.array(p5s))
+                      p6s = np.squeeze(np.array(p6s))
+                      p7s = np.squeeze(np.array(p7s))
+                      p8s = np.squeeze(np.array(p8s))
+                  else:
+                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
+                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
+                      p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
+                      p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
+                      p5s = np.squeeze(CS[4].transform(np.array(p5s).reshape(-1, 1)))
+                      p6s = np.squeeze(CS[5].transform(np.array(p6s).reshape(-1, 1)))
+                      p7s = np.squeeze(CS[6].transform(np.array(p7s).reshape(-1, 1)))
+                      p8s = np.squeeze(CS[7].transform(np.array(p8s).reshape(-1, 1)))
                   yield np.array(images),[np.array(p1s), np.array(p2s), np.array(p3s),
                         np.array(p4s), np.array(p5s), np.array(p6s),
                         np.array(p7s), np.array(p8s)]
                   images, p1s, p2s, p3s, p4s, p5s, p6s, p7s, p8s = \
                   [], [], [], [], [], [], [], [], []
                elif len(vars)==9:
-                  p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
-                  p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
-                  p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
-                  p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
-                  p5s = np.squeeze(CS[4].transform(np.array(p5s).reshape(-1, 1)))
-                  p6s = np.squeeze(CS[5].transform(np.array(p6s).reshape(-1, 1)))
-                  p7s = np.squeeze(CS[6].transform(np.array(p7s).reshape(-1, 1)))
-                  p8s = np.squeeze(CS[7].transform(np.array(p8s).reshape(-1, 1)))
-                  p9s = np.squeeze(CS[8].transform(np.array(p9s).reshape(-1, 1)))
+                  if len(CS)==0:
+                      p1s = np.squeeze(np.array(p1s))
+                      p2s = np.squeeze(np.array(p2s))
+                      p3s = np.squeeze(np.array(p3s))
+                      p4s = np.squeeze(np.array(p4s))
+                      p5s = np.squeeze(np.array(p5s))
+                      p6s = np.squeeze(np.array(p6s))
+                      p7s = np.squeeze(np.array(p7s))
+                      p8s = np.squeeze(np.array(p8s))
+                      p9s = np.squeeze(np.array(p9s))
+                  else:
+                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
+                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
+                      p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
+                      p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
+                      p5s = np.squeeze(CS[4].transform(np.array(p5s).reshape(-1, 1)))
+                      p6s = np.squeeze(CS[5].transform(np.array(p6s).reshape(-1, 1)))
+                      p7s = np.squeeze(CS[6].transform(np.array(p7s).reshape(-1, 1)))
+                      p8s = np.squeeze(CS[7].transform(np.array(p8s).reshape(-1, 1)))
+                      p9s = np.squeeze(CS[8].transform(np.array(p9s).reshape(-1, 1)))
                   try:
                      yield np.array(images),[np.array(p1s), np.array(p2s), np.array(p3s),
                            np.array(p4s), np.array(p5s), np.array(p6s),

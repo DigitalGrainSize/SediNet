@@ -32,22 +32,23 @@ def run_training_siso_simo(vars, train_csvfile, test_csvfile, name, res_folder,
    else:
       SM = make_sedinet_siso_simo(vars, greyscale, dropout)
 
-     ## scale each variable by 1 common CS rather than separate CS per variable?
-
-      CS = []
-      for var in vars:
-         cs = RobustScaler() #MinMaxScaler()
-         cs.fit_transform(
-            np.r_[train_df[var].values, test_df[var].values].reshape(-1,1)
-            )
-         CS.append(cs)
-         del cs
-      # CS = RobustScaler()
-      # H = []
-      # for var in vars:
-      #    H.append(np.r_[train_df[var].values, test_df[var].values].reshape(-1,1))
-      #
-      # CS.fit_transform(np.hstack(H).reshape(-1,1))
+      if SCALE==True:
+          CS = []
+          for var in vars:
+             cs = RobustScaler() #MinMaxScaler()
+             cs.fit_transform(
+                np.r_[train_df[var].values, test_df[var].values].reshape(-1,1)
+                )
+             CS.append(cs)
+             del cs
+          # CS = RobustScaler()
+          # H = []
+          # for var in vars:
+          #    H.append(np.r_[train_df[var].values, test_df[var].values].reshape(-1,1))
+          #
+          # CS.fit_transform(np.hstack(H).reshape(-1,1))
+      else:
+          CS = []
 
    ##==============================================
    ## train model
@@ -226,6 +227,17 @@ def train_sedinet_siso_simo(SM, train_df, test_df, train_idx, test_idx, name,
     valid_gen = get_data_generator_Nvars_siso_simo(test_df, test_idx, True,
                                                    vars, valid_batch_size, greyscale, CS) ##VALID_BATCH_SIZE
 
+
+# datagen=ImageDataGenerator(rescale=1./255,
+#                            brightness_range=0.25,
+#                            horizontal_flip=True,
+#                            vertical_flip=True,
+#                            )
+# train_gen=datagen.flow_from_dataframe(dataframe=train_df, directory=".\train_imgs",
+#                         x_col="id", y_col="label", class_mode="categorical",
+#                         target_size=(32,32), batch_size=32)
+
+
     varstring = ''.join([str(k)+'_' for k in vars])
 
     if SHALLOW is True:
@@ -250,7 +262,10 @@ def train_sedinet_siso_simo(SM, train_df, test_df, train_idx, test_idx, name,
 
     else:
 
-        joblib.dump(CS, weights_path.replace('.hdf5','_scaler.pkl'))
+        if len(CS)==0:
+            pass
+        else:
+            joblib.dump(CS, weights_path.replace('.hdf5','_scaler.pkl'))
 
         try:
             plot_model(SM, weights_path.replace('.hdf5', '_model.png'),

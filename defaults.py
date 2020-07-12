@@ -22,7 +22,9 @@ NUM_EPOCHS = 50 #100
 BATCH_SIZE =  [4,6,8] #suggested: 4 --16
 
 # if True, use a smaller (shallower) network architecture
-SHALLOW = False ##False=larger network
+SHALLOW = True ##False=larger network
+
+SCALE = False # if True, scale all variables before and after training. not stable on small datasets
 
 # optimizer (gradient descent solver) good alternative == 'adam'
 OPT = 'rmsprop'
