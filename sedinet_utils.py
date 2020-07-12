@@ -461,7 +461,7 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
                for v in vars:
                   exec(
                   v+\
-                  '_PT.append(np.squeeze(tmp))'
+                  '_PT.append(np.squeeze(tmp[counter]))'
                   )
                   counter +=1
             else:
@@ -516,7 +516,7 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
            for v in vars:
               exec(
               v+\
-              '_true = np.squeeze(tmp)'
+              '_true = np.squeeze(tmp[counter])'
               )
               counter +=1
         else:
@@ -703,14 +703,14 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
 
          plt.plot(x, y, 'bx', markersize=5)
 
-         plt.text(np.nanmin(x), 0.96*np.max(np.hstack((x,y))),'Test : '+\
+         plt.text(np.nanmin(x), 0.5*np.max(np.hstack((x,y))),'Test : '+\
                   str(np.mean(100*(np.abs(eval(vars[k-1]+'_pred') -\
                   eval(vars[k-1]+'_true')) / eval(vars[k-1]+'_true'))))[:5]+\
-                  ' %',  fontsize=8, color='b')
-         plt.text(np.nanmin(x), np.max(np.hstack((x,y))),'Train : '+\
+                  ' %',  fontsize=10, color='b')
+         plt.text(np.nanmin(x), 0.4*np.max(np.hstack((x,y))),'Train : '+\
                   str(np.mean(100*(np.abs(eval(vars[k-1]+'_predT') -\
                   eval(vars[k-1]+'_trueT')) / eval(vars[k-1]+'_trueT'))))[:5]+\
-                  ' %', fontsize=8)
+                  ' %', fontsize=10)
          plt.title(r''+labs[k-1]+') '+vars[k-1], fontsize=8, loc='left')
 
          varstring = ''.join([str(k)+'_' for k in vars])

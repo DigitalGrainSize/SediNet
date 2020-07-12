@@ -582,40 +582,16 @@ and continuous ...
 python sedinet_predict.py -c config/config_custom_4prcs.json
 ```
 
---------------------------------------------------------------------------------
-
-## Other things
-
-### If you have an issue, comment or suggestion ...
-Please use the 'issues' tab so everyone can see the question and answer. Please do not email me directly. Thanks
-
-<!-- ### Contribute your data!
-Please see the [SediNet-Contrib repo](https://github.com/MARDAScience/SediNet-Contrib) -->
-
-### Please cite
-If you find this useful for your research please cite this paper:
-
-> Buscombe, D. (2019). SediNet: a configurable deep learning model for mixed qualitative and quantitative optical granulometry. Earth Surface Processes and Landforms
-
-### Acknowledgements
-Thanks to the following individuals for donating imagery:
-* Rob Holman (Oregon State University)
-* Dave Rubin (University of California Santa Cruz)
-* Jon Warrick (US Geological Survey)
-* Brian Romans (Virginia Tech)
-* Christopher Heuberk (Freie Universitat Berlin)
-* Sarah Joerger, Mike Smith (Northern Arizona University)
-
 ### Benchmark test results
 Using the following settings ...
 
 ```
-USE_GPU = True  ##False
-IM_HEIGHT = 600
+IM_HEIGHT = 768
 IM_WIDTH = IM_HEIGHT
-NUM_EPOCHS = 100
+NUM_EPOCHS = 50
 BATCH_SIZE =  [4,6,8]
-SHALLOW = False
+SHALLOW = True
+SCALE = False
 OPT = 'rmsprop'
 CONT_LOSS = 'pinball'
 CAT_LOSS = 'focal'
@@ -637,12 +613,22 @@ CONT_DENSE_UNITS = 1024
 | Batch/Image size| 768   | 1024  |
 | ------ | ------ | ------|
 | 6,8,12      | X      |X      |
-| 2,4,6      | 36 / 30      |X      |
-| 4,6,8      | 34 / 25      |X      |
+| 2,4,6      | X     |X      |
+| 4,6,8      | X      |X      |
 
 
+#### Gravel, 9 percentiles
 
-#### Pesacdero Sand Sieve Sizes
+* Mean percent error for D50 (train / test)
+
+| Batch/Image size| 768   | 1024  |
+| ------ | ------ | ------|
+| 6,8,12      | X      |X      |
+| 2,4,6      | X      |X      |
+| 4,6,8      | 12/29      |X      |
+
+
+#### Pescadero Sand Sieve Sizes
 
 * Mean percent error for sieve size (sediment that lands on a sieve of mesh size) (train / test)
 
@@ -662,7 +648,9 @@ CONT_DENSE_UNITS = 1024
 | ------ | ------ | ------|
 | 4      | X      |X      |
 | 2,4,6      | X     |X      |
-| 4,6,8      | 0.95 / 0.68      |X      |
+| 4,6,8      | .58      |X      |
+| 4,6,8 shallow | .65     |X      |
+
 
 #### Grain population
 
@@ -672,7 +660,8 @@ CONT_DENSE_UNITS = 1024
 | ------ | ------ | ------|
 | 4      | X      |X      |
 | 2,4,6      | X     |X      |
-| 4,6,8      | X     |X      |
+| 4,6,8 | .69   |X      |
+| 4,6,8 shallow | .74    |X      |
 
 
 ### Release notes
@@ -720,8 +709,31 @@ CONT_DENSE_UNITS = 1024
 12) dynamically grow the memory used on the GPU
 13) new benchmarking section of the readme tabulating results with default settings
 14) now can take multiple batch sizes and build an ensemble model. This generally results in higher accuracy but more models = more model training time
-15) variables are all scaled the same, so they should be similar metrics  e.g. all grain sizes or all proportions
+15) response variables can be scaled using a robust scaler, or not. Scaling not recommended for small datasets
+16) now checks for estimating weights path in root and `res_folder` directory and, if present, uses it. This can be used to add batch size combinations sequentially, and also fixes OOM errors during the final prediction step of `sedinet_train.py`
 
 
 
-x
+--------------------------------------------------------------------------------
+
+## Other things
+
+### If you have an issue, comment or suggestion ...
+Please use the 'issues' tab so everyone can see the question and answer. Please do not email me directly. Thanks
+
+<!-- ### Contribute your data!
+Please see the [SediNet-Contrib repo](https://github.com/MARDAScience/SediNet-Contrib) -->
+
+### Please cite
+If you find this useful for your research please cite this paper:
+
+> Buscombe, D. (2019). SediNet: a configurable deep learning model for mixed qualitative and quantitative optical granulometry. Earth Surface Processes and Landforms
+
+### Acknowledgements
+Thanks to the following individuals for donating imagery:
+* Rob Holman (Oregon State University)
+* Dave Rubin (University of California Santa Cruz)
+* Jon Warrick (US Geological Survey)
+* Brian Romans (Virginia Tech)
+* Christopher Heuberk (Freie Universitat Berlin)
+* Sarah Joerger, Mike Smith (Northern Arizona University)

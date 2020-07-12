@@ -3,7 +3,7 @@
 ## MARDA Science
 ## daniel@mardascience.com
 
-##> Release v1.3 (June 2020)
+##> Release v1.3 (July 2020)
 
 ## Contains values for defaults that you may change.
 ## They are listed in order of likelihood that you might change them:
@@ -15,27 +15,30 @@ USE_GPU = True  ##False
 IM_HEIGHT = 768 # suggestd: 512 -- 1024
 IM_WIDTH = IM_HEIGHT
 
-# max. number of training epics
-NUM_EPOCHS = 50 #100
-
 # number of images to feed the network per step in epoch
-BATCH_SIZE =  [4,6,8] #suggested: 4 --16
+BATCH_SIZE = 8 #suggested: 4 --16
+
+#use an ensemble of batch sizes like this
+#BATCH_SIZE = [4,6,8]
 
 # if True, use a smaller (shallower) network architecture
 SHALLOW = True ##False=larger network
 
 SCALE = False # if True, scale all variables before and after training. not stable on small datasets
 
-# optimizer (gradient descent solver) good alternative == 'adam'
-OPT = 'rmsprop'
+# max. number of training epics
+NUM_EPOCHS = 50 #100
 
 ## loss function for continuous models (2 choices)
-CONT_LOSS = 'pinball'
-## CONT_LOSS = 'mse'
+#CONT_LOSS = 'pinball'
+CONT_LOSS = 'mse'
 
 ## loss function for categorical (disrete) models (2 choices)
 CAT_LOSS = 'focal'
 #CAT_LOSS = 'categorical_crossentropy'
+
+# optimizer (gradient descent solver) good alternative == 'adam'
+OPT = 'rmsprop'
 
 # a tolerance for the training. Do not change until you've researched its effects
 MIN_DELTA = 0.0001

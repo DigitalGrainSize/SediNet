@@ -69,7 +69,7 @@ def run_training_siso_simo(vars, train_csvfile, test_csvfile, name, res_folder,
          SM, weights_path = train_sedinet_siso_simo(SM, train_df, test_df,
                                                   train_idx, test_idx, name,
                                                   vars, mode, greyscale, CS,
-                                                  dropout, batch_size, valid_batch_size,
+                                                  dropout, BATCH_SIZE, VALID_BATCH_SIZE,
                                                   res_folder)
    else:
       if type(BATCH_SIZE)==list:
@@ -133,10 +133,10 @@ def train_sedinet_cat(SM, train_df, test_df, train_idx, test_idx,
 
     if SHALLOW is True:
        weights_path = name+"_"+mode+"_batch"+str(batch_size)+"_im"+str(IM_HEIGHT)+\
-                   "_shallow_"+vars[0]+"_checkpoint.hdf5" ##BATCH_SIZE
+                   "_shallow_"+vars[0]+"_"+CAT_LOSS+".hdf5" ##BATCH_SIZE
     else:
        weights_path = name+"_"+mode+"_batch"+str(batch_size)+"_im"+str(IM_HEIGHT)+\
-                   "_"+vars[0]+"_checkpoint.hdf5" ##BATCH_SIZE
+                   "_"+vars[0]+"_"+CAT_LOSS+".hdf5" ##BATCH_SIZE
 
     if os.path.exists(weights_path):
         SM.load_weights(weights_path)
@@ -242,10 +242,10 @@ def train_sedinet_siso_simo(SM, train_df, test_df, train_idx, test_idx, name,
 
     if SHALLOW is True:
        weights_path = name+"_"+mode+"_batch"+str(batch_size)+"_im"+str(IM_HEIGHT)+\
-                   "_shallow_"+varstring+"_checkpoint.hdf5" ##BATCH_SIZE
+                   "_shallow_"+varstring+"_"+CONT_LOSS+".hdf5" ##BATCH_SIZE
     else:
        weights_path = name+"_"+mode+"_batch"+str(batch_size)+"_im"+str(IM_HEIGHT)+\
-                   "_"+varstring+"_checkpoint.hdf5" ##BATCH_SIZE
+                   "_"+varstring+"_"+CONT_LOSS+".hdf5" ##BATCH_SIZE
 
     if os.path.exists(weights_path):
         SM.load_weights(weights_path)
