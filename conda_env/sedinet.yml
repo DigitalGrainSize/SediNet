@@ -3,8 +3,8 @@ name: sedinet
 channels:
   - conda-forge
   - defaults
-dependencies:  
-  - python=3.6
+dependencies:
+  - python
   - ipython
   - numpy
   - scipy
@@ -18,10 +18,10 @@ dependencies:
   - tqdm
   - joblib
   - bokeh
+  - tensorflow-gpu
+  - tensorflow-addons
   - pip:
     - Image
     - pydot
     - graphviz
     - panel
-    - tensorflow 
-    - tensorflow-addons    

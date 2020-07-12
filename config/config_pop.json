@@ -1,10 +1,10 @@
 {
-  "test_csvfile" : "data_population_test.csv",
-  "train_csvfile" : "data_population_train.csv",
-  "pop"     : "pop", 
+  "test_csvfile" : "small_data_population_test.csv",
+  "train_csvfile" : "small_data_population_train.csv",
+  "pop"     : "pop",
   "numclass" : 6,
   "name"  : "grain_population",
   "res_folder": "grain_population",
   "dropout": 0.25,
-  "greyscale": false  
+  "greyscale": false
 }

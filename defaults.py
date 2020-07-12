@@ -3,45 +3,58 @@
 ## MARDA Science
 ## daniel@mardascience.com
 
-##> Release v1.2 (Feb 4 2020)
+##> Release v1.3 (June 2020)
 
 ## Contains values for defaults that you may change.
 ## They are listed in order of likelihood that you might change them:
 
 # set to False if you wish to use cpu (not recommended)
-use_gpu = True  ##False
+USE_GPU = True  ##False
 
 # size of image in pixels. keep this consistent in training and application
-IM_HEIGHT = 1024 #768 mighter be better for color imagery
+IM_HEIGHT = 768 # suggestd: 512 -- 1024
 IM_WIDTH = IM_HEIGHT
 
 # max. number of training epics
-num_epochs = 200
+NUM_EPOCHS = 50 #100
 
 # number of images to feed the network per step in epoch
-batch_size = 8
-
-# number of images
-valid_batch_size = batch_size
+BATCH_SIZE =  [2,4,6] #suggested: 4 --16
 
 # if True, use a smaller (shallower) network architecture
-shallow = False ##True
-
-## proportion of neurons to drop in the dropout layer
-#dropout = 0.5
-## this is commented because it is recommended to set this per data set using the config file 
+SHALLOW = False ##False=larger network
 
 # optimizer (gradient descent solver) good alternative == 'adam'
-opt = 'rmsprop'
+OPT = 'rmsprop'
+
+## loss function for continuous models (2 choices)
+CONT_LOSS = 'pinball'
+## CONT_LOSS = 'mse'
+
+## loss function for continuous models (2 choices)
+CAT_LOSS = 'focal'
+#CAT_LOSS = 'categorical_crossentropy'
 
 # a tolerance for the training. Do not change until you've researched its effects
-min_delta = 0.0001
+MIN_DELTA = 0.0001
 
 # minimum learning rate (lambda in the manuscript)
-min_lr = 0.0001
+MIN_LR = 1e-5 #1e-5 -- 1e-2
 
 # the factor applied to the learning rate when the appropriate triggers are made
-factor = 0.8
+FACTOR = 0.8
 
 # training stops early if the number of successive epochs with no validation loss exceeds this number
-stop_patience = 25
+STOP_PATIENCE = 15
+
+# base number of conv2d filters in categorical models
+BASE_CAT = 30
+
+# base number of conv2d filters in continuous models
+BASE_CONT = 30
+
+# number of Dense units for categorical prediction
+CAT_DENSE_UNITS = 128
+
+# number of Dense units for continuous prediction
+CONT_DENSE_UNITS = 1024
