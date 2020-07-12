@@ -1,9 +1,9 @@
 {
   "train_csvfile" : "data_pescadero_sieve_train.csv",
-  "test_csvfile" : "data_pescadero_sieve_test.csv",  
-  "sieve" : "sieve",               
+  "test_csvfile" : "data_pescadero_sieve_test.csv",
+  "sieve" : "sieve",
   "res_folder": "grain_size_sieved_sands",
   "name"  : "sievesand_sieve",
   "dropout": 0.25,
-  "greyscale": false
+  "greyscale": true
 }

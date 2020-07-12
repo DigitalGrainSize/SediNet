@@ -9,5 +9,5 @@ python sedinet_train.py -c config/config_sievedsand_sieve_plus.json
 python sedinet_train.py -c config/config_mattole.json
 python sedinet_train.py -c config/config_sand_3prcs.json
 
-## python sedinet_train.py -c config/config_shape.json
-# python sedinet_train.py -c config/config_pop.json
+python sedinet_train.py -c config/config_shape.json
+python sedinet_train.py -c config/config_pop.json

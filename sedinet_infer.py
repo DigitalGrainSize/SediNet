@@ -42,6 +42,12 @@ def run_training_siso_simo(vars, train_csvfile, test_csvfile, name, res_folder,
             )
          CS.append(cs)
          del cs
+      # CS = RobustScaler()
+      # H = []
+      # for var in vars:
+      #    H.append(np.r_[train_df[var].values, test_df[var].values].reshape(-1,1))
+      #
+      # CS.fit_transform(np.hstack(H).reshape(-1,1))
 
    ##==============================================
    ## train model
@@ -70,7 +76,7 @@ def run_training_siso_simo(vars, train_csvfile, test_csvfile, name, res_folder,
          for batch_size, valid_batch_size in zip(BATCH_SIZE, VALID_BATCH_SIZE):
             sm, wp = train_sedinet_cat(SM, train_df, test_df, train_idx,
                          test_idx, ID_MAP, vars, greyscale, name, mode,
-                         batch_size, valid_batch_size)
+                         batch_size, valid_batch_size, res_folder)
             SMs.append(sm)
             weights_path.append(wp)
             gc.collect()
@@ -111,7 +117,8 @@ def run_training_siso_simo(vars, train_csvfile, test_csvfile, name, res_folder,
 
 ###==================================
 def train_sedinet_cat(SM, train_df, test_df, train_idx, test_idx,
-                      ID_MAP, vars, greyscale, name, mode, batch_size, valid_batch_size):
+                      ID_MAP, vars, greyscale, name, mode, batch_size, valid_batch_size,
+                      res_folder):
     """
     This function trains an implementation of SediNet
     """

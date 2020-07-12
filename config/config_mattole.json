@@ -4,6 +4,6 @@
   "d50": "d50",
   "res_folder": "mattole",
   "name"  : "mattole",
-  "greyscale" : false,
+  "greyscale" : true,
   "dropout": 0.25
 }

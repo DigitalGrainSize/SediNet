@@ -1,14 +1,14 @@
 {
   "csvfile" : "mattole_percentiles.csv",
-  "p10": "p10", 
+  "p10": "p10",
   "p16": "p16",
-  "p25": "p25",  
-  "p50": "p50", 
+  "p25": "p25",
+  "p50": "p50",
   "p75": "p75",
-  "p84": "p84",  
-  "p90": "p90", 
+  "p84": "p84",
+  "p90": "p90",
   "res_folder": "mattole",
   "name"  : "mattole",
-  "greyscale" : false,
+  "greyscale" : true,
   "dropout": 0.5
 }

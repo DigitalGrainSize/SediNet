@@ -512,7 +512,7 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
     elif len(vars)==4:
        nrows = 2; ncols = 2
     elif len(vars)==3:
-       nrows = 3; ncols = 1
+       nrows = 2; ncols = 2
     elif len(vars)==2:
        nrows = 2; ncols = 1
     elif len(vars)==1:

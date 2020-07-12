@@ -589,8 +589,8 @@ python sedinet_predict.py -c config/config_custom_4prcs.json
 ### If you have an issue, comment or suggestion ...
 Please use the 'issues' tab so everyone can see the question and answer. Please do not email me directly. Thanks
 
-### Contribute your data!
-Please see the [SediNet-Contrib repo](https://github.com/MARDAScience/SediNet-Contrib)
+<!-- ### Contribute your data!
+Please see the [SediNet-Contrib repo](https://github.com/MARDAScience/SediNet-Contrib) -->
 
 ### Please cite
 If you find this useful for your research please cite this paper:
@@ -720,6 +720,7 @@ CONT_DENSE_UNITS = 1024
 12) dynamically grow the memory used on the GPU
 13) new benchmarking section of the readme tabulating results with default settings
 14) now can take multiple batch sizes and build an ensemble model. This generally results in higher accuracy but more models = more model training time
+15) variables are all scaled the same, so they should be similar metrics  e.g. all grain sizes or all proportions
 
 
 
