@@ -209,16 +209,16 @@ def predict_test_train_cat(train_df, test_df, train_idx, test_idx, var, SM,
    PT = []
 
    if type(SM) == list:
-       counter = 0
+       #counter = 0
        for s in SM:
            tmp=s.predict(x_train, batch_size=32)
            exec(
-              'PT.append(np.asarray(np.squeeze(tmp['+str(counter)+'])))'
+              'PT.append(np.asarray(np.squeeze(tmp)))'
            )
            del tmp
 
-       PT = np.median(PT, axis=0)
-       predT = np.squeeze(np.asarray(PT))
+       predT = np.median(PT, axis=0)
+       #predT = np.squeeze(np.asarray(PT))
        del PT
        K.clear_session()
        gc.collect()
@@ -237,16 +237,16 @@ def predict_test_train_cat(train_df, test_df, train_idx, test_idx, var, SM,
    PT = []
 
    if type(SM) == list:
-       counter = 0
+       #counter = 0
        for s in SM:
            tmp=s.predict(x_test, batch_size=32)
            exec(
-              'PT.append(np.asarray(np.squeeze(tmp['+str(counter)+'])))'
+              'PT.append(np.asarray(np.squeeze(tmp)))'
            )
            del tmp
 
-       PT = np.median(PT, axis=0)
-       pred = np.squeeze(np.asarray(PT))
+       pred = np.median(PT, axis=0)
+       #pred = np.squeeze(np.asarray(PT))
        del PT
        K.clear_session()
        gc.collect()
@@ -290,7 +290,7 @@ def predict_test_train_cat(train_df, test_df, train_idx, test_idx, var, SM,
    else:
 
       plot_confmat(pred, true, var, classes)
-      plt.savefig(weights_path[0].replace('.hdf5','_cm.png'),
+      plt.savefig(weights_path.replace('.hdf5','_cm.png'),
                dpi=300, bbox_inches='tight')
       plt.close('all')
 

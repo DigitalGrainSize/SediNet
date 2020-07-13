@@ -88,7 +88,7 @@ def run_training_siso_simo(vars, train_csvfile, test_csvfile, name, res_folder,
                          BATCH_SIZE, VALID_BATCH_SIZE, res_folder)
 
 
-   classes = np.arange(len(ID_MAP))
+      classes = np.arange(len(ID_MAP))
 
    K.clear_session()
 
@@ -205,8 +205,9 @@ def train_sedinet_cat(SM, train_df, test_df, train_idx, test_idx,
         ###===================================================
         ## Plot the loss and accuracy as a function of epoch
         plot_train_history_1var(history)
-        plt.savefig(vars[0]+'_'+str(IM_HEIGHT)+'_batch'+str(batch_size)+'_history.png', ##BATCH_SIZE
-                    dpi=300, bbox_inches='tight')
+        # plt.savefig(vars+'_'+str(IM_HEIGHT)+'_batch'+str(batch_size)+'_history.png', ##BATCH_SIZE
+        #             dpi=300, bbox_inches='tight')
+        plt.savefig(weights_path.replace('.hdf5','_history.png'),dpi=300, bbox_inches='tight')
         plt.close('all')
 
         # serialize model to JSON to use later to predict

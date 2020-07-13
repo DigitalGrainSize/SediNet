@@ -240,119 +240,6 @@ bokeh serve RunSediNet.ipynb
 
 which should open a web application to run through your browser at http://localhost:60339/ -->
 
---------------------------------------------------------------------------------
-## Replicate the paper results
-
-Note that you will see different results than in the paper because
-* the implementation has changed, with more research, with a different loss function, image dimensions, and batch sizes
-* training and testing files are randomly selected with a randomness that can't fully be controlled with a seed
-
---------------------------------------------------------------------------------
-### Predict grain size/shape/population from a set of images
-
-
-The ipynb files in the ```notebooks``` directory are the same jupyter notebooks as in the Colab notebook links above. You can run them by
-
-```
-conda activate sedinet
-python -m ipykernel install --user
-jupyter notebook
-```
-
-then in your browser you should be able to navigate to the notebooks you wish to execute
-
-The following instructions are for running the provided python scripts on your computer
-
---------------------------------------------------------------------------------
-#### Continuous
-
-##### Sediment grain size prediction (sieve size) on a small population of beach sands
-```
-python sedinet_predict.py -c config/config_sievedsand_sieve_predict.json -w grain_size_sieved_sands/res/color/sievesand_sieve_siso_batch8_sieve__checkpoint.hdf5
-```
-
-<!-- ![image info](./pictures/image.png) -->
-
-<!-- ![sievesand_sieve_siso_batch8_sieve__checkpoint_skill](https://user-images.githubusercontent.com/53406404/73790480-ca501d00-475d-11ea-8fca-60b6fdc5efa1.png) -->
-
-
-##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a small population of beach sands
-
-```
-python sedinet_predict.py -c config/config_sievedsand_sieve_plus_predict.json -w grain_size_sieved_sands/res/grey/sievesand_sieve_plus_simo_batch8_P16_P25_P50_P75_P84_sieve__checkpoint.hdf5
-```
-
-<!-- ![sand_generic_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint_skill](https://user-images.githubusercontent.com/53406404/73790362-970d8e00-475d-11ea-8a8d-aae8504de15c.png) -->
-
-
-##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a large 400 image dataset
-
-```
-python sedinet_predict.py -c config/config_9percentiles_predict.json -w grain_size_global/res/grey/global_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint.hdf5
-```
-
-<!-- ![global_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint_skill](https://user-images.githubusercontent.com/53406404/73790415-a8569a80-475d-11ea-96fa-a31d207d25ad.png) -->
-
---------------------------------------------------------------------------------
-#### Categorical
-
-##### Use SediNet to estimate sediment population
-
-```
-python sedinet_predict.py -c config/config_pop.json -w grain_population/res/color/pop_model_checkpoint.hdf5
-```
-
-<!-- ![pop_model_checkpoint_cmT](https://user-images.githubusercontent.com/53406404/73790144-39794180-475d-11ea-8236-ecc7edf5bece.png) -->
-
-##### Use SediNet to estimate sediment shape
-
-```
-python sedinet_predict.py -c config/config_shape_predict.json -w grain_shape/res/color/shape_model_checkpoint.hdf5
-```
-
-<!-- ![shape_model_checkpoint_cmT](https://user-images.githubusercontent.com/53406404/73790124-2f574300-475d-11ea-9584-dcf4723cd1db.png) -->
-
-
-
---------------------------------------------------------------------------------
-## Other Examples
-
-##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on generic sands
-
-```
-python sedinet_predict.py -c config/config_sand_predict.json -w grain_size_sand_generic/res/grey/sand_generic_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint.hdf5
-```
-
-<!-- ![sand_generic_9prcs512_batch8_xy-base16_predict](https://user-images.githubusercontent.com/3596509/62002419-6e268500-b0b8-11e9-8c1a-83fc54e9d66a.png) -->
-
-
-##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on generic gravels
-
-```
-python sedinet_predict.py -c config/config_gravel_predict.json -w grain_size_gravel_generic/res/grey/gravel_generic_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint.hdf5
-```
-
-<!-- ![gravel_generic_9prcs512_batch8_xy-base16_predict](https://user-images.githubusercontent.com/3596509/62002214-46352280-b0b4-11e9-84fc-65e66116386b.png) -->
-
-
-##### Sediment grain size prediction (sieve size plus 4 percentiles of the cumulative distribution) on a small population of beach sands
-
-```
-python sedinet_predict.py -c config/config_sievedsand_sieve_plus.json
-```
-
-<!-- ![sievesand_sieve_plus_simo_batch8_P16_P25_P50_P75_P84_sieve__checkpoint_skill](https://user-images.githubusercontent.com/53406404/73790479-ca501d00-475d-11ea-817b-1c7745108aab.png) -->
-
-
-##### Sediment grain size prediction (7 percentiles of the cumulative distribution) on a large population of mixed sand and gravel beach sediment (collected by Sarah Jorger, NAU)
-
-```
-python sedinet_predict.py -c config/config_mattole.json
-```
-
-<!-- ![mattole_simo_batch8_p10_p16_p25_p50_p75_p84_p90__checkpoint_skill](https://user-images.githubusercontent.com/53406404/73790700-22871f00-475e-11ea-83ce-37ad72745171.png) -->
-
-
 
 --------------------------------------------------------------------------------
 ## Train the provided example models yourself
@@ -521,6 +408,111 @@ CONT_DENSE_UNITS = 1024
 
 ```
 
+
+--------------------------------------------------------------------------------
+### Replicate the paper results
+
+Note that you will see different results than in the paper because
+* the implementation has changed, with more research, with a different loss function, image dimensions, and batch sizes
+* training and testing files are randomly selected with a randomness that can't fully be controlled with a seed
+
+--------------------------------------------------------------------------------
+### Predict grain size/shape/population from a set of images
+
+The following instructions are for running the provided python scripts on your computer
+
+--------------------------------------------------------------------------------
+#### Continuous
+
+##### Sediment grain size prediction (sieve size) on a small population of beach sands
+```
+python sedinet_predict.py -c config/config_sievedsand_sieve_predict.json -w grain_size_sieved_sands/res/color/sievesand_sieve_siso_batch8_sieve__checkpoint.hdf5
+```
+
+<!-- ![image info](./pictures/image.png) -->
+
+<!-- ![sievesand_sieve_siso_batch8_sieve__checkpoint_skill](https://user-images.githubusercontent.com/53406404/73790480-ca501d00-475d-11ea-8fca-60b6fdc5efa1.png) -->
+
+
+##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a small population of beach sands
+
+```
+python sedinet_predict.py -c config/config_sievedsand_sieve_plus_predict.json -w grain_size_sieved_sands/res/grey/sievesand_sieve_plus_simo_batch8_P16_P25_P50_P75_P84_sieve__checkpoint.hdf5
+```
+
+<!-- ![sand_generic_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint_skill](https://user-images.githubusercontent.com/53406404/73790362-970d8e00-475d-11ea-8a8d-aae8504de15c.png) -->
+
+
+##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a large 400 image dataset
+
+```
+python sedinet_predict.py -c config/config_9percentiles_predict.json -w grain_size_global/res/grey/global_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint.hdf5
+```
+
+<!-- ![global_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint_skill](https://user-images.githubusercontent.com/53406404/73790415-a8569a80-475d-11ea-96fa-a31d207d25ad.png) -->
+
+--------------------------------------------------------------------------------
+#### Categorical
+
+##### Use SediNet to estimate sediment population
+
+```
+python sedinet_predict.py -c config/config_pop.json -w grain_population/res/color/pop_model_checkpoint.hdf5
+```
+
+<!-- ![pop_model_checkpoint_cmT](https://user-images.githubusercontent.com/53406404/73790144-39794180-475d-11ea-8236-ecc7edf5bece.png) -->
+
+##### Use SediNet to estimate sediment shape
+
+```
+python sedinet_predict.py -c config/config_shape_predict.json -w grain_shape/res/color/shape_model_checkpoint.hdf5
+```
+
+<!-- ![shape_model_checkpoint_cmT](https://user-images.githubusercontent.com/53406404/73790124-2f574300-475d-11ea-9584-dcf4723cd1db.png) -->
+
+
+
+--------------------------------------------------------------------------------
+## Other Examples
+
+##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on generic sands
+
+```
+python sedinet_predict.py -c config/config_sand_predict.json -w grain_size_sand_generic/res/grey/sand_generic_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint.hdf5
+```
+
+<!-- ![sand_generic_9prcs512_batch8_xy-base16_predict](https://user-images.githubusercontent.com/3596509/62002419-6e268500-b0b8-11e9-8c1a-83fc54e9d66a.png) -->
+
+
+##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on generic gravels
+
+```
+python sedinet_predict.py -c config/config_gravel_predict.json -w grain_size_gravel_generic/res/grey/gravel_generic_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint.hdf5
+```
+
+<!-- ![gravel_generic_9prcs512_batch8_xy-base16_predict](https://user-images.githubusercontent.com/3596509/62002214-46352280-b0b4-11e9-84fc-65e66116386b.png) -->
+
+
+##### Sediment grain size prediction (sieve size plus 4 percentiles of the cumulative distribution) on a small population of beach sands
+
+```
+python sedinet_predict.py -c config/config_sievedsand_sieve_plus.json
+```
+
+<!-- ![sievesand_sieve_plus_simo_batch8_P16_P25_P50_P75_P84_sieve__checkpoint_skill](https://user-images.githubusercontent.com/53406404/73790479-ca501d00-475d-11ea-817b-1c7745108aab.png) -->
+
+
+##### Sediment grain size prediction (7 percentiles of the cumulative distribution) on a large population of mixed sand and gravel beach sediment (collected by Sarah Jorger, NAU)
+
+```
+python sedinet_predict.py -c config/config_mattole.json
+```
+
+<!-- ![mattole_simo_batch8_p10_p16_p25_p50_p75_p84_p90__checkpoint_skill](https://user-images.githubusercontent.com/53406404/73790700-22871f00-475e-11ea-83ce-37ad72745171.png) -->
+
+
+
+
 ### How to use on your own data
 
 SediNet is very configurable. You can specify many variables in the config file, from the size of the imagery to use, to the number of models to ensemble and their respective batch sizes.
@@ -596,7 +588,7 @@ Using the following settings ...
 IM_HEIGHT = 768
 IM_WIDTH = IM_HEIGHT
 NUM_EPOCHS = 50
-BATCH_SIZE =  [4,6,8]
+BATCH_SIZE =  [4,6,8] #or 4,6,or 8 individually
 SHALLOW = True
 SCALE = False
 OPT = 'rmsprop'
@@ -612,17 +604,27 @@ CAT_DENSE_UNITS = 128
 CONT_DENSE_UNITS = 1024
 ```
 
-
-#### Global (400 images), 9 percentiles
+#### Sand, 9 percentiles
 
 * Mean percent error for D50 (train / test)
 
 | Batch/Image size| 768   | 1024  |
 | ------ | ------ | ------|
-| 6,8,12      | X      |X      |
-| 2,4,6      | X     |X      |
+| 4      | X      |X      |
+| 6      | X      |X      |
+| 8      | X     |X      |
 | 4,6,8      | X      |X      |
 
+#### Sand, 3 percentiles
+
+* Mean percent error for D50 (train / test)
+
+| Batch/Image size| 768   | 1024  |
+| ------ | ------ | ------|
+| 4      | X      |X      |
+| 6      | X      |X      |
+| 8      | X     |X      |
+| 4,6,8      | X      |X      |
 
 #### Gravel, 9 percentiles
 
@@ -630,10 +632,22 @@ CONT_DENSE_UNITS = 1024
 
 | Batch/Image size| 768   | 1024  |
 | ------ | ------ | ------|
-| 6,8,12      | X      |X      |
-| 2,4,6      | X      |X      |
-| 4,6,8      | 12/29      |X      |
+| 4      | X      |X      |
+| 6      | X      |X      |
+| 8      | X     |X      |
+| 4,6,8      | X      |X      |
 
+
+#### Global (400 images), 9 percentiles
+
+* Mean percent error for D50 (train / test)
+
+| Batch/Image size| 768   | 1024  |
+| ------ | ------ | ------|
+| 4      | X      |X      |
+| 6      | X      |X      |
+| 8      | X     |X      |
+| 4,6,8      | X      |X      |
 
 #### Pescadero Sand Sieve Sizes
 
@@ -642,9 +656,9 @@ CONT_DENSE_UNITS = 1024
 | Batch/Image size| 768   | 1024  |
 | ------ | ------ | ------|
 | 4      | X      |X      |
-| 2,4,6      | X      |X      |
+| 6      | X      |X      |
+| 8      | X     |X      |
 | 4,6,8      | X      |X      |
-
 
 
 #### Grain shape
@@ -654,9 +668,9 @@ CONT_DENSE_UNITS = 1024
 | Batch/Image size| 768   | 1024  |
 | ------ | ------ | ------|
 | 4      | X      |X      |
-| 2,4,6      | X     |X      |
-| 4,6,8      | .58      |X      |
-| 4,6,8 shallow | .65     |X      |
+| 6      | X      |X      |
+| 8      | X     |X      |
+| 4,6,8      | X      |X      |
 
 
 #### Grain population
@@ -666,10 +680,27 @@ CONT_DENSE_UNITS = 1024
 | Batch/Image size| 768   | 1024  |
 | ------ | ------ | ------|
 | 4      | X      |X      |
-| 2,4,6      | X     |X      |
-| 4,6,8 | .69   |X      |
-| 4,6,8 shallow | .74    |X      |
+| 6      | X      |X      |
+| 8      | X     |X      |
+| 4,6,8      | X      |X      |
 
+
+
+<!--
+The ipynb files in the ```notebooks``` directory are the same jupyter notebooks as in the Colab notebook links above. You can run them by
+
+```
+conda activate sedinet
+python -m ipykernel install --user
+jupyter notebook
+```
+
+then in your browser you should be able to navigate to the notebooks you wish to execute -->
+
+
+### Known bugs
+
+After long training periods, especially with multiple batch sizes, the `train` script gets killed at the end when it tries to use the model(s) in prediction mode. It is unclear why this happens. However, if you run the script again, with the same everything, this time it will skip the model training (assuming the `hdf5` files are still in the root directory or in `res_folder` - you'll see a `Loading weights that already exist:` message) and use the model weights to predict.
 
 ### Release notes
 
