@@ -82,6 +82,12 @@ def run_training_siso_simo(vars, train_csvfile, test_csvfile, name, res_folder,
             weights_path.append(wp)
             gc.collect()
 
+      else:
+          SM, weights_path = train_sedinet_cat(SM, train_df, test_df, train_idx,
+                         test_idx, ID_MAP, vars, greyscale, name, mode,
+                         BATCH_SIZE, VALID_BATCH_SIZE, res_folder)
+
+
       classes = np.arange(len(ID_MAP))
 
    K.clear_session()

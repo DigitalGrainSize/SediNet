@@ -271,6 +271,8 @@ The following instructions are for running the provided python scripts on your c
 python sedinet_predict.py -c config/config_sievedsand_sieve_predict.json -w grain_size_sieved_sands/res/color/sievesand_sieve_siso_batch8_sieve__checkpoint.hdf5
 ```
 
+<!-- ![image info](./pictures/image.png) -->
+
 <!-- ![sievesand_sieve_siso_batch8_sieve__checkpoint_skill](https://user-images.githubusercontent.com/53406404/73790480-ca501d00-475d-11ea-8fca-60b6fdc5efa1.png) -->
 
 
@@ -353,7 +355,7 @@ python sedinet_predict.py -c config/config_mattole.json
 
 
 --------------------------------------------------------------------------------
-## Train the models yourself
+## Train the provided example models yourself
 
 #### Continuous
 
@@ -465,28 +467,33 @@ Contains values for defaults that you may change. They are listed in order of li
 USE_GPU = True  ##False
 
 # size of image in pixels. keep this consistent in training and application
-IM_HEIGHT = 600 # suggestd: 512 -- 1024
+IM_HEIGHT = 768 # suggestd: 512 -- 1024
 IM_WIDTH = IM_HEIGHT
 
-# max. number of training epics
-NUM_EPOCHS = 10 #100
-
 # number of images to feed the network per step in epoch
-BATCH_SIZE =  [2,4,6] #suggested: 4 --16
+BATCH_SIZE = 8 #suggested: 4 --16
+
+#use an ensemble of batch sizes like this
+#BATCH_SIZE = [4,6,8]
 
 # if True, use a smaller (shallower) network architecture
-SHALLOW = False ##False=larger network
+SHALLOW = True ##False=larger network
 
-# optimizer (gradient descent solver) good alternative == 'adam'
-OPT = 'rmsprop'
+SCALE = False # if True, scale all variables before and after training. not stable on small datasets
+
+# max. number of training epics
+NUM_EPOCHS = 50 #100
 
 ## loss function for continuous models (2 choices)
 CONT_LOSS = 'pinball'
-## CONT_LOSS = 'mse'
+#CONT_LOSS = 'mse'
 
-## loss function for continuous models (2 choices)
+## loss function for categorical (disrete) models (2 choices)
 CAT_LOSS = 'focal'
 #CAT_LOSS = 'categorical_crossentropy'
+
+# optimizer (gradient descent solver) good alternative == 'adam'
+OPT = 'rmsprop'
 
 # a tolerance for the training. Do not change until you've researched its effects
 MIN_DELTA = 0.0001

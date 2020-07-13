@@ -362,12 +362,12 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
     if SCALE == True:
 
         if type(SM) == list:
-            counter = 0
+            counter = 0 #model iterator
             for s in SM:
                 tmp=s.predict(x_train, batch_size=32)
 
                 if len(vars)>1:
-                   counter2 = 0
+                   counter2 = 0 #variable iterator
                    for v in vars:
                       exec(
                       v+\
@@ -383,13 +383,13 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
                 del tmp
 
             if len(vars)>1:
-               counter = 0
+               #counter = 0
                for v in vars:
                   exec(
                   v+\
                   '_PT = np.median('+v+'_PT, axis=0)'
                   )
-                  counter +=1
+                  #counter +=1
             else:
                exec(
                vars[0]+\
@@ -415,7 +415,6 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
 
             del tmp
 
-
     else:
 
         if type(SM) == list:
@@ -440,13 +439,13 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
                 del tmp
 
             if len(vars)>1:
-               counter = 0
+               #counter = 0
                for v in vars:
                   exec(
                   v+\
                   '_PT = np.median('+v+'_PT, axis=0)'
                   )
-                  counter +=1
+                  #counter +=1
             else:
                exec(
                vars[0]+\
@@ -534,7 +533,7 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
     if SCALE == True:
 
         if type(SM) == list:
-            counter = 0
+            #counter = 0
             for s in SM:
                 tmp=s.predict(x_test, batch_size=32)
 
@@ -555,13 +554,13 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
                 del tmp
 
             if len(vars)>1:
-               counter = 0
+               #counter = 0
                for v in vars:
                   exec(
                   v+\
                   '_P = np.median('+v+'_P, axis=0)'
                   )
-                  counter +=1
+                  #counter +=1
             else:
                exec(
                vars[0]+\
@@ -599,7 +598,7 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
                    for v in vars:
                       exec(
                       v+\
-                      '_P.append(np.squeeze(tmp))'
+                      '_P.append(np.squeeze(tmp[counter]))'
                       )
                       counter +=1
                 else:
@@ -611,13 +610,13 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
                 del tmp
 
             if len(vars)>1:
-               counter = 0
+               #counter = 0
                for v in vars:
                   exec(
                   v+\
                   '_P = np.median('+v+'_P, axis=0)'
                   )
-                  counter +=1
+                  #counter +=1
             else:
                exec(
                vars[0]+\
@@ -638,7 +637,7 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
             else:
                exec(
                vars[0]+\
-               '_P.append(np.asarray(np.squeeze(tmp.reshape)))'
+               '_P.append(np.asarray(np.squeeze(tmp)))'
                )
 
             del tmp
@@ -703,11 +702,11 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
 
          plt.plot(x, y, 'bx', markersize=5)
 
-         plt.text(np.nanmin(x), 0.5*np.max(np.hstack((x,y))),'Test : '+\
+         plt.text(np.nanmin(x), 0.75*np.max(np.hstack((x,y))),'Test : '+\
                   str(np.mean(100*(np.abs(eval(vars[k-1]+'_pred') -\
                   eval(vars[k-1]+'_true')) / eval(vars[k-1]+'_true'))))[:5]+\
                   ' %',  fontsize=10, color='b')
-         plt.text(np.nanmin(x), 0.4*np.max(np.hstack((x,y))),'Train : '+\
+         plt.text(np.nanmin(x), 0.7*np.max(np.hstack((x,y))),'Train : '+\
                   str(np.mean(100*(np.abs(eval(vars[k-1]+'_predT') -\
                   eval(vars[k-1]+'_trueT')) / eval(vars[k-1]+'_trueT'))))[:5]+\
                   ' %', fontsize=10)
