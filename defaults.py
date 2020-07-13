@@ -30,8 +30,8 @@ SCALE = False # if True, scale all variables before and after training. not stab
 NUM_EPOCHS = 50 #100
 
 ## loss function for continuous models (2 choices)
-#CONT_LOSS = 'pinball'
-CONT_LOSS = 'mse'
+CONT_LOSS = 'pinball'
+#CONT_LOSS = 'mse'
 
 ## loss function for categorical (disrete) models (2 choices)
 CAT_LOSS = 'focal'

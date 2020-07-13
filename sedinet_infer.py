@@ -88,7 +88,7 @@ def run_training_siso_simo(vars, train_csvfile, test_csvfile, name, res_folder,
                          BATCH_SIZE, VALID_BATCH_SIZE, res_folder)
 
 
-      classes = np.arange(len(ID_MAP))
+   classes = np.arange(len(ID_MAP))
 
    K.clear_session()
 

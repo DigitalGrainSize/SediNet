@@ -189,7 +189,7 @@ def plot_train_history_Nvar(history, varuse, N):
 def predict_test_train_cat(train_df, test_df, train_idx, test_idx, var, SM,
                            classes, weights_path, greyscale, name):
    """
-   This function creates makes predcitions on test and train data,
+   This function creates makes predictions on test and train data,
    prints a classification report, and prints confusion matrices
    """
    if type(SM) == list:
@@ -211,11 +211,11 @@ def predict_test_train_cat(train_df, test_df, train_idx, test_idx, var, SM,
    if type(SM) == list:
        counter = 0
        for s in SM:
-           exec('tmp'+str(counter)+'=s.predict(x_train, batch_size=32)')
+           tmp=s.predict(x_train, batch_size=32)
            exec(
-              'PT.append(np.asarray(np.squeeze(tmp'+str(counter)+')))'
+              'PT.append(np.asarray(np.squeeze(tmp['+str(counter)+'])))'
            )
-           exec('del tmp'+str(counter))
+           del tmp
 
        PT = np.median(PT, axis=0)
        predT = np.squeeze(np.asarray(PT))
@@ -225,7 +225,7 @@ def predict_test_train_cat(train_df, test_df, train_idx, test_idx, var, SM,
 
    else:
      predT = SM.predict(x_train, batch_size=32)
-     predT = np.asarray(predT).argmax(axis=-1)
+     #predT = np.asarray(predT).argmax(axis=-1)
 
    del train_gen, x_train
 
@@ -239,11 +239,11 @@ def predict_test_train_cat(train_df, test_df, train_idx, test_idx, var, SM,
    if type(SM) == list:
        counter = 0
        for s in SM:
-           exec('tmp'+str(counter)+'=s.predict(x_test, batch_size=32)')
+           tmp=s.predict(x_test, batch_size=32)
            exec(
-              'PT.append(np.asarray(np.squeeze(tmp'+str(counter)+')))'
+              'PT.append(np.asarray(np.squeeze(tmp['+str(counter)+'])))'
            )
-           exec('del tmp'+str(counter))
+           del tmp
 
        PT = np.median(PT, axis=0)
        pred = np.squeeze(np.asarray(PT))
@@ -254,7 +254,7 @@ def predict_test_train_cat(train_df, test_df, train_idx, test_idx, var, SM,
    else:
 
        pred = SM.predict(x_test, batch_size=32) #1)
-       pred = np.asarray(pred).argmax(axis=-1)
+       #pred = np.asarray(pred).argmax(axis=-1)
 
    del test_gen, x_test
 
