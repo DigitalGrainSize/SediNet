@@ -13,5 +13,7 @@
   "res_folder": "grain_size_sand_generic",
   "name"  : "sand_generic_9prcs",
   "dropout": 0.25,
-  "greyscale": true
+  "greyscale": true,
+  "scale": false
+  
 }

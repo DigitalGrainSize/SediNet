@@ -50,6 +50,8 @@ if __name__ == '__main__':
     #convert imagery to greyscale or not
     dropout = config["dropout"]
     #dropout factor
+    scale = config["scale"] #do scaling on variable 
+
 
     try:
        numclass = config['numclass']
@@ -62,7 +64,7 @@ if __name__ == '__main__':
             k.startswith('test_csvfile'), k.startswith('name'),
             k.startswith('greyscale'), k.startswith('aux_in'),
             k.startswith('dropout'), k.startswith('N'),
-            k.startswith('numclass')])]
+            k.startswith('scale'), k.startswith('numclass')])]
     vars = sorted(vars)
 
     auxin = [k for k in config.keys() if k.startswith('aux_in')]
@@ -91,9 +93,9 @@ if __name__ == '__main__':
     if (mode=='siso' or mode=='simo'):
        run_training_siso_simo(vars, train_csvfile, test_csvfile,
                               name, res_folder, mode, greyscale,
-                              dropout, numclass)
+                              dropout, numclass, scale)
 
     if (mode=='miso' or mode=='mimo'):
        run_training_miso_mimo(vars, train_csvfile, test_csvfile,
                               name, res_folder, mode, greyscale,
-                              auxin, dropout, numclass)
+                              auxin, dropout, numclass, scale)

@@ -53,6 +53,8 @@ CNNs have multiple processing layers (called [convolutional layers](https://mach
 
 ![Fig3-sedinet_fig_ann2_v3](https://user-images.githubusercontent.com/3596509/61979684-59a79700-afa9-11e9-9605-4f893784f65b.png)
 
+SediNet is very configurable, and is designed primarily to be a research tool. There are two in-built model sizes (shallow and false), and numerous options for how to train and treat the data. For example, data inputs can optionally be scaled. Various image sizes can be used. Greyscale or color imagery may be used. A single batch size may be chosen, or a model might be constructed using multiple batch sizes. Therefore it might take some experimentation to achieve optimal results for a particular dataset. Hopefully, this toolbox makes such experimentation straightforward. It isn't always obvious what combinations of settings to use, so be prepared to construct models using a variety of settings, then using the model with the best validation scores.
+
 
 <!-- --------------------------------------------------------------------------------
 ## Run in your browser!
@@ -320,6 +322,14 @@ python sedinet_train.py -c config/config_sand.json
 
 <!-- ![sand_generic_9prcs512_batch8_xy-base16_log](https://user-images.githubusercontent.com/3596509/62001865-b80a6d80-b0ae-11e9-8dcd-0c3c3030c366.png) -->
 
+
+##### Train SediNet for estimating mean size from images of mixed sand and gravel
+
+```
+python sedinet_train.py -c config/mattole.json
+```
+
+
 --------------------------------------------------------------------------------
 ## More details about inputs and using this tool on your own data
 
@@ -365,8 +375,6 @@ BATCH_SIZE = 8 #suggested: 4 --16
 
 # if True, use a smaller (shallower) network architecture
 SHALLOW = True ##False=larger network
-
-SCALE = False # if True, scale all variables before and after training. not stable on small datasets
 
 # max. number of training epics
 NUM_EPOCHS = 50 #100
@@ -539,7 +547,9 @@ where ```config/config_custom_4prcs.json``` has ben put together by you in the c
   "res_folder": "my_custom_model",
   "name"  : "custom_4prcs",
   "dropout": 0.5,
-  "greyscale": true  
+  "greyscale": true ,
+  "scale": false
+
 }
 ```
 
@@ -564,7 +574,10 @@ Put together a config file in the config folder (called, say ```config_custom_co
 }
 ```
 
-* Note that categories in the csvfile should be numeric integers increasing from zero
+Notes:
+
+* Categorical variables are not scaled, therefore "scale" is ignored, if present
+* Categories in the csvfile should be numeric integers increasing from zero
 
 
 #### Using your model
@@ -588,9 +601,9 @@ Using the following settings ...
 IM_HEIGHT = 768
 IM_WIDTH = IM_HEIGHT
 NUM_EPOCHS = 50
-BATCH_SIZE =  [4,6,8] #or 4,6,or 8 individually
+BATCH_SIZE = 8
 SHALLOW = True
-SCALE = False
+DO_AUG = True
 OPT = 'rmsprop'
 CONT_LOSS = 'pinball'
 CAT_LOSS = 'focal'
@@ -603,86 +616,6 @@ BASE_CONT = 30
 CAT_DENSE_UNITS = 128
 CONT_DENSE_UNITS = 1024
 ```
-
-#### Sand, 9 percentiles
-
-* Mean percent error for D50 (train / test)
-
-| Batch/Image size| 768   | 1024  |
-| ------ | ------ | ------|
-| 4      | X      |X      |
-| 6      | X      |X      |
-| 8      | X     |X      |
-| 4,6,8      | X      |X      |
-
-#### Sand, 3 percentiles
-
-* Mean percent error for D50 (train / test)
-
-| Batch/Image size| 768   | 1024  |
-| ------ | ------ | ------|
-| 4      | X      |X      |
-| 6      | X      |X      |
-| 8      | X     |X      |
-| 4,6,8      | X      |X      |
-
-#### Gravel, 9 percentiles
-
-* Mean percent error for D50 (train / test)
-
-| Batch/Image size| 768   | 1024  |
-| ------ | ------ | ------|
-| 4      | X      |X      |
-| 6      | X      |X      |
-| 8      | X     |X      |
-| 4,6,8      | X      |X      |
-
-
-#### Global (400 images), 9 percentiles
-
-* Mean percent error for D50 (train / test)
-
-| Batch/Image size| 768   | 1024  |
-| ------ | ------ | ------|
-| 4      | X      |X      |
-| 6      | X      |X      |
-| 8      | X     |X      |
-| 4,6,8      | X      |X      |
-
-#### Pescadero Sand Sieve Sizes
-
-* Mean percent error for sieve size (sediment that lands on a sieve of mesh size) (train / test)
-
-| Batch/Image size| 768   | 1024  |
-| ------ | ------ | ------|
-| 4      | X      |X      |
-| 6      | X      |X      |
-| 8      | X     |X      |
-| 4,6,8      | X      |X      |
-
-
-#### Grain shape
-
-* Mean accuracy for grain shape (train / test)
-
-| Batch/Image size| 768   | 1024  |
-| ------ | ------ | ------|
-| 4      | X      |X      |
-| 6      | X      |X      |
-| 8      | X     |X      |
-| 4,6,8      | X      |X      |
-
-
-#### Grain population
-
-* Mean accuracy for grain population (train / test)
-
-| Batch/Image size| 768   | 1024  |
-| ------ | ------ | ------|
-| 4      | X      |X      |
-| 6      | X      |X      |
-| 8      | X     |X      |
-| 4,6,8      | X      |X      |
 
 
 
@@ -744,12 +677,12 @@ After long training periods, especially with multiple batch sizes, the `train` s
 9) fixed bug in categorical model training (expected ndarray, not list, for batch labels)
 10) fixed bug in categorical model plotting
 11) added LICENSE
-12) dynamically grow the memory used on the GPU
-13) new benchmarking section of the readme tabulating results with default settings
-14) now can take multiple batch sizes and build an ensemble model. This generally results in higher accuracy but more models = more model training time
-15) response variables can be scaled using a robust scaler, or not. Scaling not recommended for small datasets
-16) now checks for estimating weights path in root and `res_folder` directory and, if present, uses it. This can be used to add batch size combinations sequentially, and also fixes OOM errors during the final prediction step of `sedinet_train.py`
-
+12) new benchmarking section of the readme tabulating results with default settings
+13) now can take multiple batch sizes and build an ensemble model. This generally results in higher accuracy but more models = more model training time
+14) response variables can be scaled using a robust scaler, or not. Scaling not recommended for small datasets. Use `scale=True` in a config file to use
+15) now checks for estimating weights path in root and `res_folder` directory and, if present, uses it. This can be used to add batch size combinations sequentially, and also fixes OOM errors during the final prediction step of `sedinet_train.py`
+16) optionally, training imagery is now augmented if `DO_AUG=True` (in the defaults file). This doubles the training set, by augmenting each image (random horizontal shift, followed by a vertical flip)
+17) file names shorter (number of variables enumerated rather than each listed)
 
 
 --------------------------------------------------------------------------------
@@ -765,7 +698,7 @@ Please see the [SediNet-Contrib repo](https://github.com/MARDAScience/SediNet-Co
 ### Please cite
 If you find this useful for your research please cite this paper:
 
-> Buscombe, D. (2019). SediNet: a configurable deep learning model for mixed qualitative and quantitative optical granulometry. Earth Surface Processes and Landforms
+> Buscombe, D. (2019). SediNet: a configurable deep learning model for mixed qualitative and quantitative optical granulometry. Earth Surface Processes and Landforms 45 (3), 638-651. https://onlinelibrary.wiley.com/doi/abs/10.1002/esp.4760
 
 ### Acknowledgements
 Thanks to the following individuals for donating imagery:

@@ -1,10 +1,12 @@
 {
-  "train_csvfile" : "small_data_shape_train.csv",
-  "test_csvfile" : "small_data_shape_test.csv",
+  "train_csvfile" : "data_shape_train.csv",
+  "test_csvfile" : "data_shape_test.csv",
   "shape"     : "shape",
   "numclass" : 4,
   "res_folder": "grain_shape",
   "name": "grain_shape",
   "dropout": 0.25,
-  "greyscale": false        
+  "greyscale": false,
+  "scale": false
+
 }

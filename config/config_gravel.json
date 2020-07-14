@@ -13,5 +13,7 @@
   "res_folder": "grain_size_gravel_generic",
   "name"  : "gravel_generic_9prcs",
   "greyscale": true,
-  "dropout": 0.25
+  "dropout": 0.25,
+  "scale": false
+  
 }

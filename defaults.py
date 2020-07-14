@@ -16,26 +16,26 @@ IM_HEIGHT = 768 # suggestd: 512 -- 1024
 IM_WIDTH = IM_HEIGHT
 
 # number of images to feed the network per step in epoch
-#BATCH_SIZE = 8 #suggested: 4 --16
+BATCH_SIZE = 6 #suggested: 4 --16
 
 #use an ensemble of batch sizes like this
-BATCH_SIZE = [4,6,8]
+#BATCH_SIZE = [4,6,8]
 
 # if True, use a smaller (shallower) network architecture
 SHALLOW = True ##False=larger network
 
-SCALE = False # if True, scale all variables before and after training. not stable on small datasets
+DO_AUG = True  ## if True, carry out data augmentation. 2 x number of images used in training
 
 # max. number of training epics
 NUM_EPOCHS = 50 #100
 
 ## loss function for continuous models (2 choices)
-CONT_LOSS = 'pinball'
-#CONT_LOSS = 'mse'
+#CONT_LOSS = 'pinball'
+CONT_LOSS = 'mse'
 
 ## loss function for categorical (disrete) models (2 choices)
-CAT_LOSS = 'focal'
-#CAT_LOSS = 'categorical_crossentropy'
+#CAT_LOSS = 'focal'
+CAT_LOSS = 'categorical_crossentropy'
 
 # optimizer (gradient descent solver) good alternative == 'adam'
 OPT = 'rmsprop'
@@ -44,7 +44,7 @@ OPT = 'rmsprop'
 MIN_DELTA = 0.0001
 
 # minimum learning rate (lambda in the manuscript)
-MIN_LR = 1e-5 #1e-5 -- 1e-2
+MIN_LR = 1e-3 #1e-5 -- 1e-2
 
 # the factor applied to the learning rate when the appropriate triggers are made
 FACTOR = 0.8

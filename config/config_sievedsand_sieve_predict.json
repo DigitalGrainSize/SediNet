@@ -4,5 +4,7 @@
   "res_folder": "grain_size_sieved_sands",
   "name"  : "sievesand_sieve",
   "dropout": 0.25,
-  "greyscale": true
+  "greyscale": true,
+  "scale": false
+  
 }

@@ -21,7 +21,7 @@ global VALID_BATCH_SIZE, BATCH_SIZE
 
 VALID_BATCH_SIZE = BATCH_SIZE
 
-global MIN_DELTA, MIN_LR, FACTOR, OPT, USE_GPU, STOP_PATIENCE
+global MIN_DELTA, MIN_LR, FACTOR, OPT, USE_GPU, STOP_PATIENCE, DO_AUG
 
 ##====================================================
 
@@ -59,7 +59,6 @@ import tensorflow_addons as tfa
 
 ##SKLEARN
 from sklearn.preprocessing import RobustScaler #MinMaxScaler
-#from sklearn.externals import joblib
 from sklearn.metrics import confusion_matrix, classification_report
 
 ##OTHER
@@ -70,16 +69,556 @@ import pandas as pd
 import numpy as np
 import itertools
 import joblib
+import random
 
 import tensorflow_addons as tfa
 import tqdm
 
-#normalizer = rescaled independently of other samples so that its norm (l2) equals one. The Normalizer rescales the vector for each sample to have unit norm, independently of the distribution of the samples.
-#minmaxsacler = MinMaxScaler rescales the data set such that all feature values are in the range [0, 1] as shown in the right panel below. However, this scaling compress all inliers in the narrow range
+from skimage.transform import AffineTransform, warp #rotate,
+
+###===================================================
+# def clockwise_rotation(image):
+#     angle= random.randint(0,180)
+#     return rotate(image, -angle)
+
+def h_flip(image):
+    return  np.fliplr(image)
+
+def v_flip(image):
+    return np.flipud(image)
+
+def warp_shift(image):
+    shift= random.randint(25,200)
+    transform = AffineTransform(translation=(0,shift))
+    warp_image = warp(image, transform, mode="wrap")
+    return warp_image
+
+def apply_aug(im):
+    return [im,v_flip(warp_shift(im))] #, clockwise_rotation(im), h_flip(im)]
+
+
+###===================================================
+def get_data_generator_Nvars_siso_simo(df, indices, for_training, vars,
+                                       batch_size, greyscale, CS, do_aug): ##BATCH_SIZE
+    """
+    This function generates data for a batch of images and N associated metrics
+    """
+
+    ##print(do_aug)
+
+    if len(vars)==1:
+       images, p1s = [], []
+    elif len(vars)==2:
+       images, p1s, p2s = [], [], []
+    elif len(vars)==3:
+       images, p1s, p2s, p3s = [], [], [], []
+    elif len(vars)==4:
+       images, p1s, p2s, p3s, p4s = [], [], [], [], []
+    elif len(vars)==5:
+       images, p1s, p2s, p3s, p4s, p5s = [], [], [], [], [], []
+    elif len(vars)==6:
+       images, p1s, p2s, p3s, p4s, p5s, p6s =\
+        [], [], [], [], [], [], []
+    elif len(vars)==7:
+       images, p1s, p2s, p3s, p4s, p5s, p6s, p7s =\
+        [], [], [], [], [], [], [], []
+    elif len(vars)==8:
+       images, p1s, p2s, p3s, p4s, p5s, p6s, p7s, p8s =\
+        [], [], [], [], [], [], [], [], []
+    elif len(vars)==9:
+       images, p1s, p2s, p3s, p4s, p5s, p6s, p7s, p8s, p9s =\
+        [], [], [], [], [], [], [], [], [], []
+
+    while True:
+        for i in indices:
+            r = df.iloc[i]
+            if len(vars)==1:
+               file, p1 = r['files'], r[vars[0]]
+            if len(vars)==2:
+               file, p1, p2 = r['files'], r[vars[0]], r[vars[1]]
+            if len(vars)==3:
+               file, p1, p2, p3 = \
+               r['files'], r[vars[0]], r[vars[1]], r[vars[2]]
+            if len(vars)==4:
+               file, p1, p2, p3, p4 = \
+               r['files'], r[vars[0]], r[vars[1]], r[vars[2]], r[vars[3]]
+            if len(vars)==5:
+               file, p1, p2, p3, p4, p5 = \
+               r['files'], r[vars[0]], r[vars[1]], r[vars[2]], r[vars[3]], r[vars[4]]
+            if len(vars)==6:
+               file, p1, p2, p3, p4, p5, p6 = \
+               r['files'], r[vars[0]], r[vars[1]], r[vars[2]], r[vars[3]], r[vars[4]], r[vars[5]]
+            if len(vars)==7:
+               file, p1, p2, p3, p4, p5, p6, p7 = \
+               r['files'], r[vars[0]], r[vars[1]], r[vars[2]], r[vars[3]], r[vars[4]], r[vars[5]], r[vars[6]]
+            if len(vars)==8:
+               file, p1, p2, p3, p4, p5, p6, p7, p8 = \
+               r['files'], r[vars[0]], r[vars[1]], r[vars[2]], r[vars[3]], r[vars[4]], r[vars[5]], r[vars[6]], r[vars[7]]
+            elif len(vars)==9:
+               file, p1, p2, p3, p4, p5, p6, p7, p8, p9 = \
+               r['files'], r[vars[0]], r[vars[1]], r[vars[2]], r[vars[3]], r[vars[4]], r[vars[5]], r[vars[6]], r[vars[7]], r[vars[8]]
+
+            if greyscale==True:
+               im = Image.open(file).convert('LA')
+            else:
+               im = Image.open(file)
+            im = im.resize((IM_HEIGHT, IM_HEIGHT))
+            im = np.array(im) / 255.0
+
+            if np.ndim(im)==2:
+               im = np.dstack((im, im , im)) ##np.expand_dims(im[:,:,0], axis=2)
+
+            im = im[:,:,:3]
+
+            if greyscale==True:
+               if do_aug==True:
+                   aug = apply_aug(im[:,:,0])
+                   images.append(aug)
+                   if len(vars)==1:
+                      p1s.append([p1 for k in range(2)])
+                   elif len(vars)==2:
+                      p1s.append([p1 for k in range(2)]); p2s.append([p2 for k in range(2)])
+                   elif len(vars)==3:
+                      p1s.append([p1 for k in range(2)]); p2s.append([p2 for k in range(2)])
+                      p3s.append([p3 for k in range(2)]);
+                   elif len(vars)==4:
+                      p1s.append([p1 for k in range(2)]); p2s.append([p2 for k in range(2)])
+                      p3s.append([p3 for k in range(2)]); p4s.append([p4 for k in range(2)])
+                   elif len(vars)==5:
+                      p1s.append([p1 for k in range(2)]); p2s.append([p2 for k in range(2)])
+                      p3s.append([p3 for k in range(2)]); p4s.append([p4 for k in range(2)])
+                      p5s.append([p5 for k in range(2)]);
+                   elif len(vars)==6:
+                      p1s.append([p1 for k in range(2)]); p2s.append([p2 for k in range(2)])
+                      p3s.append([p3 for k in range(2)]); p4s.append([p4 for k in range(2)])
+                      p5s.append([p5 for k in range(2)]); p6s.append([p6 for k in range(2)])
+                   elif len(vars)==7:
+                      p1s.append([p1 for k in range(2)]); p2s.append([p2 for k in range(2)])
+                      p3s.append([p3 for k in range(2)]); p4s.append([p4 for k in range(2)])
+                      p5s.append([p5 for k in range(2)]); p6s.append([p6 for k in range(2)])
+                      p7s.append([p7 for k in range(2)]);
+                   elif len(vars)==8:
+                      p1s.append([p1 for k in range(2)]); p2s.append([p2 for k in range(2)])
+                      p3s.append([p3 for k in range(2)]); p4s.append([p4 for k in range(2)])
+                      p5s.append([p5 for k in range(2)]); p6s.append([p6 for k in range(2)])
+                      p7s.append([p7 for k in range(2)]); p8s.append([p8 for k in range(2)])
+                   elif len(vars)==9:
+                      p1s.append([p1 for k in range(2)]); p2s.append([p2 for k in range(2)])
+                      p3s.append([p3 for k in range(2)]); p4s.append([p4 for k in range(2)])
+                      p5s.append([p5 for k in range(2)]); p6s.append([p6 for k in range(2)])
+                      p7s.append([p7 for k in range(2)]); p8s.append([p8 for k in range(2)])
+                      p9s.append([p9 for k in range(2)])
+
+               else:
+                   images.append(np.expand_dims(im[:,:,0], axis=2))
+                   if len(vars)==1:
+                      p1s.append(p1)
+                   elif len(vars)==2:
+                      p1s.append(p1); p2s.append(p2)
+                   elif len(vars)==3:
+                      p1s.append(p1); p2s.append(p2)
+                      p3s.append(p3);
+                   elif len(vars)==4:
+                      p1s.append(p1); p2s.append(p2)
+                      p3s.append(p3); p4s.append(p4)
+                   elif len(vars)==5:
+                      p1s.append(p1); p2s.append(p2)
+                      p3s.append(p3); p4s.append(p4)
+                      p5s.append(p5);
+                   elif len(vars)==6:
+                      p1s.append(p1); p2s.append(p2)
+                      p3s.append(p3); p4s.append(p4)
+                      p5s.append(p5); p6s.append(p6)
+                   elif len(vars)==7:
+                      p1s.append(p1); p2s.append(p2)
+                      p3s.append(p3); p4s.append(p4)
+                      p5s.append(p5); p6s.append(p6)
+                      p7s.append(p7);
+                   elif len(vars)==8:
+                      p1s.append(p1); p2s.append(p2)
+                      p3s.append(p3); p4s.append(p4)
+                      p5s.append(p5); p6s.append(p6)
+                      p7s.append(p7); p8s.append(p8)
+                   elif len(vars)==9:
+                      p1s.append(p1); p2s.append(p2)
+                      p3s.append(p3); p4s.append(p4)
+                      p5s.append(p5); p6s.append(p6)
+                      p7s.append(p7); p8s.append(p8)
+                      p9s.append(p9)
+
+            else:
+               if do_aug==True:
+                   aug = apply_aug(im)
+                   images.append(aug)
+                   if len(vars)==1:
+                      p1s.append([p1 for k in range(2)])
+                   elif len(vars)==2:
+                      p1s.append([p1 for k in range(2)]); p2s.append([p2 for k in range(2)])
+                   elif len(vars)==3:
+                      p1s.append([p1 for k in range(2)]); p2s.append([p2 for k in range(2)])
+                      p3s.append([p3 for k in range(2)]);
+                   elif len(vars)==4:
+                      p1s.append([p1 for k in range(2)]); p2s.append([p2 for k in range(2)])
+                      p3s.append([p3 for k in range(2)]); p4s.append([p4 for k in range(2)])
+                   elif len(vars)==5:
+                      p1s.append([p1 for k in range(2)]); p2s.append([p2 for k in range(2)])
+                      p3s.append([p3 for k in range(2)]); p4s.append([p4 for k in range(2)])
+                      p5s.append([p5 for k in range(2)]);
+                   elif len(vars)==6:
+                      p1s.append([p1 for k in range(2)]); p2s.append([p2 for k in range(2)])
+                      p3s.append([p3 for k in range(2)]); p4s.append([p4 for k in range(2)])
+                      p5s.append([p5 for k in range(2)]); p6s.append([p6 for k in range(2)])
+                   elif len(vars)==7:
+                      p1s.append([p1 for k in range(2)]); p2s.append([p2 for k in range(2)])
+                      p3s.append([p3 for k in range(2)]); p4s.append([p4 for k in range(2)])
+                      p5s.append([p5 for k in range(2)]); p6s.append([p6 for k in range(2)])
+                      p7s.append([p7 for k in range(2)]);
+                   elif len(vars)==8:
+                      p1s.append([p1 for k in range(2)]); p2s.append([p2 for k in range(2)])
+                      p3s.append([p3 for k in range(2)]); p4s.append([p4 for k in range(2)])
+                      p5s.append([p5 for k in range(2)]); p6s.append([p6 for k in range(2)])
+                      p7s.append([p7 for k in range(2)]); p8s.append([p8 for k in range(2)])
+                   elif len(vars)==9:
+                      p1s.append([p1 for k in range(2)]); p2s.append([p2 for k in range(2)])
+                      p3s.append([p3 for k in range(2)]); p4s.append([p4 for k in range(2)])
+                      p5s.append([p5 for k in range(2)]); p6s.append([p6 for k in range(2)])
+                      p7s.append([p7 for k in range(2)]); p8s.append([p8 for k in range(2)])
+                      p9s.append([p9 for k in range(2)])
+
+               else:
+                   images.append(im)
+                   if len(vars)==1:
+                      p1s.append(p1)
+                   elif len(vars)==2:
+                      p1s.append(p1); p2s.append(p2)
+                   elif len(vars)==3:
+                      p1s.append(p1); p2s.append(p2)
+                      p3s.append(p3);
+                   elif len(vars)==4:
+                      p1s.append(p1); p2s.append(p2)
+                      p3s.append(p3); p4s.append(p4)
+                   elif len(vars)==5:
+                      p1s.append(p1); p2s.append(p2)
+                      p3s.append(p3); p4s.append(p4)
+                      p5s.append(p5);
+                   elif len(vars)==6:
+                      p1s.append(p1); p2s.append(p2)
+                      p3s.append(p3); p4s.append(p4)
+                      p5s.append(p5); p6s.append(p6)
+                   elif len(vars)==7:
+                      p1s.append(p1); p2s.append(p2)
+                      p3s.append(p3); p4s.append(p4)
+                      p5s.append(p5); p6s.append(p6)
+                      p7s.append(p7);
+                   elif len(vars)==8:
+                      p1s.append(p1); p2s.append(p2)
+                      p3s.append(p3); p4s.append(p4)
+                      p5s.append(p5); p6s.append(p6)
+                      p7s.append(p7); p8s.append(p8)
+                   elif len(vars)==9:
+                      p1s.append(p1); p2s.append(p2)
+                      p3s.append(p3); p4s.append(p4)
+                      p5s.append(p5); p6s.append(p6)
+                      p7s.append(p7); p8s.append(p8)
+                      p9s.append(p9)
+
+            if len(images) >= batch_size:
+               if len(vars)==1:
+                  if len(CS)==0:
+                      p1s = np.squeeze(np.array(p1s))
+                  else:
+                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
+                  if do_aug==True:
+                     if len(images) >= batch_size:
+                        if greyscale==False:
+                           images = np.array(np.vstack(images))
+                        else:
+                           images = np.expand_dims(np.array(np.vstack(images)), axis=-1)
+                           p1s = np.expand_dims(np.vstack(p1s).flatten(),axis=-1)
+                        yield images,[p1s]
+                  else:
+                     if len(images) >= batch_size:
+                           #p1s = np.expand_dims(np.vstack(p1s).flatten(),axis=-1)
+                           yield np.array(images),[np.array(p1s)]
+                  images, p1s = [], []
+
+               elif len(vars)==2:
+                  if len(CS)==0:
+                      p1s = np.squeeze(np.array(p1s))
+                      p2s = np.squeeze(np.array(p2s))
+                  else:
+                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
+                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
+                  if do_aug==True:
+                     if len(images) >= batch_size:
+                        if greyscale==False:
+                           images = np.array(np.vstack(images))
+                        else:
+                           images = np.expand_dims(np.array(np.vstack(images)), axis=-1)
+                           p1s = np.expand_dims(np.vstack(p1s).flatten(),axis=-1)
+                           p2s = np.expand_dims(np.vstack(p2s).flatten(),axis=-1)
+                        yield images,[p1s, p2s]
+                  else:
+                     if len(images) >= batch_size:
+                        yield np.array(images),[np.array(p1s), np.array(p2s)]
+                  images, p1s, p2s = [], [], []
+
+               elif len(vars)==3:
+                  if len(CS)==0:
+                      p1s = np.squeeze(np.array(p1s))
+                      p2s = np.squeeze(np.array(p2s))
+                      p3s = np.squeeze(np.array(p3s))
+                  else:
+                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
+                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
+                      p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
+                  if do_aug==True:
+                     if len(images) >= batch_size:
+                        if greyscale==False:
+                           images = np.array(np.vstack(images))
+                        else:
+                           images = np.expand_dims(np.array(np.vstack(images)), axis=-1)
+                           p1s = np.expand_dims(np.vstack(p1s).flatten(),axis=-1)
+                           p2s = np.expand_dims(np.vstack(p2s).flatten(),axis=-1)
+                           p3s = np.expand_dims(np.vstack(p3s).flatten(),axis=-1)
+                        yield images,[p1s, p2s, p3s]
+                  else:
+                     if len(images) >= batch_size:
+                        yield np.array(images),[np.array(p1s), np.array(p2s), np.array(p3s)]
+                  images, p1s, p2s, p3s = [], [], [], []
+
+               elif len(vars)==4:
+                  if len(CS)==0:
+                      p1s = np.squeeze(np.array(p1s))
+                      p2s = np.squeeze(np.array(p2s))
+                      p3s = np.squeeze(np.array(p3s))
+                      p4s = np.squeeze(np.array(p4s))
+                  else:
+                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
+                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
+                      p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
+                      p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
+                  if do_aug==True:
+                     if len(images) >= batch_size:
+                        if greyscale==False:
+                           images = np.array(np.vstack(images))
+                        else:
+                           images = np.expand_dims(np.array(np.vstack(images)), axis=-1)
+                           p1s = np.expand_dims(np.vstack(p1s).flatten(),axis=-1)
+                           p2s = np.expand_dims(np.vstack(p2s).flatten(),axis=-1)
+                           p3s = np.expand_dims(np.vstack(p3s).flatten(),axis=-1)
+                           p4s = np.expand_dims(np.vstack(p4s).flatten(),axis=-1)
+                        yield images,[p1s, p2s, p3s, p4s]
+                  else:
+                     if len(images) >= batch_size:
+                        yield np.array(images),[np.array(p1s), np.array(p2s), np.array(p3s),
+                              np.array(p4s)]
+                  images, p1s, p2s, p3s, p4s = [], [], [], [], []
+
+               elif len(vars)==5:
+                  if len(CS)==0:
+                      p1s = np.squeeze(np.array(p1s))
+                      p2s = np.squeeze(np.array(p2s))
+                      p3s = np.squeeze(np.array(p3s))
+                      p4s = np.squeeze(np.array(p4s))
+                      p5s = np.squeeze(np.array(p5s))
+                  else:
+                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
+                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
+                      p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
+                      p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
+                      p5s = np.squeeze(CS[4].transform(np.array(p5s).reshape(-1, 1)))
+                  if do_aug==True:
+                     if len(images) >= batch_size:
+                        if greyscale==False:
+                           images = np.array(np.vstack(images))
+                        else:
+                           images = np.expand_dims(np.array(np.vstack(images)), axis=-1)
+                           p1s = np.expand_dims(np.vstack(p1s).flatten(),axis=-1)
+                           p2s = np.expand_dims(np.vstack(p2s).flatten(),axis=-1)
+                           p3s = np.expand_dims(np.vstack(p3s).flatten(),axis=-1)
+                           p4s = np.expand_dims(np.vstack(p4s).flatten(),axis=-1)
+                           p5s = np.expand_dims(np.vstack(p5s).flatten(),axis=-1)
+                        yield images,[p1s, p2s, p3s, p4s, p5s]
+                  else:
+                     if len(images) >= batch_size:
+                        yield np.array(images),[np.array(p1s), np.array(p2s), np.array(p3s),
+                              np.array(p4s), np.array(p5s)]
+                  images, p1s, p2s, p3s, p4s, p5s = [], [], [], [], [], []
+
+               elif len(vars)==6:
+                  if len(CS)==0:
+                      p1s = np.squeeze(np.array(p1s))
+                      p2s = np.squeeze(np.array(p2s))
+                      p3s = np.squeeze(np.array(p3s))
+                      p4s = np.squeeze(np.array(p4s))
+                      p5s = np.squeeze(np.array(p5s))
+                      p6s = np.squeeze(np.array(p6s))
+                  else:
+                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
+                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
+                      p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
+                      p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
+                      p5s = np.squeeze(CS[4].transform(np.array(p5s).reshape(-1, 1)))
+                      p6s = np.squeeze(CS[5].transform(np.array(p6s).reshape(-1, 1)))
+                  if do_aug==True:
+                     if len(images) >= batch_size:
+                        if greyscale==False:
+                           images = np.array(np.vstack(images))
+                        else:
+                           images = np.expand_dims(np.array(np.vstack(images)), axis=-1)
+                           p1s = np.expand_dims(np.vstack(p1s).flatten(),axis=-1)
+                           p2s = np.expand_dims(np.vstack(p2s).flatten(),axis=-1)
+                           p3s = np.expand_dims(np.vstack(p3s).flatten(),axis=-1)
+                           p4s = np.expand_dims(np.vstack(p4s).flatten(),axis=-1)
+                           p5s = np.expand_dims(np.vstack(p5s).flatten(),axis=-1)
+                           p6s = np.expand_dims(np.vstack(p6s).flatten(),axis=-1)
+                        yield images,[p1s, p2s, p3s, p4s, p5s, p6s]
+                  else:
+                     if len(images) >= batch_size:
+                        yield np.array(images),[np.array(p1s), np.array(p2s), np.array(p3s),
+                              np.array(p4s), np.array(p5s), np.array(p6s)]
+                  images, p1s, p2s, p3s, p4s, p5s, p6s = \
+                  [], [], [], [], [], [], []
+
+               elif len(vars)==7:
+                  if len(CS)==0:
+                      p1s = np.squeeze(np.array(p1s))
+                      p2s = np.squeeze(np.array(p2s))
+                      p3s = np.squeeze(np.array(p3s))
+                      p4s = np.squeeze(np.array(p4s))
+                      p5s = np.squeeze(np.array(p5s))
+                      p6s = np.squeeze(np.array(p6s))
+                      p7s = np.squeeze(np.array(p7s))
+                  else:
+                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
+                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
+                      p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
+                      p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
+                      p5s = np.squeeze(CS[4].transform(np.array(p5s).reshape(-1, 1)))
+                      p6s = np.squeeze(CS[5].transform(np.array(p6s).reshape(-1, 1)))
+                      p7s = np.squeeze(CS[6].transform(np.array(p7s).reshape(-1, 1)))
+                  if do_aug==True:
+                     if len(images) >= batch_size:
+                        if greyscale==False:
+                           images = np.array(np.vstack(images))
+                        else:
+                           images = np.expand_dims(np.array(np.vstack(images)), axis=-1)
+                           p1s = np.expand_dims(np.vstack(p1s).flatten(),axis=-1)
+                           p2s = np.expand_dims(np.vstack(p2s).flatten(),axis=-1)
+                           p3s = np.expand_dims(np.vstack(p3s).flatten(),axis=-1)
+                           p4s = np.expand_dims(np.vstack(p4s).flatten(),axis=-1)
+                           p5s = np.expand_dims(np.vstack(p5s).flatten(),axis=-1)
+                           p6s = np.expand_dims(np.vstack(p6s).flatten(),axis=-1)
+                           p7s = np.expand_dims(np.vstack(p7s).flatten(),axis=-1)
+                        yield images,[p1s, p2s, p3s, p4s, p5s, p6s, p7s]
+                  else:
+                     if len(images) >= batch_size:
+                        yield np.array(images),[np.array(p1s), np.array(p2s), np.array(p3s),
+                              np.array(p4s), np.array(p5s), np.array(p6s),
+                              np.array(p7s)]
+                  images, p1s, p2s, p3s, p4s, p5s, p6s, p7s = \
+                  [], [], [], [], [], [], [], []
+
+               elif len(vars)==8:
+                  if len(CS)==0:
+                      p1s = np.squeeze(np.array(p1s))
+                      p2s = np.squeeze(np.array(p2s))
+                      p3s = np.squeeze(np.array(p3s))
+                      p4s = np.squeeze(np.array(p4s))
+                      p5s = np.squeeze(np.array(p5s))
+                      p6s = np.squeeze(np.array(p6s))
+                      p7s = np.squeeze(np.array(p7s))
+                      p8s = np.squeeze(np.array(p8s))
+                  else:
+                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
+                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
+                      p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
+                      p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
+                      p5s = np.squeeze(CS[4].transform(np.array(p5s).reshape(-1, 1)))
+                      p6s = np.squeeze(CS[5].transform(np.array(p6s).reshape(-1, 1)))
+                      p7s = np.squeeze(CS[6].transform(np.array(p7s).reshape(-1, 1)))
+                      p8s = np.squeeze(CS[7].transform(np.array(p8s).reshape(-1, 1)))
+                  if do_aug==True:
+                     if len(images) >= batch_size:
+                        if greyscale==False:
+                           images = np.array(np.vstack(images))
+                        else:
+                           images = np.expand_dims(np.array(np.vstack(images)), axis=-1)
+                           p1s = np.expand_dims(np.vstack(p1s).flatten(),axis=-1)
+                           p2s = np.expand_dims(np.vstack(p2s).flatten(),axis=-1)
+                           p3s = np.expand_dims(np.vstack(p3s).flatten(),axis=-1)
+                           p4s = np.expand_dims(np.vstack(p4s).flatten(),axis=-1)
+                           p5s = np.expand_dims(np.vstack(p5s).flatten(),axis=-1)
+                           p6s = np.expand_dims(np.vstack(p6s).flatten(),axis=-1)
+                           p7s = np.expand_dims(np.vstack(p7s).flatten(),axis=-1)
+                           p8s = np.expand_dims(np.vstack(p8s).flatten(),axis=-1)
+                        yield images,[p1s, p2s, p3s, p4s, p5s, p6s, p7s, p8s]
+
+                  else:
+                     if len(images) >= batch_size:
+                        yield np.array(images),[np.array(p1s), np.array(p2s), np.array(p3s),
+                              np.array(p4s), np.array(p5s), np.array(p6s),
+                              np.array(p7s), np.array(p8s)]
+                  images, p1s, p2s, p3s, p4s, p5s, p6s, p7s, p8s = \
+                  [], [], [], [], [], [], [], [], []
+
+               elif len(vars)==9:
+                  if len(CS)==0:
+                      p1s = np.squeeze(np.array(p1s))
+                      p2s = np.squeeze(np.array(p2s))
+                      p3s = np.squeeze(np.array(p3s))
+                      p4s = np.squeeze(np.array(p4s))
+                      p5s = np.squeeze(np.array(p5s))
+                      p6s = np.squeeze(np.array(p6s))
+                      p7s = np.squeeze(np.array(p7s))
+                      p8s = np.squeeze(np.array(p8s))
+                      p9s = np.squeeze(np.array(p9s))
+                  else:
+                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
+                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
+                      p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
+                      p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
+                      p5s = np.squeeze(CS[4].transform(np.array(p5s).reshape(-1, 1)))
+                      p6s = np.squeeze(CS[5].transform(np.array(p6s).reshape(-1, 1)))
+                      p7s = np.squeeze(CS[6].transform(np.array(p7s).reshape(-1, 1)))
+                      p8s = np.squeeze(CS[7].transform(np.array(p8s).reshape(-1, 1)))
+                      p9s = np.squeeze(CS[8].transform(np.array(p9s).reshape(-1, 1)))
+
+                  try:
+                     if do_aug==True:
+                         if len(images) >= batch_size:
+                            if greyscale==False:
+                               images = np.array(np.vstack(images))
+                            else:
+                               images = np.expand_dims(np.array(np.vstack(images)), axis=-1)
+                               p1s = np.expand_dims(np.vstack(p1s).flatten(),axis=-1)
+                               p2s = np.expand_dims(np.vstack(p2s).flatten(),axis=-1)
+                               p3s = np.expand_dims(np.vstack(p3s).flatten(),axis=-1)
+                               p4s = np.expand_dims(np.vstack(p4s).flatten(),axis=-1)
+                               p5s = np.expand_dims(np.vstack(p5s).flatten(),axis=-1)
+                               p6s = np.expand_dims(np.vstack(p6s).flatten(),axis=-1)
+                               p7s = np.expand_dims(np.vstack(p7s).flatten(),axis=-1)
+                               p8s = np.expand_dims(np.vstack(p8s).flatten(),axis=-1)
+                               p9s = np.expand_dims(np.vstack(p9s).flatten(),axis=-1)
+                            yield images,[p1s, p2s, p3s, p4s, p5s, p6s, p7s, p8s, p9s]
+                     else:
+                         if len(images) >= batch_size:
+                            yield np.array(images),[np.array(p1s), np.array(p2s), np.array(p3s),
+                                  np.array(p4s), np.array(p5s), np.array(p6s),
+                                  np.array(p7s), np.array(p8s), np.array(p9s)]
+                  except GeneratorExit:
+                      print(" ")
+                  images, p1s, p2s, p3s, p4s, p5s, p6s, p7s, p8s, p9s = \
+                  [], [], [], [], [], [], [], [], [], []
+
+        if not for_training:
+            break
+
 
 ###===================================================
 def get_data_generator_1image(df, indices, for_training, ID_MAP,
-                              var, batch_size, greyscale): ##BATCH_SIZE
+                              var, batch_size, greyscale, do_aug):
     """
     This function creates a dataset generator consisting of batches of images
     and corresponding one-hot-encoded labels describing the sediment in each image
@@ -95,17 +634,6 @@ def get_data_generator_1image(df, indices, for_training, ID_MAP,
         for i in indices:
             r = df.iloc[i]
             file, pop = r['files'], r[var]
-#            im = Image.open(file)#.convert('LA')
-#            im = im.resize((IM_HEIGHT, IM_HEIGHT))
-#            im = np.array(im) / 255.0
-#            im2 = np.rot90(im)
-#            if np.ndim(im)==2:
-#               tmp = np.zeros((IM_HEIGHT,IM_HEIGHT,3))
-#               tmp[:,:,0] = im
-#               tmp[:,:,1] = im
-#               tmp[:,:,2] = im
-#               im = tmp
-#            images.append(np.expand_dims(im[:,:,:3],axis=2))
 
             if greyscale==True:
                im = Image.open(file).convert('LA')
@@ -119,15 +647,36 @@ def get_data_generator_1image(df, indices, for_training, ID_MAP,
             im = im[:,:,:3]
 
             if greyscale==True:
-               images.append(np.expand_dims(im[:,:,0], axis=2))
+               if do_aug==True:
+                   aug = apply_aug(im[:,:,0])
+                   images.append(aug)
+                   pops.append([to_categorical(pop, len(ID_MAP2)) for k in range(2)]) #3
+               else:
+                   images.append(np.expand_dims(im[:,:,0], axis=2))
             else:
-               images.append(im)
+               if do_aug==True:
+                   aug = apply_aug(im)
+                   images.append(aug)
+                   pops.append([to_categorical(pop, len(ID_MAP2)) for k in range(2)])
+               else:
+                   images.append(im)
+                   pops.append(to_categorical(pop, len(ID_MAP2)))
 
-            pops.append(to_categorical(pop, len(ID_MAP2)))
             try:
-               if len(images) >= batch_size:
-                  yield np.squeeze(np.array(images)),np.array(pops) #[np.array(pops)]
-                  images, pops = [], []
+               if do_aug==True:
+                  if len(images) >= batch_size:
+                     if greyscale==False:
+                        images = np.array(np.vstack(images))
+                        pops = np.array(np.vstack(pops))
+                     else:
+                        images = np.expand_dims(np.array(np.vstack(images)), axis=-1)
+                        pops = np.array(np.vstack(pops))
+                     yield images, pops
+                     images, pops = [], []
+               else:
+                  if len(images) >= batch_size:
+                     yield np.squeeze(np.array(images)),np.array(pops) #[np.array(pops)]
+                     images, pops = [], []
             except GeneratorExit:
                print(" ") #pass
 
@@ -187,7 +736,7 @@ def plot_train_history_Nvar(history, varuse, N):
 
 ###===================================================
 def predict_test_train_cat(train_df, test_df, train_idx, test_idx, var, SM,
-                           classes, weights_path, greyscale, name):
+                           classes, weights_path, greyscale, name, do_aug):
    """
    This function creates makes predictions on test and train data,
    prints a classification report, and prints confusion matrices
@@ -203,7 +752,7 @@ def predict_test_train_cat(train_df, test_df, train_idx, test_idx, var, SM,
    ##==============================================
    ## make predictions on training data
    train_gen = get_data_generator_1image(train_df, train_idx, False,
-               len(classes), var, len(train_idx), greyscale)
+               len(classes), var, len(train_idx), greyscale, do_aug)
    x_train, (trueT)= next(train_gen)
 
    PT = []
@@ -231,7 +780,7 @@ def predict_test_train_cat(train_df, test_df, train_idx, test_idx, var, SM,
 
    ## make predictions on testing data
    test_gen = get_data_generator_1image(test_df, test_idx, False,
-              len(classes), var, len(test_idx), greyscale)
+              len(classes), var, len(test_idx), greyscale, False) #no augmentation on validation data
    x_test, (true)= next(test_gen)
 
    PT = []
@@ -305,7 +854,7 @@ def predict_test_train_cat(train_df, test_df, train_idx, test_idx, var, SM,
 ###===================================================
 def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
                                  SM, weights_path, name, mode, greyscale,
-                                 CS, dropout):
+                                 CS, dropout, scale, do_aug):
     """
     This function creates makes predcitions on test and train data
     """
@@ -320,10 +869,10 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
         SM.load_weights(weights_path)
 
     train_gen = get_data_generator_Nvars_siso_simo(train_df, train_idx, False,
-                vars, len(train_idx), greyscale, CS)
+                vars, len(train_idx), greyscale, CS, do_aug)
     x_train, tmp = next(train_gen)
 
-    if SCALE == True:
+    if scale == True:
 
         if len(vars)>1:
            counter = 0
@@ -336,7 +885,7 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
         else:
            exec(
            vars[0]+\
-           '_trueT = np.squeeze(CS[0].inverse_transform(tmp.reshape(-1,1)))'
+           '_trueT = np.squeeze(CS[0].inverse_transform(tmp[0].reshape(-1,1)))'
            )
 
     else:
@@ -359,7 +908,7 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
     for v in vars:
        exec(v+'_PT = []')
 
-    if SCALE == True:
+    if scale == True:
 
         if type(SM) == list:
             counter = 0 #model iterator
@@ -488,12 +1037,12 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
 
     ## make predictions on testing data
     test_gen = get_data_generator_Nvars_siso_simo(test_df, test_idx, False,
-               vars, len(test_idx), greyscale, CS)
+               vars, len(test_idx), greyscale, CS, False)
 
     x_test, tmp = next(test_gen)
 
 
-    if SCALE == True:
+    if scale == True:
 
         if len(vars)>1:
            counter = 0
@@ -530,7 +1079,7 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
     for v in vars:
        exec(v+'_P = []')
 
-    if SCALE == True:
+    if scale == True:
 
         if type(SM) == list:
             #counter = 0
@@ -669,7 +1218,7 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
     elif len(vars)==3:
        nrows = 2; ncols = 2
     elif len(vars)==2:
-       nrows = 2; ncols = 1
+       nrows = 1; ncols = 2
     elif len(vars)==1:
        nrows = 1; ncols = 1
 
@@ -863,271 +1412,6 @@ def  plot_train_history_1var_mae(history):
    axes[1].set_xlabel('Epochs')
    axes[1].legend()
 
-
-###===================================================
-def get_data_generator_Nvars_siso_simo(df, indices, for_training, vars,
-                                       batch_size, greyscale, CS): ##BATCH_SIZE
-    """
-    This function generates data for a batch of images and N associated metrics
-    """
-
-    if len(vars)==1:
-       images, p1s = [], []
-    elif len(vars)==2:
-       images, p1s, p2s = [], [], []
-    elif len(vars)==3:
-       images, p1s, p2s, p3s = [], [], [], []
-    elif len(vars)==4:
-       images, p1s, p2s, p3s, p4s = [], [], [], [], []
-    elif len(vars)==5:
-       images, p1s, p2s, p3s, p4s, p5s = [], [], [], [], [], []
-    elif len(vars)==6:
-       images, p1s, p2s, p3s, p4s, p5s, p6s =\
-        [], [], [], [], [], [], []
-    elif len(vars)==7:
-       images, p1s, p2s, p3s, p4s, p5s, p6s, p7s =\
-        [], [], [], [], [], [], [], []
-    elif len(vars)==8:
-       images, p1s, p2s, p3s, p4s, p5s, p6s, p7s, p8s =\
-        [], [], [], [], [], [], [], [], []
-    elif len(vars)==9:
-       images, p1s, p2s, p3s, p4s, p5s, p6s, p7s, p8s, p9s =\
-        [], [], [], [], [], [], [], [], [], []
-
-    while True:
-        for i in indices:
-            r = df.iloc[i]
-            if len(vars)==1:
-               file, p1 = r['files'], r[vars[0]]
-            if len(vars)==2:
-               file, p1, p2 = r['files'], r[vars[0]], r[vars[1]]
-            if len(vars)==3:
-               file, p1, p2, p3 = \
-               r['files'], r[vars[0]], r[vars[1]], r[vars[2]]
-            if len(vars)==4:
-               file, p1, p2, p3, p4 = \
-               r['files'], r[vars[0]], r[vars[1]], r[vars[2]], r[vars[3]]
-            if len(vars)==5:
-               file, p1, p2, p3, p4, p5 = \
-               r['files'], r[vars[0]], r[vars[1]], r[vars[2]], r[vars[3]], r[vars[4]]
-            if len(vars)==6:
-               file, p1, p2, p3, p4, p5, p6 = \
-               r['files'], r[vars[0]], r[vars[1]], r[vars[2]], r[vars[3]], r[vars[4]], r[vars[5]]
-            if len(vars)==7:
-               file, p1, p2, p3, p4, p5, p6, p7 = \
-               r['files'], r[vars[0]], r[vars[1]], r[vars[2]], r[vars[3]], r[vars[4]], r[vars[5]], r[vars[6]]
-            if len(vars)==8:
-               file, p1, p2, p3, p4, p5, p6, p7, p8 = \
-               r['files'], r[vars[0]], r[vars[1]], r[vars[2]], r[vars[3]], r[vars[4]], r[vars[5]], r[vars[6]], r[vars[7]]
-            elif len(vars)==9:
-               file, p1, p2, p3, p4, p5, p6, p7, p8, p9 = \
-               r['files'], r[vars[0]], r[vars[1]], r[vars[2]], r[vars[3]], r[vars[4]], r[vars[5]], r[vars[6]], r[vars[7]], r[vars[8]]
-
-            if greyscale==True:
-               im = Image.open(file).convert('LA')
-            else:
-               im = Image.open(file)
-            im = im.resize((IM_HEIGHT, IM_HEIGHT))
-            im = np.array(im) / 255.0
-
-            if np.ndim(im)==2:
-               im = np.dstack((im, im , im)) ##np.expand_dims(im[:,:,0], axis=2)
-
-            im = im[:,:,:3]
-
-            if greyscale==True:
-               images.append(np.expand_dims(im[:,:,0], axis=2))
-            else:
-               images.append(im)
-
-            if len(vars)==1:
-               p1s.append(p1)
-            elif len(vars)==2:
-               p1s.append(p1); p2s.append(p2)
-            elif len(vars)==3:
-               p1s.append(p1); p2s.append(p2)
-               p3s.append(p3);
-            elif len(vars)==4:
-               p1s.append(p1); p2s.append(p2)
-               p3s.append(p3); p4s.append(p4)
-            elif len(vars)==5:
-               p1s.append(p1); p2s.append(p2)
-               p3s.append(p3); p4s.append(p4)
-               p5s.append(p5);
-            elif len(vars)==6:
-               p1s.append(p1); p2s.append(p2)
-               p3s.append(p3); p4s.append(p4)
-               p5s.append(p5); p6s.append(p6)
-            elif len(vars)==7:
-               p1s.append(p1); p2s.append(p2)
-               p3s.append(p3); p4s.append(p4)
-               p5s.append(p5); p6s.append(p6)
-               p7s.append(p7);
-            elif len(vars)==8:
-               p1s.append(p1); p2s.append(p2)
-               p3s.append(p3); p4s.append(p4)
-               p5s.append(p5); p6s.append(p6)
-               p7s.append(p7); p8s.append(p8)
-            elif len(vars)==9:
-               p1s.append(p1); p2s.append(p2)
-               p3s.append(p3); p4s.append(p4)
-               p5s.append(p5); p6s.append(p6)
-               p7s.append(p7); p8s.append(p8)
-               p9s.append(p9)
-
-            if len(images) >= batch_size:
-               if len(vars)==1:
-                  if len(CS)==0:
-                      p1s = np.squeeze(np.array(p1s))
-                  else:
-                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
-                  yield np.array(images), [np.array(p1s)]
-                  images, p1s = [], []
-               elif len(vars)==2:
-                  if len(CS)==0:
-                      p1s = np.squeeze(np.array(p1s))
-                      p2s = np.squeeze(np.array(p2s))
-                  else:
-                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
-                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
-                  yield np.array(images), [np.array(p1s), np.array(p2s)]
-                  images, p1s, p2s = [], [], []
-               elif len(vars)==3:
-                  if len(CS)==0:
-                      p1s = np.squeeze(np.array(p1s))
-                      p2s = np.squeeze(np.array(p2s))
-                      p3s = np.squeeze(np.array(p3s))
-                  else:
-                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
-                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
-                      p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
-                  yield np.array(images),[np.array(p1s), np.array(p2s), np.array(p3s)]
-                  images, p1s, p2s, p3s = [], [], [], []
-               elif len(vars)==4:
-                  if len(CS)==0:
-                      p1s = np.squeeze(np.array(p1s))
-                      p2s = np.squeeze(np.array(p2s))
-                      p3s = np.squeeze(np.array(p3s))
-                      p4s = np.squeeze(np.array(p4s))
-                  else:
-                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
-                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
-                      p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
-                      p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
-                  yield np.array(images),[np.array(p1s), np.array(p2s),
-                        np.array(p3s), np.array(p4s)]
-                  images, p1s, p2s, p3s, p4s = [], [], [], [], []
-               elif len(vars)==5:
-                  if len(CS)==0:
-                      p1s = np.squeeze(np.array(p1s))
-                      p2s = np.squeeze(np.array(p2s))
-                      p3s = np.squeeze(np.array(p3s))
-                      p4s = np.squeeze(np.array(p4s))
-                      p5s = np.squeeze(np.array(p5s))
-                  else:
-                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
-                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
-                      p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
-                      p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
-                      p5s = np.squeeze(CS[4].transform(np.array(p5s).reshape(-1, 1)))
-                  yield np.array(images),[np.array(p1s), np.array(p2s), np.array(p3s),
-                        np.array(p4s), np.array(p5s)]
-                  images, p1s, p2s, p3s, p4s, p5s = [], [], [], [], [], []
-               elif len(vars)==6:
-                  if len(CS)==0:
-                      p1s = np.squeeze(np.array(p1s))
-                      p2s = np.squeeze(np.array(p2s))
-                      p3s = np.squeeze(np.array(p3s))
-                      p4s = np.squeeze(np.array(p4s))
-                      p5s = np.squeeze(np.array(p5s))
-                      p6s = np.squeeze(np.array(p6s))
-                  else:
-                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
-                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
-                      p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
-                      p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
-                      p5s = np.squeeze(CS[4].transform(np.array(p5s).reshape(-1, 1)))
-                      p6s = np.squeeze(CS[5].transform(np.array(p6s).reshape(-1, 1)))
-                  yield np.array(images),[np.array(p1s), np.array(p2s), np.array(p3s),
-                        np.array(p4s), np.array(p5s), np.array(p6s)]
-                  images, p1s, p2s, p3s, p4s, p5s, p6s = \
-                  [], [], [], [], [], [], []
-               elif len(vars)==7:
-                  if len(CS)==0:
-                      p1s = np.squeeze(np.array(p1s))
-                      p2s = np.squeeze(np.array(p2s))
-                      p3s = np.squeeze(np.array(p3s))
-                      p4s = np.squeeze(np.array(p4s))
-                      p5s = np.squeeze(np.array(p5s))
-                      p6s = np.squeeze(np.array(p6s))
-                      p7s = np.squeeze(np.array(p7s))
-                  else:
-                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
-                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
-                      p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
-                      p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
-                      p5s = np.squeeze(CS[4].transform(np.array(p5s).reshape(-1, 1)))
-                      p6s = np.squeeze(CS[5].transform(np.array(p6s).reshape(-1, 1)))
-                      p7s = np.squeeze(CS[6].transform(np.array(p7s).reshape(-1, 1)))
-                  yield np.array(images),[np.array(p1s), np.array(p2s), np.array(p3s),
-                        np.array(p4s), np.array(p5s), np.array(p6s), np.array(p7s)]
-                  images, p1s, p2s, p3s, p4s, p5s, p6s, p7s = \
-                  [], [], [], [], [], [], [], []
-               elif len(vars)==8:
-                  if len(CS)==0:
-                      p1s = np.squeeze(np.array(p1s))
-                      p2s = np.squeeze(np.array(p2s))
-                      p3s = np.squeeze(np.array(p3s))
-                      p4s = np.squeeze(np.array(p4s))
-                      p5s = np.squeeze(np.array(p5s))
-                      p6s = np.squeeze(np.array(p6s))
-                      p7s = np.squeeze(np.array(p7s))
-                      p8s = np.squeeze(np.array(p8s))
-                  else:
-                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
-                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
-                      p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
-                      p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
-                      p5s = np.squeeze(CS[4].transform(np.array(p5s).reshape(-1, 1)))
-                      p6s = np.squeeze(CS[5].transform(np.array(p6s).reshape(-1, 1)))
-                      p7s = np.squeeze(CS[6].transform(np.array(p7s).reshape(-1, 1)))
-                      p8s = np.squeeze(CS[7].transform(np.array(p8s).reshape(-1, 1)))
-                  yield np.array(images),[np.array(p1s), np.array(p2s), np.array(p3s),
-                        np.array(p4s), np.array(p5s), np.array(p6s),
-                        np.array(p7s), np.array(p8s)]
-                  images, p1s, p2s, p3s, p4s, p5s, p6s, p7s, p8s = \
-                  [], [], [], [], [], [], [], [], []
-               elif len(vars)==9:
-                  if len(CS)==0:
-                      p1s = np.squeeze(np.array(p1s))
-                      p2s = np.squeeze(np.array(p2s))
-                      p3s = np.squeeze(np.array(p3s))
-                      p4s = np.squeeze(np.array(p4s))
-                      p5s = np.squeeze(np.array(p5s))
-                      p6s = np.squeeze(np.array(p6s))
-                      p7s = np.squeeze(np.array(p7s))
-                      p8s = np.squeeze(np.array(p8s))
-                      p9s = np.squeeze(np.array(p9s))
-                  else:
-                      p1s = np.squeeze(CS[0].transform(np.array(p1s).reshape(-1, 1)))
-                      p2s = np.squeeze(CS[1].transform(np.array(p2s).reshape(-1, 1)))
-                      p3s = np.squeeze(CS[2].transform(np.array(p3s).reshape(-1, 1)))
-                      p4s = np.squeeze(CS[3].transform(np.array(p4s).reshape(-1, 1)))
-                      p5s = np.squeeze(CS[4].transform(np.array(p5s).reshape(-1, 1)))
-                      p6s = np.squeeze(CS[5].transform(np.array(p6s).reshape(-1, 1)))
-                      p7s = np.squeeze(CS[6].transform(np.array(p7s).reshape(-1, 1)))
-                      p8s = np.squeeze(CS[7].transform(np.array(p8s).reshape(-1, 1)))
-                      p9s = np.squeeze(CS[8].transform(np.array(p9s).reshape(-1, 1)))
-                  try:
-                     yield np.array(images),[np.array(p1s), np.array(p2s), np.array(p3s),
-                           np.array(p4s), np.array(p5s), np.array(p6s),
-                           np.array(p7s), np.array(p8s), np.array(p9s)]
-                  except GeneratorExit:
-                     print(" ") #pass
-                  images, p1s, p2s, p3s, p4s, p5s, p6s, p7s, p8s, p9s = \
-                  [], [], [], [], [], [], [], [], [], []
-        if not for_training:
-            break
 
 #
 # ###===================================================

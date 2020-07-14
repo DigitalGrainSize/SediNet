@@ -53,14 +53,23 @@ if __name__ == '__main__':
     name = config["name"] #name prefix for output files
     greyscale = config["greyscale"] #convert imagery to greyscale or not
     dropout = config["dropout"]
+    scale = config["scale"] #do scaling on variable
 
     try:
        numclass = config['numclass']
     except:
        numclass = 0
 
-    vars = [k for k in config.keys() if not npany([k.startswith('csvfile'), k.startswith('dropout'), k.startswith('base'), k.startswith('res_folder'), k.startswith('train_csvfile'), k.startswith('test_csvfile'), k.startswith('name'), k.startswith('greyscale'), k.startswith('aux_in'), k.startswith('N'), k.startswith('numclass')])]
+    # vars = [k for k in config.keys() if not npany([k.startswith('csvfile'), k.startswith('dropout'), k.startswith('base'), k.startswith('res_folder'), k.startswith('train_csvfile'), k.startswith('test_csvfile'), k.startswith('name'), k.startswith('greyscale'), k.startswith('aux_in'), k.startswith('N'), k.startswith('numclass')])]
+    # vars = sorted(vars)
 
+    #output variables
+    vars = [k for k in config.keys() if not npany([k.startswith('base'), k.startswith('csvfile'),
+            k.startswith('res_folder'), k.startswith('train_csvfile'),
+            k.startswith('test_csvfile'), k.startswith('name'),
+            k.startswith('greyscale'), k.startswith('aux_in'),
+            k.startswith('dropout'), k.startswith('N'),
+            k.startswith('scale'), k.startswith('numclass')])]
     vars = sorted(vars)
 
     auxin = [k for k in config.keys() if k.startswith('aux_in')]

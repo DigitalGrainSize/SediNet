@@ -1,9 +1,11 @@
 {
   "train_csvfile" : "mattole_train.csv",
   "test_csvfile" : "mattole_test.csv",
-  "d50": "d50",
+  "mean": "mean",
   "res_folder": "mattole",
   "name"  : "mattole",
   "greyscale" : true,
-  "dropout": 0.25
+  "dropout": 0.25,
+  "scale": false
+
 }

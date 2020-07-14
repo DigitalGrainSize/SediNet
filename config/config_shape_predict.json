@@ -1,9 +1,11 @@
 {
-  "csvfile" : "small_dataset_shape.csv",
-  "shape"     : "shape", 
+  "csvfile" : "dataset_shape.csv",
+  "shape"     : "shape",
   "numclass" : 4,
   "res_folder": "grain_shape",
   "name": "grain_shape",
   "dropout": 0.25,
-  "greyscale": false        
+  "greyscale": false,
+  "scale": false
+
 }

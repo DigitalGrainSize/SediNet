@@ -9,7 +9,7 @@ from sedinet_models import *
 
 ###===================================================
 def run_training_siso_simo(vars, train_csvfile, test_csvfile, name, res_folder,
-                           mode, greyscale, dropout, numclass):
+                           mode, greyscale, dropout, numclass, scale):
    """
    This function generates, trains and evaluates a sedinet model for
    continuous prediction
@@ -32,7 +32,7 @@ def run_training_siso_simo(vars, train_csvfile, test_csvfile, name, res_folder,
    else:
       SM = make_sedinet_siso_simo(vars, greyscale, dropout)
 
-      if SCALE==True:
+      if scale==True:
           CS = []
           for var in vars:
              cs = RobustScaler() #MinMaxScaler()
@@ -60,7 +60,7 @@ def run_training_siso_simo(vars, train_csvfile, test_csvfile, name, res_folder,
                                                   train_idx, test_idx, name,
                                                   vars, mode, greyscale, CS,
                                                   dropout, batch_size, valid_batch_size,
-                                                  res_folder)
+                                                  res_folder, scale)
             SMs.append(sm)
             weights_path.append(wp)
             gc.collect()
@@ -70,7 +70,7 @@ def run_training_siso_simo(vars, train_csvfile, test_csvfile, name, res_folder,
                                                   train_idx, test_idx, name,
                                                   vars, mode, greyscale, CS,
                                                   dropout, BATCH_SIZE, VALID_BATCH_SIZE,
-                                                  res_folder)
+                                                  res_folder, scale)
    else:
       if type(BATCH_SIZE)==list:
          SMs = []; weights_path = []
@@ -101,19 +101,21 @@ def run_training_siso_simo(vars, train_csvfile, test_csvfile, name, res_folder,
       if type(BATCH_SIZE)==list:
           predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
                                 SMs, weights_path, name, mode, greyscale, CS,
-                                dropout)
+                                dropout, scale, DO_AUG)
       else:
           predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
                                 SM, weights_path, name, mode, greyscale, CS,
-                                dropout)
+                                dropout, scale, DO_AUG)
 
    else:
       if type(BATCH_SIZE)==list:
           predict_test_train_cat(train_df, test_df, train_idx, test_idx, vars[0],
-                             SMs, [i for i in ID_MAP.keys()], weights_path, greyscale, name)
+                             SMs, [i for i in ID_MAP.keys()], weights_path, greyscale,
+                             name, DO_AUG)
       else:
           predict_test_train_cat(train_df, test_df, train_idx, test_idx, vars[0],
-                             SM, [i for i in ID_MAP.keys()], weights_path, greyscale, name)
+                             SM, [i for i in ID_MAP.keys()], weights_path, greyscale,
+                             name, DO_AUG)
 
    K.clear_session()
 
@@ -121,6 +123,10 @@ def run_training_siso_simo(vars, train_csvfile, test_csvfile, name, res_folder,
    ## move model files and plots to the results folder
    tidy(res_folder)
 
+
+# df = train_df
+# indices=train_idx[:10]
+# for_training=True
 
 ###==================================
 def train_sedinet_cat(SM, train_df, test_df, train_idx, test_idx,
@@ -133,16 +139,24 @@ def train_sedinet_cat(SM, train_df, test_df, train_idx, test_idx,
     ## create training and testing file generators, set the weights path,
     ## plot the model, and create a callback list for model training
     train_gen = get_data_generator_1image(train_df, train_idx, True, ID_MAP,
-                vars[0], batch_size, greyscale) ##BATCH_SIZE
+                vars[0], batch_size, greyscale, DO_AUG) ##BATCH_SIZE
     valid_gen = get_data_generator_1image(test_df, test_idx, True, ID_MAP,
-                vars[0], valid_batch_size, greyscale) ##VALID_BATCH_SIZE
+                vars[0], valid_batch_size, greyscale, False) ##VALID_BATCH_SIZE
 
     if SHALLOW is True:
-       weights_path = name+"_"+mode+"_batch"+str(batch_size)+"_im"+str(IM_HEIGHT)+\
-                   "_shallow_"+vars[0]+"_"+CAT_LOSS+".hdf5" ##BATCH_SIZE
+       if DO_AUG is True:
+           weights_path = name+"_"+mode+"_batch"+str(batch_size)+"_im"+str(IM_HEIGHT)+\
+                   "_shallow_"+vars[0]+"_"+CAT_LOSS+"_aug.hdf5"
+       else:
+           weights_path = name+"_"+mode+"_batch"+str(batch_size)+"_im"+str(IM_HEIGHT)+\
+                   "_shallow_"+vars[0]+"_"+CAT_LOSS+"_noaug.hdf5"
     else:
-       weights_path = name+"_"+mode+"_batch"+str(batch_size)+"_im"+str(IM_HEIGHT)+\
-                   "_"+vars[0]+"_"+CAT_LOSS+".hdf5" ##BATCH_SIZE
+       if DO_AUG is True:
+           weights_path = name+"_"+mode+"_batch"+str(batch_size)+"_im"+str(IM_HEIGHT)+\
+                   "_"+vars[0]+"_"+CAT_LOSS+"_aug.hdf5"
+       else:
+           weights_path = name+"_"+mode+"_batch"+str(batch_size)+"_im"+str(IM_HEIGHT)+\
+                   "_"+vars[0]+"_"+CAT_LOSS+"_noaug.hdf5"
 
     if os.path.exists(weights_path):
         SM.load_weights(weights_path)
@@ -220,7 +234,7 @@ def train_sedinet_cat(SM, train_df, test_df, train_idx, test_idx,
 ###===================================================
 def train_sedinet_siso_simo(SM, train_df, test_df, train_idx, test_idx, name,
                             vars, mode, greyscale, CS, dropout, batch_size, valid_batch_size,
-                            res_folder):
+                            res_folder, scale):
     """
     This function trains an implementation of sedinet
     """
@@ -230,29 +244,26 @@ def train_sedinet_siso_simo(SM, train_df, test_df, train_idx, test_idx, name,
     ## plot the model, and create a callback list for model training
 
     train_gen = get_data_generator_Nvars_siso_simo(train_df, train_idx, True,
-                                                   vars, batch_size, greyscale, CS) ##BATCH_SIZE
+                                                   vars, batch_size, greyscale, CS, DO_AUG) 
     valid_gen = get_data_generator_Nvars_siso_simo(test_df, test_idx, True,
-                                                   vars, valid_batch_size, greyscale, CS) ##VALID_BATCH_SIZE
+                                                   vars, valid_batch_size, greyscale, CS, False) ##only augment training
 
-
-# datagen=ImageDataGenerator(rescale=1./255,
-#                            brightness_range=0.25,
-#                            horizontal_flip=True,
-#                            vertical_flip=True,
-#                            )
-# train_gen=datagen.flow_from_dataframe(dataframe=train_df, directory=".\train_imgs",
-#                         x_col="id", y_col="label", class_mode="categorical",
-#                         target_size=(32,32), batch_size=32)
-
-
-    varstring = ''.join([str(k)+'_' for k in vars])
+    varstring = str(len(vars))+'vars' #''.join([str(k)+'_' for k in vars])
 
     if SHALLOW is True:
-       weights_path = name+"_"+mode+"_batch"+str(batch_size)+"_im"+str(IM_HEIGHT)+\
-                   "_shallow_"+varstring+"_"+CONT_LOSS+".hdf5" ##BATCH_SIZE
+       if DO_AUG is True:
+          weights_path = name+"_"+mode+"_batch"+str(batch_size)+"_im"+str(IM_HEIGHT)+\
+                   "_shallow_"+varstring+"_"+CONT_LOSS+"_aug.hdf5"
+       else:
+          weights_path = name+"_"+mode+"_batch"+str(batch_size)+"_im"+str(IM_HEIGHT)+\
+                   "_shallow_"+varstring+"_"+CONT_LOSS+"_noaug.hdf5"
     else:
-       weights_path = name+"_"+mode+"_batch"+str(batch_size)+"_im"+str(IM_HEIGHT)+\
-                   "_"+varstring+"_"+CONT_LOSS+".hdf5" ##BATCH_SIZE
+       if DO_AUG is True:
+          weights_path = name+"_"+mode+"_batch"+str(batch_size)+"_im"+str(IM_HEIGHT)+\
+                   "_"+varstring+"_"+CONT_LOSS+"_aug.hdf5"
+       else:
+          weights_path = name+"_"+mode+"_batch"+str(batch_size)+"_im"+str(IM_HEIGHT)+\
+                   "_"+varstring+"_"+CONT_LOSS+"_noaug.hdf5"
 
     if os.path.exists(weights_path):
         SM.load_weights(weights_path)

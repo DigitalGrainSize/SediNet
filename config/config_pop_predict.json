@@ -1,9 +1,9 @@
 {
-  "csvfile" : "small_dataset_population.csv",
-  "pop"     : "pop", 
+  "csvfile" : "dataset_population.csv",
+  "pop"     : "pop",
   "numclass" : 6,
   "name"  : "grain_population",
   "res_folder": "grain_population",
   "dropout": 0.25,
-  "greyscale": false  
+  "greyscale": false
 }
