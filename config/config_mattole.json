@@ -1,11 +1,12 @@
 {
   "train_csvfile" : "mattole_train.csv",
   "test_csvfile" : "mattole_test.csv",
+  "csvfile" : "mattole_new.csv",
   "mean": "mean",
+  "sorting": "sorting",
   "res_folder": "mattole",
   "name"  : "mattole",
   "greyscale" : true,
   "dropout": 0.25,
   "scale": false
-
 }

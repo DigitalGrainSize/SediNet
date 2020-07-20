@@ -9,6 +9,22 @@
 # import libraries
 
 import sys, getopt, json, os
+
+# set to False if you wish to use cpu (not recommended)
+##True or False
+USE_GPU = True
+# PREDICT = False
+#
+# ##OS
+# if PREDICT == True:
+#    os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+if USE_GPU == True:
+   ##use the first available GPU
+   os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+else:
+   ## to use the CPU (not recommended):
+   os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+
 from numpy import any as npany
 from sedinet_infer import *
 
@@ -30,8 +46,6 @@ if __name__ == '__main__':
         elif opt in ("-c"):
             configfile = arg
 
-    #configfile = 'config/config_mattole.json'
-
     # load the user configs
     with open(os.getcwd()+os.sep+configfile) as f:
         config = json.load(f)
@@ -46,21 +60,26 @@ if __name__ == '__main__':
     #folder containing csv file and that will contain model outputs
     name = config["name"]
     #name prefix for output files
-    greyscale = config["greyscale"]
     #convert imagery to greyscale or not
     dropout = config["dropout"]
     #dropout factor
-    scale = config["scale"] #do scaling on variable 
-
+    scale = config["scale"] #do scaling on variable
+    greyscale = config['greyscale']
 
     try:
        numclass = config['numclass']
     except:
        numclass = 0
 
+    try:
+       greyscale = config['greyscale']
+    except:
+       greyscale = True
+
     #output variables
     vars = [k for k in config.keys() if not npany([k.startswith('base'),
-            k.startswith('res_folder'), k.startswith('train_csvfile'),
+            k.startswith('MIN_LR'), k.startswith('DO_AUG'), k.startswith('SHALLOW'), k.startswith('MAX_LR'),
+            k.startswith('res_folder'), k.startswith('train_csvfile'), k.startswith('csvfile'),
             k.startswith('test_csvfile'), k.startswith('name'),
             k.startswith('greyscale'), k.startswith('aux_in'),
             k.startswith('dropout'), k.startswith('N'),
@@ -89,13 +108,12 @@ if __name__ == '__main__':
     train_csvfile = res_folder+os.sep+train_csvfile
     test_csvfile = res_folder+os.sep+test_csvfile
 
-
     if (mode=='siso' or mode=='simo'):
        run_training_siso_simo(vars, train_csvfile, test_csvfile,
                               name, res_folder, mode, greyscale,
                               dropout, numclass, scale)
 
-    if (mode=='miso' or mode=='mimo'):
-       run_training_miso_mimo(vars, train_csvfile, test_csvfile,
-                              name, res_folder, mode, greyscale,
-                              auxin, dropout, numclass, scale)
+    # if (mode=='miso' or mode=='mimo'):
+    #    run_training_miso_mimo(vars, train_csvfile, test_csvfile,
+    #                           name, res_folder, mode, greyscale,
+    #                           auxin, dropout, numclass, scale)

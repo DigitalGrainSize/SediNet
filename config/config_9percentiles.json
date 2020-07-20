@@ -1,6 +1,7 @@
 {
-  "train_csvfile" : "data_set_400images_train.csv",
-  "test_csvfile" : "data_set_400images_test.csv",
+  "train_csvfile" : "global_all2_train.csv",
+  "test_csvfile" : "global_all2_test.csv",
+  "csvfile" : "global_all2.csv",
   "P5" : "P5",
   "P10": "P10",
   "P16": "P16",
@@ -15,5 +16,4 @@
   "greyscale": true,
   "dropout": 0.25,
   "scale": false
-  
 }

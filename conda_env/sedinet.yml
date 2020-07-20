@@ -17,7 +17,6 @@ dependencies:
   - scikit-learn
   - tqdm
   - joblib
-  - bokeh
   - tensorflow-gpu
   - tensorflow-addons
   - scikit-image
@@ -25,4 +24,3 @@ dependencies:
     - Image
     - pydot
     - graphviz
-    - panel

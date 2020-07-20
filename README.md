@@ -1,6 +1,4 @@
-# Upgrade in progress. please don't use until the next update when this message will disappear. Thanks
-
-
+# Warning, good things are coming. Major upgrade in progress. Listen to announcements on twitter or when this message disappears
 
 # SediNet: Build your own sediment descriptor
 
@@ -44,7 +42,6 @@ Within this package there are several examples of different ways it can be confi
 You can use the models in this repository for your purposes (and you might find them useful because they have been trained on large numbers of images). If that doesn't work for you, you can train SediNet for your own purposes even on small datasets
 
 
-
 ### How SediNet works
 
 Sedinet is a [deep learning](https://en.wikipedia.org/wiki/Deep_learning) model, which is a type of machine learning model that uses very large neural networks to automatically extract features from data to make predictions. For imagery, network layers typically use convolutions therefore the models are called [Convolutional Neural Networks](https://en.wikipedia.org/wiki/Convolutional_neural_network) or CNNs for short.
@@ -53,7 +50,7 @@ CNNs have multiple processing layers (called [convolutional layers](https://mach
 
 ![Fig3-sedinet_fig_ann2_v3](https://user-images.githubusercontent.com/3596509/61979684-59a79700-afa9-11e9-9605-4f893784f65b.png)
 
-SediNet is very configurable, and is designed primarily to be a research tool. There are two in-built model sizes (shallow and false), and numerous options for how to train and treat the data. For example, data inputs can optionally be scaled. Various image sizes can be used. Greyscale or color imagery may be used. A single batch size may be chosen, or a model might be constructed using multiple batch sizes. Therefore it might take some experimentation to achieve optimal results for a particular dataset. Hopefully, this toolbox makes such experimentation straightforward. It isn't always obvious what combinations of settings to use, so be prepared to construct models using a variety of settings, then using the model with the best validation scores.
+SediNet is very configurable, and is designed primarily to be a research tool. There are two in-built model sizes (shallow and false), and numerous options for how to train and treat the data. For example, data inputs can optionally be scaled. Various image sizes can be used.  A single batch size may be chosen, or a model might be constructed using multiple batch sizes. Therefore it might take some experimentation to achieve optimal results for a particular dataset. Hopefully, this toolbox makes such experimentation straightforward. It isn't always obvious what combinations of settings to use, so be prepared to construct models using a variety of settings, then using the model with the best validation scores.
 
 
 <!-- --------------------------------------------------------------------------------
@@ -65,85 +62,29 @@ The following links will open jupyter notebooks in Google Colab, which is a free
 
 ##### Use SediNet to estimate sediment population
 
-[Open this link](https://colab.research.google.com/drive/1M-hX5oBS2K0hof4oVG15oN_vNSi9AD2E)
+[Open this link]()
 
 ##### Use SediNet to estimate sediment shape
 
-[Open this link](https://colab.research.google.com/drive/1mSxuJzto6QReAddGZ6A0fZ_g1o9qLljN)
+[Open this link]()
 
-which is equivalent to the following respective commands from the command line using an installed SediNet (see below):
-
-```
-python sedinet_predict.py -c config/config_pop.json
-```
-
-and
-
-```
-python sedinet_predict.py -c config/config_shape.json
-``` -->
+-->
 
 <!-- #### Continuous
 
 ##### Sediment grain size prediction (sieve size) on a small population of beach sands
 
-[Open this link](https://colab.research.google.com/drive/1CFkE4meWHQ7ylmWSN01BO8qJu2fcpvcS)
+[Open this link]()
 
 ##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a small population of beach sands
 
-[Open this link](https://colab.research.google.com/drive/1GYZUVkLLQQhJygwsrkR11dDWAlLCy5aJ)
+[Open this link]()
 
 ##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a large 400 image dataset
 
-[Open this link](https://colab.research.google.com/drive/11sm53rkS-dYjanBPVAAUM7VnjEBWH59v)
+[Open this link]()
 
-
-which is equivalent to the following respective commands from the command line using an installed SediNet (see below):
-
-```
-python sedinet_predict.py -c config/config_sievedsand_sieve.json
-```
-
-```
-python sedinet_predict.py -c config/config_sievedsand_9prcs.json
-```
-
-and
-
-```
-python sedinet_predict.py -c config/config_9percentiles.json
-``` -->
-
-
-<!-- #### Other Continuous Examples
-
-##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on generic sands
-
-[Open this link](https://colab.research.google.com/drive/1kQoWmyUOOQFYNebTi6t9VZP5HRkgjxLa)
-
-##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on generic gravels
-
-[Open this link](https://colab.research.google.com/drive/1VHciGSyp4wsgo8w6mSbxlP_A228rScQ_)
-
-##### Sediment grain size prediction (sieve size plus 4 percentiles of the cumulative distribution) on a small population of beach sands
-
-[Open this link](https://colab.research.google.com/drive/1oXtYZJ3niDm3XOeKG1xikOZSjqIBVbQD)
-
-which is equivalent to the following respective commands from the command line using an installed SediNet (see below):
-
-```
-python sedinet_predict.py -c config/config_sand.json
-```
-
-```
-python sedinet_predict.py -c config/config_gravel.json
-```
-
-and
-
-```
-python sedinet_predict.py -c config/config_sievedsand_sieve_plus.json
-``` -->
+-->
 
 --------------------------------------------------------------------------------
 ## Install and run on your computer
@@ -175,94 +116,33 @@ conda activate sedinet
 
 (Later, when you're done ... ```conda deactivate sedinet```)
 
-
-#### Install and instructions for developers
-If you wish to contribute to the development of this project (yes please!) it is better that you first fork this repository to your own github, then work on changes, and submit a pull request. Before submitting, please test your code changes by running a full set of tests in `predict_all.sh`, then verifying they all executed without error.
-
-You can also contribute imagery this way, but if you do so, also please provide a dataset (csv file) that goes along with the imagery, a file that describes the data with your name and contact details, (and you should also thank yourself in this README!)
-
-
 --------------------------------------------------------------------------------
-## Fork this repo and run on Google Cloud Platform (GCP)
-
-First, follow instructions [here](https://tudip.com/blog-post/run-jupyter-notebook-on-google-cloud-platform/) for how to set up an instance to run in GCP. Make sure to set a static IP address, as per the instructions, and make a note of that because you'll need it later
-
-Then open a shell into the VM and set it up to
-
-```
-ssh-keygen -t rsa -b 4096 -C "yourname@youremail.com"
-
-eval "$(ssh-agent -s)"
-
-ssh-add ~/.ssh/id_rsa
-
-cat ~/.ssh/id_rsa.pub
-```
-
-Then copy the key into your github profile keys. For more information about how to do that, see [here](https://help.github.com/en/articles/adding-a-new-ssh-key-to-your-github-account). xclip likely won't work, but you can simply copy (Ctrl-C) the text printed to screen
-
-
-You will be cloning your fork of the main repo, so replace ```YOURUSERNAME``` in the below code to clone the repo and set up a conda environment to run in
-
-```
-git clone --depth 1 git@github.com:YOURUSERNAME/SediNet.git
-cd SediNet
-
-pip install --upgrade pip
-
-conda env create -f conda_env/sedinet.yml
-
-source activate sedinet
-```
-
-Now you can run sedinet on the cloud.
-
-To run the jupyter notebooks, run the following command to run the jupyter notebook server
-
-```
-python -m ipykernel install --user
-jupyter notebook --NotebookApp.iopub_data_rate_limit=10000000
-```
-
-The jupyterlab server will be displayed at
-
-```
-http://IP:8888
-```
-
-where ```IP``` is the static IP of the VM that you noted earlier.
-
-
-<!-- --------------------------------------------------------------------------------
-## Run the interactive applications in your web browser
-
-```
-bokeh serve RunSediNet.ipynb
-```
-
-which should open a web application to run through your browser at http://localhost:60339/ -->
-
-
---------------------------------------------------------------------------------
-## Train the provided example models yourself
+## Train and use the provided example models yourself
 
 #### Continuous
 
-##### Train SediNet for sediment grain size prediction (9 percentiles of the cumulative distribution) on a small population of beach sands
+##### Train SediNet for sediment grain size prediction (4 percentiles of the cumulative distribution plus sieve size) on a small population of beach sands
 
 ```
 python sedinet_train.py -c config/config_sievedsand_sieve_plus.json
 ```
 
-<!-- ![sievesand_9prcs512_batch8_xy-base26_log](https://user-images.githubusercontent.com/3596509/62001390-40374580-b0a4-11e9-8803-1aabce95dab9.png) -->
+Subsequently predict using:
+```
+python sedinet_predict.py -c config/config_sievedsand_sieve_plus.json -w grain_size_sieved_sands/res_sieve_plus/sievesand_sieve_plus_simo_batch8_im512_512_6vars_pinball_aug_scale.hdf5
+```
 
 ##### Train SediNet for sediment mid sieve size on a small population of beach sands
 
 ```
 python sedinet_train.py -c config/config_sievedsand_sieve.json
 ```
-<!--
-![sievesand_sieve512_batch8_xy-base22_log](https://user-images.githubusercontent.com/3596509/62001432-5bef1b80-b0a5-11e9-9a74-c613b1ad85d5.png) -->
+
+Subsequently predict using:
+```
+python sedinet_predict.py -c config/config_sievedsand_sieve.json -w grain_size_sieved_sands/res_sieve/sievesand_sieve_siso_batch7_im512_512_1vars_pinball_aug_scale.hdf5
+```
+
 
 ##### Train SediNet for sediment grain size prediction (9 percentiles of the cumulative distribution) on a large population of 400 images
 
@@ -270,7 +150,9 @@ python sedinet_train.py -c config/config_sievedsand_sieve.json
 python sedinet_train.py -c config/config_9percentiles.json
 ```
 
-<!-- ![global_9prcs512_batch8_xy-base24_log](https://user-images.githubusercontent.com/3596509/62001561-64952100-b0a8-11e9-973b-b496f4e1dfee.png) -->
+Subsequently predict using:
+```
+```
 
 #### Categorical
 
@@ -280,9 +162,9 @@ python sedinet_train.py -c config/config_9percentiles.json
 python sedinet_train.py -c config/config_pop.json
 ```
 
-<!-- ![pop_base22_model_checkpoint_cmT](https://user-images.githubusercontent.com/3596509/62001568-8ee6de80-b0a8-11e9-8e13-634a614e979b.png)
-
-![pop_base22_model_checkpoint_cm](https://user-images.githubusercontent.com/3596509/62001571-927a6580-b0a8-11e9-89e1-10b88b760ceb.png) -->
+Subsequently predict using:
+```
+```
 
 ##### Train SediNet for sediment shape prediction
 
@@ -290,20 +172,13 @@ python sedinet_train.py -c config/config_pop.json
 python sedinet_train.py -c config/config_shape.json
 ```
 
-<!-- ![shape_base20_model_checkpoint_cmT](https://user-images.githubusercontent.com/3596509/62001821-d885f800-b0ad-11e9-9082-dca57913f8f8.png)
-
-![shape_base20_model_checkpoint_cm](https://user-images.githubusercontent.com/3596509/62001822-da4fbb80-b0ad-11e9-846e-aa4d7cbd1256.png) -->
+Subsequently predict using:
+```
+```
 
 
 ### Other examples
 
-##### Train SediNet for sediment grain size prediction (sieve size plus 4 percentiles of the cumulative distribution) on a small population of beach sands
-
-```
-python sedinet_train.py -c config/config_sievedsand_sieve_plus.json
-```
-
-<!-- ![sievesand_sieve_plus512_batch8_xy-base18_log](https://user-images.githubusercontent.com/3596509/62001639-817e2400-b0a9-11e9-920e-9b729873a41c.png) -->
 
 ##### Train SediNet for sediment grain size prediction (9 percentiles of the cumulative distribution) on gravel images
 
@@ -311,7 +186,9 @@ python sedinet_train.py -c config/config_sievedsand_sieve_plus.json
 python sedinet_train.py -c config/config_gravel.json
 ```
 
-<!-- ![gravel_generic_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint_skill](https://user-images.githubusercontent.com/53406404/73790586-f10e5380-475d-11ea-8f47-fb9b6d518eaa.png) -->
+Subsequently predict using:
+```
+```
 
 
 ##### Train SediNet for sediment grain size prediction (9 percentiles of the cumulative distribution) on sand images
@@ -320,15 +197,22 @@ python sedinet_train.py -c config/config_gravel.json
 python sedinet_train.py -c config/config_sand.json
 ```
 
-<!-- ![sand_generic_9prcs512_batch8_xy-base16_log](https://user-images.githubusercontent.com/3596509/62001865-b80a6d80-b0ae-11e9-8dcd-0c3c3030c366.png) -->
+Subsequently predict using:
+```
+```
 
 
-##### Train SediNet for estimating mean size from images of mixed sand and gravel
+##### Train SediNet for estimating mean size and sorting from images of mixed sand and gravel
 
 ```
 python sedinet_train.py -c config/mattole.json
 ```
 
+Subsequently predict using:
+
+```
+python sedinet_predict.py -c config/config_mattole.json -w mattole/res/mattole_simo_batch7_im512_512_2vars_pinball_aug.hdf5
+```
 
 --------------------------------------------------------------------------------
 ## More details about inputs and using this tool on your own data
@@ -353,6 +237,8 @@ A typical SediNet model configuration for predicting continuous variables is:
 * variables: in the form "variable": "variable" (up to 9)
 * dropout: proportion of neurons to randomly drop before fully connected layer (e.g. 0.5)
 * greyscale: true = use greyscale version of the image, or false (use color version)
+* scale: if true, use scikit-learn's robust scaler to scale all variables. Otherwise, False for no scaling
+
 
 ### The defaults.py file
 
@@ -360,24 +246,33 @@ Contains values for defaults that you may change. They are listed in order of li
 
 ```
 
-# set to False if you wish to use cpu (not recommended)
-USE_GPU = True  ##False
-
 # size of image in pixels. keep this consistent in training and application
-IM_HEIGHT = 768 # suggestd: 512 -- 1024
-IM_WIDTH = IM_HEIGHT
+# suggestd: 512 -- 1024 (larger = larger GPU required)
+# integer
+IM_HEIGHT = 768
+IM_WIDTH = IM_HEIGHT #1024 #IM_HEIGHT
 
-# number of images to feed the network per step in epoch
-BATCH_SIZE = 8 #suggested: 4 --16
+# number of images to feed the network per step in epoch #suggested: 4 --16
+# integer
+BATCH_SIZE = 7
 
 #use an ensemble of batch sizes like this
-#BATCH_SIZE = [4,6,8]
+#BATCH_SIZE = [11,13,15]
 
 # if True, use a smaller (shallower) network architecture
-SHALLOW = True ##False=larger network
+##True or False ##False=larger network
+SHALLOW = False #True
 
-# max. number of training epics
-NUM_EPOCHS = 50 #100
+## if True, carry out data augmentation. 2 x number of images used in training
+##True or False
+DO_AUG = True
+
+# maximum learning rate ##1e-1 -- 1e-4
+MAX_LR = 1e-3
+
+# max. number of training epics (20 -100)
+# integer
+NUM_EPOCHS = 100
 
 ## loss function for continuous models (2 choices)
 CONT_LOSS = 'pinball'
@@ -387,145 +282,50 @@ CONT_LOSS = 'pinball'
 CAT_LOSS = 'focal'
 #CAT_LOSS = 'categorical_crossentropy'
 
-# optimizer (gradient descent solver) good alternative == 'adam'
-OPT = 'rmsprop'
-
-# a tolerance for the training. Do not change until you've researched its effects
-MIN_DELTA = 0.0001
-
-# minimum learning rate (lambda in the manuscript)
-MIN_LR = 1e-5 #1e-5 -- 1e-2
-
-# the factor applied to the learning rate when the appropriate triggers are made
-FACTOR = 0.8
-
-# training stops early if the number of successive epochs with no validation loss exceeds this number
-STOP_PATIENCE = 15
+# optimizer (gradient descent solver) good alternative == 'rmsprop'
+OPT = 'rmsprop' #'adam'
 
 # base number of conv2d filters in categorical models
+# integer
 BASE_CAT = 30
 
 # base number of conv2d filters in continuous models
+# integer
 BASE_CONT = 30
 
+# number of Dense units for continuous prediction
+# integer
+CONT_DENSE_UNITS = 1024 #1024 #512
+
 # number of Dense units for categorical prediction
+# integer
 CAT_DENSE_UNITS = 128
 
-# number of Dense units for continuous prediction
-CONT_DENSE_UNITS = 1024
-
 ```
 
+### Filename convention
+
+For continuously distributed variables, file names are constructed according to the following convention
+
+```
+name "_" mode "_batch" batch_size "_im" IM_HEIGHT "_shallow_" varstring "_" CONT_LOSS "_aug_scale.hdf5"
+```
+if imagery is not augmented, `aug` in the above is replaced with `noaug`. If variables are not scaled, `_scale` is missing from the end
+
+For categorical variables, we use
+
+```
+name "_" mode "_batch" batch_size "_im" IM_HEIGHT "_shallow_" varstring "_" CAT_LOSS "_aug.hdf5"
+```
+
+if imagery is not augmented, `aug` in the above is replaced with `noaug`. Categorical variables are never scaled
 
 --------------------------------------------------------------------------------
-### Replicate the paper results
-
-Note that you will see different results than in the paper because
-* the implementation has changed, with more research, with a different loss function, image dimensions, and batch sizes
-* training and testing files are randomly selected with a randomness that can't fully be controlled with a seed
-
---------------------------------------------------------------------------------
-### Predict grain size/shape/population from a set of images
-
-The following instructions are for running the provided python scripts on your computer
-
---------------------------------------------------------------------------------
-#### Continuous
-
-##### Sediment grain size prediction (sieve size) on a small population of beach sands
-```
-python sedinet_predict.py -c config/config_sievedsand_sieve_predict.json -w grain_size_sieved_sands/res/color/sievesand_sieve_siso_batch8_sieve__checkpoint.hdf5
-```
-
-<!-- ![image info](./pictures/image.png) -->
-
-<!-- ![sievesand_sieve_siso_batch8_sieve__checkpoint_skill](https://user-images.githubusercontent.com/53406404/73790480-ca501d00-475d-11ea-8fca-60b6fdc5efa1.png) -->
-
-
-##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a small population of beach sands
-
-```
-python sedinet_predict.py -c config/config_sievedsand_sieve_plus_predict.json -w grain_size_sieved_sands/res/grey/sievesand_sieve_plus_simo_batch8_P16_P25_P50_P75_P84_sieve__checkpoint.hdf5
-```
-
-<!-- ![sand_generic_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint_skill](https://user-images.githubusercontent.com/53406404/73790362-970d8e00-475d-11ea-8a8d-aae8504de15c.png) -->
-
-
-##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on a large 400 image dataset
-
-```
-python sedinet_predict.py -c config/config_9percentiles_predict.json -w grain_size_global/res/grey/global_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint.hdf5
-```
-
-<!-- ![global_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint_skill](https://user-images.githubusercontent.com/53406404/73790415-a8569a80-475d-11ea-96fa-a31d207d25ad.png) -->
-
---------------------------------------------------------------------------------
-#### Categorical
-
-##### Use SediNet to estimate sediment population
-
-```
-python sedinet_predict.py -c config/config_pop.json -w grain_population/res/color/pop_model_checkpoint.hdf5
-```
-
-<!-- ![pop_model_checkpoint_cmT](https://user-images.githubusercontent.com/53406404/73790144-39794180-475d-11ea-8236-ecc7edf5bece.png) -->
-
-##### Use SediNet to estimate sediment shape
-
-```
-python sedinet_predict.py -c config/config_shape_predict.json -w grain_shape/res/color/shape_model_checkpoint.hdf5
-```
-
-<!-- ![shape_model_checkpoint_cmT](https://user-images.githubusercontent.com/53406404/73790124-2f574300-475d-11ea-9584-dcf4723cd1db.png) -->
-
-
-
---------------------------------------------------------------------------------
-## Other Examples
-
-##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on generic sands
-
-```
-python sedinet_predict.py -c config/config_sand_predict.json -w grain_size_sand_generic/res/grey/sand_generic_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint.hdf5
-```
-
-<!-- ![sand_generic_9prcs512_batch8_xy-base16_predict](https://user-images.githubusercontent.com/3596509/62002419-6e268500-b0b8-11e9-8c1a-83fc54e9d66a.png) -->
-
-
-##### Sediment grain size prediction (9 percentiles of the cumulative distribution) on generic gravels
-
-```
-python sedinet_predict.py -c config/config_gravel_predict.json -w grain_size_gravel_generic/res/grey/gravel_generic_9prcs_simo_batch8_P10_P16_P25_P5_P50_P75_P84_P90_P95__checkpoint.hdf5
-```
-
-<!-- ![gravel_generic_9prcs512_batch8_xy-base16_predict](https://user-images.githubusercontent.com/3596509/62002214-46352280-b0b4-11e9-84fc-65e66116386b.png) -->
-
-
-##### Sediment grain size prediction (sieve size plus 4 percentiles of the cumulative distribution) on a small population of beach sands
-
-```
-python sedinet_predict.py -c config/config_sievedsand_sieve_plus.json
-```
-
-<!-- ![sievesand_sieve_plus_simo_batch8_P16_P25_P50_P75_P84_sieve__checkpoint_skill](https://user-images.githubusercontent.com/53406404/73790479-ca501d00-475d-11ea-817b-1c7745108aab.png) -->
-
-
-##### Sediment grain size prediction (7 percentiles of the cumulative distribution) on a large population of mixed sand and gravel beach sediment (collected by Sarah Jorger, NAU)
-
-```
-python sedinet_predict.py -c config/config_mattole.json
-```
-
-<!-- ![mattole_simo_batch8_p10_p16_p25_p50_p75_p84_p90__checkpoint_skill](https://user-images.githubusercontent.com/53406404/73790700-22871f00-475e-11ea-83ce-37ad72745171.png) -->
-
-
-
-
-### How to use on your own data
+## How to use on your own data
 
 SediNet is very configurable. You can specify many variables in the config file, from the size of the imagery to use, to the number of models to ensemble and their respective batch sizes.
 
-#### Train your own SediNet for continuous variable prediction
+### Train your own SediNet for continuous variable prediction
 
 The SediNet training function ```train_sedinet_continuous.py``` is set up to predict arbitrary numbers of continuous variables. All your specific information (what data set to use, what to predict, etc) is contained in the config file and called the same way as above. For example:
 
@@ -547,7 +347,6 @@ where ```config/config_custom_4prcs.json``` has ben put together by you in the c
   "res_folder": "my_custom_model",
   "name"  : "custom_4prcs",
   "dropout": 0.5,
-  "greyscale": true ,
   "scale": false
 
 }
@@ -558,7 +357,7 @@ where ```config/config_custom_4prcs.json``` has ben put together by you in the c
 * You must label the file names in your csv file the same way as in the examples, i.e. "images/yourfilename.ext" and that column must be labeled 'files'
 
 
-#### Train your own SediNet for categorical prediction
+### Train your own SediNet for categorical prediction
 
 Put together a config file in the config folder (called, say ```config_custom_colour.json```) and populate it like this example:
 
@@ -570,7 +369,6 @@ Put together a config file in the config folder (called, say ```config_custom_co
   "res_folder": "grain_colour",
   "name": "grain_colour",
   "dropout": 0.5,
-  "greyscale': false
 }
 ```
 
@@ -579,7 +377,7 @@ Notes:
 * Categorical variables are not scaled, therefore "scale" is ignored, if present
 * Categories in the csvfile should be numeric integers increasing from zero
 
-
+<!--
 #### Using your model
 
 Just the same way as the examples. For categorical ...
@@ -592,55 +390,16 @@ and continuous ...
 
 ```
 python sedinet_predict.py -c config/config_custom_4prcs.json
-```
-
-### Benchmark test results
-Using the following settings ...
-
-```
-IM_HEIGHT = 768
-IM_WIDTH = IM_HEIGHT
-NUM_EPOCHS = 50
-BATCH_SIZE = 8
-SHALLOW = True
-DO_AUG = True
-OPT = 'rmsprop'
-CONT_LOSS = 'pinball'
-CAT_LOSS = 'focal'
-MIN_DELTA = 0.0001
-MIN_LR = 1e-5
-FACTOR = 0.8
-STOP_PATIENCE = 15
-BASE_CAT = 30
-BASE_CONT = 30
-CAT_DENSE_UNITS = 128
-CONT_DENSE_UNITS = 1024
-```
+``` -->
 
 
+--------------------------------------------------------------------------------
 
-<!--
-The ipynb files in the ```notebooks``` directory are the same jupyter notebooks as in the Colab notebook links above. You can run them by
-
-```
-conda activate sedinet
-python -m ipykernel install --user
-jupyter notebook
-```
-
-then in your browser you should be able to navigate to the notebooks you wish to execute -->
-
-
-### Known bugs
-
-After long training periods, especially with multiple batch sizes, the `train` script gets killed at the end when it tries to use the model(s) in prediction mode. It is unclear why this happens. However, if you run the script again, with the same everything, this time it will skip the model training (assuming the `hdf5` files are still in the root directory or in `res_folder` - you'll see a `Loading weights that already exist:` message) and use the model weights to predict.
-
-### Release notes
+## Release notes
 
 > Release v1.0 (Sep 30 2019): initial submission of SediNet paper to journal
 
 [![DOI](https://zenodo.org/badge/199072106.svg)](https://zenodo.org/badge/latestdoi/199072106)
-
 
 > Release v1.1 (Nov 5 2019): upgrade from keras with Tensorflow 1.X backend to Tensorflow 2.0 native keras. Enforce TF==2.0 in conda yml file
 
@@ -656,7 +415,7 @@ After long training periods, especially with multiple batch sizes, the `train` s
 9) Default now uses rmsprop optimizer (instead of adam)
 10) Color as well as greyscale imagery (user optional)
 11) Simpler workflow of ```train``` followed by ```predict``` - no longer any separate scripts for continous and categorical variables. Adding ```numclasses``` to the config file tells the project to use a categorical variable workflow
-12) Use of GPU is controlled by ```use_gpu``` = True\False in the ```defaults.py``` script
+12) Use of GPU is controlled by ```use_gpu``` = True \ False in the ```defaults.py``` script
 
 > Update 26 June 2020:
 1) updated yml file and tested env on linux (pop!OS, ubuntu) and windows (10)
@@ -677,17 +436,38 @@ After long training periods, especially with multiple batch sizes, the `train` s
 9) fixed bug in categorical model training (expected ndarray, not list, for batch labels)
 10) fixed bug in categorical model plotting
 11) added LICENSE
-12) new benchmarking section of the readme tabulating results with default settings
-13) now can take multiple batch sizes and build an ensemble model. This generally results in higher accuracy but more models = more model training time
-14) response variables can be scaled using a robust scaler, or not. Scaling not recommended for small datasets. Use `scale=True` in a config file to use
-15) now checks for estimating weights path in root and `res_folder` directory and, if present, uses it. This can be used to add batch size combinations sequentially, and also fixes OOM errors during the final prediction step of `sedinet_train.py`
-16) optionally, training imagery is now augmented if `DO_AUG=True` (in the defaults file). This doubles the training set, by augmenting each image (random horizontal shift, followed by a vertical flip)
-17) file names shorter (number of variables enumerated rather than each listed)
+12) now can take multiple batch sizes and build an ensemble model. This generally results in higher accuracy but more models = more model training time
+13) response variables can be scaled using a robust scaler, or not. Use `scale=True` in a config file to use scaling
+14) now checks for estimating weights path in root and `res_folder` directory and, if present, uses it. This can be used to add batch size combinations sequentially
+15) optionally, training imagery is now augmented if `DO_AUG=True` (in the defaults file). This doubles the training set, by augmenting each image (random horizontal shift, followed by a vertical flip)
+16) file names shorter (number of variables enumerated rather than each listed)
+17) updated README
+18) more consistent and descriptive filenaming convention
+19) simpler structure: `train` only does training (no prediction). Use `predict` to get train and test sets evaluation. This also allows defaulting to CPU for prediction, to avoid OOM errors that are more likely using GPU for prediction
+20) no separate config file for prediction. One config file for both training and prediction
+21) fixed many bugs, including one that was using 3-band greyscale imagery (doh!)
+22) uses an exponentially decreasing learning rate scheduler rather than adaptive (because validation loss can be erratic)
+23) uses depthwise separable 2d convolutions rather than trad 2d convs. see [here](https://keras.io/api/layers/convolution_layers/separable_convolution2d/)
+24) variables in `defaults.py` based on consideration of accuracy across many datasets, both included and not included as pat of the SediNt package
 
+> The most important changes area
+* depthwise separable convolution layers
+* exponentially decreasing learning rate scheduler
+* pinball loss for continuous variables
+* focal loss for categorical variables
 
 --------------------------------------------------------------------------------
-
 ## Other things
+
+### Replicate the paper results
+
+Note that you will see different results than in the paper because
+* the implementation has changed, with more research, with a different loss function, image dimensions, and batch sizes
+* training and testing files are randomly selected with a randomness that can't fully be controlled with a seed
+
+### Known bugs
+
+After long training periods, especially with multiple batch sizes, the `train` script gets killed at the end when it tries to use the model(s) in prediction mode. It is unclear why this happens. However, if you run the script again, with the same everything, this time it will skip the model training (assuming the `hdf5` files are still in the root directory or in `res_folder` - you'll see a `Loading weights that already exist:` message) and use the model weights to predict.
 
 ### If you have an issue, comment or suggestion ...
 Please use the 'issues' tab so everyone can see the question and answer. Please do not email me directly. Thanks
@@ -708,3 +488,103 @@ Thanks to the following individuals for donating imagery:
 * Brian Romans (Virginia Tech)
 * Christopher Heuberk (Freie Universitat Berlin)
 * Sarah Joerger, Mike Smith (Northern Arizona University)
+
+### Avoiding OOM (out of memory) errors
+
+In order of trial:
+
+1. use a smaller batch size (`BATCH_SIZE` in `defaults.py`)
+2. turn augmentation off (`DO_AUG = False` in `defaults.py`)
+3. use smaller imagery (`IM_WIDTH` and `IM_HEIGHT` in `defaults.py`)
+4. use a bigger GPU
+
+
+--------------------------------------------------------------------------------
+## Notes for developers
+
+### Organization
+SediNet is organized as follows:
+
+1. Model training
+
+  * when `sedinet_train.py` is called, it first sets an operating system environmental variable that controls the use or otherwise of the GPU. It uses GPU 0 if use_GPU=True, otherwise GPU -1 (shorthand for CPU)
+  * it imports everything in `sedinet_infer` which import everything in `sedinet_models`, so on for `sedinet_utils`, and finally `imports`
+  * `imports` sets global variables and reads the `defaults.py`
+  * then `sedinet_train.py` reads the specified (at the command line) `config` file, organizes the config variables, and finally calls `run_training_siso_simo` from `sedinet_infer`
+  * `run_training_siso_simo` runs either `make_cat_sedinet` to make a categorical model, or `make_sedinet_siso_simo` to make a continuous model  (both called from `sedinet_models`)
+  * then `train_sedinet_siso_simo` for continuous model training, or `train_sedinet_cat` for categorical (both called from `sedinet_infer`)
+  * finally it calls `predict_test_train_siso_simo` or `predict_test_train_cat` for cont/cat variables (both called from `sedinet_utils`) and `tidy` moves the files into the `res_folder`, specified in the `config` file
+
+2. Model prediction
+
+  * Given a provided `config` file, `csv_file` and `weights_file`, use the model defined in the config file, load the weights, and estimate the variables on the images listed in the csv file
+  * When `sedinet_predict.py` is called, it first sets an operating system environmental variable that controls the use or otherwise of the GPU. It uses GPU 0 if use_GPU=True, otherwise GPU -1 (shorthand for CPU)
+  * it imports everything in `sedinet_eval` which import everything in `sedinet_models`, so on for `sedinet_utils`, and finally `imports`
+  * `imports` sets global variables and reads the `defaults.py`
+  * then `sedinet_predict.py` reads the specified (at the command line) `config` file, and weights file, organizes the config variables, and finally calls `estimate_siso_simo` or `estimate_categorical` from `sedinet_eval`
+  * `estimate_siso_simo` runs `make_sedinet_siso_simo` to make a continuous model. `estimate_categorical` runs `make_cat_sedinet` to make a categorical model  (both called from `sedinet_models`)
+  * then `predict_test_train_siso_simo` for continuous model training, or `predict_test_train_cat` for categorical (both called from `sedinet_utils`) and finally `tidy` moves the files into the `res_folder`, specified in the `config` file
+
+
+### Contribute
+If you wish to contribute to the development of this project (yes please!) it is better that you first fork this repository to your own github, then work on changes, and submit a pull request. Before submitting, please test your code changes by running a full set of tests in `predict_all.sh`, then verifying they all executed without error.
+
+You can also contribute imagery this way, but if you do so, also please provide a dataset (csv file) that goes along with the imagery, a file that describes the data with your name and contact details, (and you should also thank yourself in this README!)
+
+### Fork this repo and run on Google Cloud Platform (GCP)
+
+First, follow instructions [here](https://tudip.com/blog-post/run-jupyter-notebook-on-google-cloud-platform/) for how to set up an instance to run in GCP. Make sure to set a static IP address, as per the instructions, and make a note of that because you'll need it later
+
+Then open a shell into the VM and set it up to
+
+```
+  ssh-keygen -t rsa -b 4096 -C "yourname@youremail.com"
+
+  eval "$(ssh-agent -s)"
+
+  ssh-add ~/.ssh/id_rsa
+
+  cat ~/.ssh/id_rsa.pub
+```
+
+Then copy the key into your github profile keys. For more information about how to do that, see [here](https://help.github.com/en/articles/adding-a-new-ssh-key-to-your-github-account). xclip likely won't work, but you can simply copy (Ctrl-C) the text printed to screen
+
+
+You will be cloning your fork of the main repo, so replace ```YOURUSERNAME``` in the below code to clone the repo and set up a conda environment to run in
+
+```
+  git clone --depth 1 git@github.com:YOURUSERNAME/SediNet.git
+  cd SediNet
+
+  pip install --upgrade pip
+
+  conda env create -f conda_env/sedinet.yml
+
+  source activate sedinet
+```
+
+Now you can run sedinet on the cloud.
+
+To run the jupyter notebooks, run the following command to run the jupyter notebook server
+
+```
+  python -m ipykernel install --user
+  jupyter notebook --NotebookApp.iopub_data_rate_limit=10000000
+```
+
+The jupyterlab server will be displayed at
+
+```
+  http://IP:8888
+```
+
+where ```IP``` is the static IP of the VM that you noted earlier.
+
+
+--------------------------------------------------------------------------------
+## Future plans
+
+*  change batch generators into a better keras ones that will allow augmentation etc e.g [this](https://www.kaggle.com/amyjang/tensorflow-cnn-data-augmentation-prostate-cancer) or [this](https://www.kaggle.com/amyjang/tensorflow-pneumonia-classification-on-x-rays)
+* multiple input, using pyDGS output perhaps (unsupervised prior / covariate )
+* k-folds cross-val for training
+* transfer learning  

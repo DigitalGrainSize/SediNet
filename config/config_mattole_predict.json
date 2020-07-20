@@ -1,9 +1,0 @@
-{
-  "csvfile" : "mattole_new.csv",
-  "mean": "mean",
-  "res_folder": "mattole",
-  "name"  : "mattole",
-  "greyscale" : true,
-  "dropout": 0.25,
-  "scale": false
-}

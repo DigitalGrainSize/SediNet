@@ -5,84 +5,25 @@
 
 ##> Release v1.3 (July 2020)
 
-###===================================================
-# import libraries
-import gc, os, sys, shutil
+from imports import *
 
 ###===================================================
-# import and set global variables from defaults.py
-from defaults import *
+## FUNCTIONS FOR LEARNING RATE SCHEDULER
 
-global IM_HEIGHT, IM_WIDTH
-
-global NUM_EPOCHS, SHALLOW
-
-global VALID_BATCH_SIZE, BATCH_SIZE
-
-VALID_BATCH_SIZE = BATCH_SIZE
-
-global MIN_DELTA, MIN_LR, FACTOR, OPT, USE_GPU, STOP_PATIENCE, DO_AUG
-
-##====================================================
-
-##OS
-if USE_GPU == True:
-   ##use the first available GPU
-   os.environ['CUDA_VISIBLE_DEVICES'] = '0' #'1'
-else:
-   ## to use the CPU (not recommended):
-   os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
-
-# import tensorflow.compat.v1 as tf1
-# config = tf1.ConfigProto()
-# config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
-# config.log_device_placement = True  # to log device placement (on which device the operation ran)
-# sess = tf1.Session(config=config)
-# tf1.keras.backend.set_session(sess)
-
-##TF/keras
-from tensorflow.keras.layers import Input, Dense, MaxPool2D, GlobalMaxPool2D
-from tensorflow.keras.layers import Dropout, MaxPooling2D, GlobalAveragePooling2D
-from tensorflow.keras.models import Model, Sequential
-from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
-from tensorflow.keras.layers import DepthwiseConv2D, Conv2D
-from tensorflow.keras.layers import BatchNormalization, Activation, concatenate
-
-try:
-    from tensorflow.keras.utils import plot_model
-except:
-    pass
-
-import tensorflow.keras.backend as K
-from tensorflow.keras.utils import to_categorical
-import tensorflow_addons as tfa
-
-##SKLEARN
-from sklearn.preprocessing import RobustScaler #MinMaxScaler
-from sklearn.metrics import confusion_matrix, classification_report
-
-##OTHER
-from PIL import Image
-from glob import glob
-import matplotlib.pyplot as plt
-import pandas as pd
-import numpy as np
-import itertools
-import joblib
-import random
-
-import tensorflow_addons as tfa
-import tqdm
-
-from skimage.transform import AffineTransform, warp #rotate,
+def exponential_decay(lr0, s):
+    def exponential_decay_fn(epoch):
+        return lr0 * 0.1 **(epoch / s)
+    return exponential_decay_fn
 
 ###===================================================
+## IMAGE AUGMENTATION FUNCTIONS (for DO_AUG=True)
+
 # def clockwise_rotation(image):
 #     angle= random.randint(0,180)
 #     return rotate(image, -angle)
 
-def h_flip(image):
-    return  np.fliplr(image)
+# def h_flip(image):
+#     return  np.fliplr(image)
 
 def v_flip(image):
     return np.flipud(image)
@@ -98,6 +39,8 @@ def apply_aug(im):
 
 
 ###===================================================
+### IMAGE BATCH GENERATOR FUNCTIONS
+
 def get_data_generator_Nvars_siso_simo(df, indices, for_training, vars,
                                        batch_size, greyscale, CS, do_aug): ##BATCH_SIZE
     """
@@ -160,19 +103,24 @@ def get_data_generator_Nvars_siso_simo(df, indices, for_training, vars,
 
             if greyscale==True:
                im = Image.open(file).convert('LA')
+               im = im.resize((IM_HEIGHT, IM_HEIGHT))
+               im = np.array(im)[:,:,0]
+
             else:
                im = Image.open(file)
-            im = im.resize((IM_HEIGHT, IM_HEIGHT))
+               im = im.resize((IM_HEIGHT, IM_HEIGHT))
+               im = np.array(im)
+
             im = np.array(im) / 255.0
 
-            if np.ndim(im)==2:
-               im = np.dstack((im, im , im)) ##np.expand_dims(im[:,:,0], axis=2)
+            #if np.ndim(im)==2:
+            #   im = np.dstack((im, im , im)) ##np.expand_dims(im[:,:,0], axis=2)
 
-            im = im[:,:,:3]
+            #im = im[:,:,:3]
 
             if greyscale==True:
                if do_aug==True:
-                   aug = apply_aug(im[:,:,0])
+                   aug = apply_aug(im)
                    images.append(aug)
                    if len(vars)==1:
                       p1s.append([p1 for k in range(2)])
@@ -210,7 +158,7 @@ def get_data_generator_Nvars_siso_simo(df, indices, for_training, vars,
                       p9s.append([p9 for k in range(2)])
 
                else:
-                   images.append(np.expand_dims(im[:,:,0], axis=2))
+                   images.append(np.expand_dims(im, axis=2))
                    if len(vars)==1:
                       p1s.append(p1)
                    elif len(vars)==2:
@@ -642,9 +590,9 @@ def get_data_generator_1image(df, indices, for_training, ID_MAP,
             im = im.resize((IM_HEIGHT, IM_HEIGHT))
             im = np.array(im) / 255.0
 
-            if np.ndim(im)==2:
-               im = np.dstack((im, im , im)) ##np.expand_dims(im[:,:,0], axis=2)
-            im = im[:,:,:3]
+            # if np.ndim(im)==2:
+            #    im = np.dstack((im, im , im)) ##np.expand_dims(im[:,:,0], axis=2)
+            # im = im[:,:,:3]
 
             if greyscale==True:
                if do_aug==True:
@@ -685,6 +633,8 @@ def get_data_generator_1image(df, indices, for_training, ID_MAP,
 
 
 ###===================================================
+### PLOT TRAINING HISTORY FUNCTIONS
+
 def  plot_train_history_1var(history):
    """
    This function plots loss and accuracy curves from the model training
@@ -728,579 +678,41 @@ def plot_train_history_Nvar(history, varuse, N):
        axes[k].set_xlabel('Epochs')
        axes[k].legend()
 
-    axes[N].plot(np.log(history.history['loss']), label='Log Training loss')
-    axes[N].plot(np.log(history.history['val_loss']), label='Log Validation loss')
+    axes[N].plot(history.history['loss'], label='Training loss')
+    axes[N].plot(history.history['val_loss'], label='Validation loss')
     axes[N].set_xlabel('Epochs')
     axes[N].legend()
 
 
 ###===================================================
-def predict_test_train_cat(train_df, test_df, train_idx, test_idx, var, SM,
-                           classes, weights_path, greyscale, name, do_aug):
+def  plot_train_history_1var_mae(history):
    """
-   This function creates makes predictions on test and train data,
-   prints a classification report, and prints confusion matrices
+   This function plots loss and accuracy curves from the model training
    """
-   if type(SM) == list:
-      counter = 0
-      for s,wp in zip(SM, weights_path):
-         exec('SM[counter].load_weights(wp)')
-      counter += 1
-   else:
-     SM.load_weights(weights_path)
+   print(history.history.keys())
 
-   ##==============================================
-   ## make predictions on training data
-   train_gen = get_data_generator_1image(train_df, train_idx, False,
-               len(classes), var, len(train_idx), greyscale, do_aug)
-   x_train, (trueT)= next(train_gen)
+   fig, axes = plt.subplots(1, 2, figsize=(10, 10))
 
-   PT = []
+   axes[0].plot(history.history['loss'], label='Training loss')
+   axes[0].plot(history.history['val_loss'],
+                label='Validation loss')
+   axes[0].set_xlabel('Epochs')
+   axes[0].legend()
 
-   if type(SM) == list:
-       #counter = 0
-       for s in SM:
-           tmp=s.predict(x_train, batch_size=32)
-           exec(
-              'PT.append(np.asarray(np.squeeze(tmp)))'
-           )
-           del tmp
+   try:
+      axes[1].plot(history.history['mean_absolute_error'],
+                   label='pop train MAE')
+      axes[1].plot(history.history['val_mean_absolute_error'],
+                   label='pop test MAE')
+   except:
+      axes[1].plot(history.history['mae'], label='pop train MAE')
+      axes[1].plot(history.history['val_mae'], label='pop test MAE')
 
-       predT = np.median(PT, axis=0)
-       #predT = np.squeeze(np.asarray(PT))
-       del PT
-       K.clear_session()
-       gc.collect()
-
-   else:
-     predT = SM.predict(x_train, batch_size=32)
-     #predT = np.asarray(predT).argmax(axis=-1)
-
-   del train_gen, x_train
-
-   ## make predictions on testing data
-   test_gen = get_data_generator_1image(test_df, test_idx, False,
-              len(classes), var, len(test_idx), greyscale, False) #no augmentation on validation data
-   x_test, (true)= next(test_gen)
-
-   PT = []
-
-   if type(SM) == list:
-       #counter = 0
-       for s in SM:
-           tmp=s.predict(x_test, batch_size=32)
-           exec(
-              'PT.append(np.asarray(np.squeeze(tmp)))'
-           )
-           del tmp
-
-       pred = np.median(PT, axis=0)
-       #pred = np.squeeze(np.asarray(PT))
-       del PT
-       K.clear_session()
-       gc.collect()
-
-   else:
-
-       pred = SM.predict(x_test, batch_size=32) #1)
-       #pred = np.asarray(pred).argmax(axis=-1)
-
-   del test_gen, x_test
-
-   true = np.squeeze(np.asarray(true).argmax(axis=-1) )
-   trueT = np.squeeze(np.asarray(trueT).argmax(axis=-1) )
-
-   pred = np.squeeze(np.asarray(pred).argmax(axis=-1))#[0])
-   predT = np.squeeze(np.asarray(predT).argmax(axis=-1))#[0])
-
-   ##==============================================
-   ## print a classification report to screen, showing f1, precision, recall and accuracy
-   print("==========================================")
-   print("Classification report for "+var)
-   print(classification_report(true, pred))
-
-   fig = plt.figure()
-   ##==============================================
-   ## create figures showing confusion matrices for train and test data sets
-   if type(SM) == list:
-
-      plot_confmat(pred, true, var, classes)
-      plt.savefig(weights_path[0].replace('.hdf5','_cm.png').\
-               replace('batch','_'.join(np.asarray(BATCH_SIZE, dtype='str'))),
-               dpi=300, bbox_inches='tight')
-      plt.close('all')
-
-      plot_confmat(predT, trueT, var+'T',classes)
-      plt.savefig(weights_path[0].replace('.hdf5','_cmT.png').\
-               replace('batch','_'.join(np.asarray(BATCH_SIZE, dtype='str'))),
-               dpi=300, bbox_inches='tight')
-      plt.close('all')
-
-   else:
-
-      plot_confmat(pred, true, var, classes)
-      plt.savefig(weights_path.replace('.hdf5','_cm.png'),
-               dpi=300, bbox_inches='tight')
-      plt.close('all')
-
-      plot_confmat(predT, trueT, var+'T',classes)
-      plt.savefig(weights_path.replace('.hdf5','_cmT.png'),
-               dpi=300, bbox_inches='tight')
-      plt.close('all')
-
-   plt.close()
-   del fig
+   axes[1].set_xlabel('Epochs')
+   axes[1].legend()
 
 ###===================================================
-def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
-                                 SM, weights_path, name, mode, greyscale,
-                                 CS, dropout, scale, do_aug):
-    """
-    This function creates makes predcitions on test and train data
-    """
-    ##==============================================
-    ## make predictions on training data
-    if type(SM) == list:
-        counter = 0
-        for s,wp in zip(SM, weights_path):
-           exec('SM[counter].load_weights(wp)')
-        counter += 1
-    else:
-        SM.load_weights(weights_path)
-
-    train_gen = get_data_generator_Nvars_siso_simo(train_df, train_idx, False,
-                vars, len(train_idx), greyscale, CS, do_aug)
-    x_train, tmp = next(train_gen)
-
-    if scale == True:
-
-        if len(vars)>1:
-           counter = 0
-           for v in vars:
-              exec(
-              v+\
-              '_trueT = np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1)))'
-              )
-              counter +=1
-        else:
-           exec(
-           vars[0]+\
-           '_trueT = np.squeeze(CS[0].inverse_transform(tmp[0].reshape(-1,1)))'
-           )
-
-    else:
-        if len(vars)>1:
-           counter = 0
-           for v in vars:
-              exec(
-              v+\
-              '_trueT = np.squeeze(tmp[counter])'
-              )
-              counter +=1
-        else:
-           exec(
-           vars[0]+\
-           '_trueT = np.squeeze(tmp)'
-           )
-
-    del tmp
-
-    for v in vars:
-       exec(v+'_PT = []')
-
-    if scale == True:
-
-        if type(SM) == list:
-            counter = 0 #model iterator
-            for s in SM:
-                tmp=s.predict(x_train, batch_size=32)
-
-                if len(vars)>1:
-                   counter2 = 0 #variable iterator
-                   for v in vars:
-                      exec(
-                      v+\
-                      '_PT.append(np.squeeze(CS[counter].inverse_transform(tmp[counter2].reshape(-1,1))))'
-                      )
-                      counter2 +=1
-                else:
-                   exec(
-                   vars[0]+\
-                   '_PT.append(np.asarray(np.squeeze(CS[0].inverse_transform(tmp.reshape(-1,1)))))'
-                   )
-
-                del tmp
-
-            if len(vars)>1:
-               #counter = 0
-               for v in vars:
-                  exec(
-                  v+\
-                  '_PT = np.median('+v+'_PT, axis=0)'
-                  )
-                  #counter +=1
-            else:
-               exec(
-               vars[0]+\
-               '_PT = np.median('+v+'_PT, axis=0)'
-               )
-
-        else:
-            tmp = SM.predict(x_train, batch_size=32) #128)
-
-            if len(vars)>1:
-               counter = 0
-               for v in vars:
-                  exec(
-                  v+\
-                  '_PT.append(np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1))))'
-                  )
-                  counter +=1
-            else:
-               exec(
-               vars[0]+\
-               '_PT.append(np.asarray(np.squeeze(CS[0].inverse_transform(tmp.reshape(-1,1)))))'
-               )
-
-            del tmp
-
-    else:
-
-        if type(SM) == list:
-            #counter = 0
-            for s in SM:
-                tmp=s.predict(x_train, batch_size=32)
-
-                if len(vars)>1:
-                   counter2 = 0
-                   for v in vars:
-                      exec(
-                      v+\
-                      '_PT.append(np.squeeze(tmp[counter2]))'
-                      )
-                      counter2 +=1
-                else:
-                   exec(
-                   vars[0]+\
-                   '_PT.append(np.asarray(tmp))'
-                   )
-
-                del tmp
-
-            if len(vars)>1:
-               #counter = 0
-               for v in vars:
-                  exec(
-                  v+\
-                  '_PT = np.median('+v+'_PT, axis=0)'
-                  )
-                  #counter +=1
-            else:
-               exec(
-               vars[0]+\
-               '_PT = np.median('+v+'_PT, axis=0)'
-               )
-
-        else:
-            tmp = SM.predict(x_train, batch_size=32) #128)
-
-            if len(vars)>1:
-               counter = 0
-               for v in vars:
-                  exec(
-                  v+\
-                  '_PT.append(np.squeeze(tmp[counter]))'
-                  )
-                  counter +=1
-            else:
-               exec(
-               vars[0]+\
-               '_PT.append(np.asarray(np.squeeze(tmp)))'
-               )
-
-            del tmp
-
-
-
-    if len(vars)>1:
-       for k in range(len(vars)):
-          exec(vars[k]+'_predT = np.squeeze(np.asarray('+vars[k]+'_PT))')
-    else:
-       exec(vars[0]+'_predT = np.squeeze(np.asarray('+vars[0]+'_PT))')
-
-
-    for v in vars:
-       exec('del '+v+'_PT')
-
-
-    del train_gen, x_train
-
-    ## make predictions on testing data
-    test_gen = get_data_generator_Nvars_siso_simo(test_df, test_idx, False,
-               vars, len(test_idx), greyscale, CS, False)
-
-    x_test, tmp = next(test_gen)
-
-
-    if scale == True:
-
-        if len(vars)>1:
-           counter = 0
-           for v in vars:
-              exec(
-              v+\
-              '_true = np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1)))'
-              )
-              counter +=1
-        else:
-           exec(
-           vars[0]+\
-           '_true = np.squeeze(CS[0].inverse_transform(tmp[0].reshape(-1,1)))'
-           )
-
-    else:
-        if len(vars)>1:
-           counter = 0
-           for v in vars:
-              exec(
-              v+\
-              '_true = np.squeeze(tmp[counter])'
-              )
-              counter +=1
-        else:
-           exec(
-           vars[0]+\
-           '_true = np.squeeze(tmp)'
-           )
-
-
-    del tmp
-
-    for v in vars:
-       exec(v+'_P = []')
-
-    if scale == True:
-
-        if type(SM) == list:
-            #counter = 0
-            for s in SM:
-                tmp=s.predict(x_test, batch_size=32)
-
-                if len(vars)>1:
-                   counter = 0
-                   for v in vars:
-                      exec(
-                      v+\
-                      '_P.append(np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1))))'
-                      )
-                      counter +=1
-                else:
-                   exec(
-                   vars[0]+\
-                   '_P.append(np.asarray(np.squeeze(CS[0].inverse_transform(tmp.reshape(-1,1)))))'
-                   )
-
-                del tmp
-
-            if len(vars)>1:
-               #counter = 0
-               for v in vars:
-                  exec(
-                  v+\
-                  '_P = np.median('+v+'_P, axis=0)'
-                  )
-                  #counter +=1
-            else:
-               exec(
-               vars[0]+\
-               '_P = np.median('+v+'_P, axis=0)'
-               )
-
-        else:
-
-            tmp = SM.predict(x_test, batch_size=32) #128)
-            if len(vars)>1:
-               counter = 0
-               for v in vars:
-                  exec(
-                  v+\
-                  '_P.append(np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1))))'
-                  )
-                  counter +=1
-            else:
-               exec(
-               vars[0]+\
-               '_P.append(np.asarray(np.squeeze(CS[0].inverse_transform(tmp.reshape(-1,1)))))'
-               )
-
-            del tmp
-
-
-    else:
-        if type(SM) == list:
-            counter = 0
-            for s in SM:
-                tmp=s.predict(x_test, batch_size=32)
-
-                if len(vars)>1:
-                   counter = 0
-                   for v in vars:
-                      exec(
-                      v+\
-                      '_P.append(np.squeeze(tmp[counter]))'
-                      )
-                      counter +=1
-                else:
-                   exec(
-                   vars[0]+\
-                   '_P.append(np.asarray(np.squeeze(tmp)))'
-                   )
-
-                del tmp
-
-            if len(vars)>1:
-               #counter = 0
-               for v in vars:
-                  exec(
-                  v+\
-                  '_P = np.median('+v+'_P, axis=0)'
-                  )
-                  #counter +=1
-            else:
-               exec(
-               vars[0]+\
-               '_P = np.median('+v+'_P, axis=0)'
-               )
-
-        else:
-
-            tmp = SM.predict(x_test, batch_size=32) #128)
-            if len(vars)>1:
-               counter = 0
-               for v in vars:
-                  exec(
-                  v+\
-                  '_P.append(np.squeeze(tmp[counter]))'
-                  )
-                  counter +=1
-            else:
-               exec(
-               vars[0]+\
-               '_P.append(np.asarray(np.squeeze(tmp)))'
-               )
-
-            del tmp
-
-
-    del test_gen, x_test
-
-    if len(vars)>1:
-       for k in range(len(vars)):
-          exec(vars[k]+'_pred = np.squeeze(np.asarray('+vars[k]+'_P))')
-    else:
-       exec(vars[0]+'_pred = np.squeeze(np.asarray('+vars[0]+'_P))')
-
-    for v in vars:
-       exec('del '+v+'_P')
-
-    if len(vars)==9:
-       nrows = 3; ncols = 3
-    elif len(vars)==8:
-       nrows = 4; ncols = 2
-    elif len(vars)==7:
-       nrows = 3; ncols = 3
-    elif len(vars)==6:
-       nrows = 3; ncols = 2
-    elif len(vars)==5:
-       nrows = 3; ncols = 2
-    elif len(vars)==4:
-       nrows = 2; ncols = 2
-    elif len(vars)==3:
-       nrows = 2; ncols = 2
-    elif len(vars)==2:
-       nrows = 1; ncols = 2
-    elif len(vars)==1:
-       nrows = 1; ncols = 1
-
-    Z = []
-
-    ## make a plot
-    fig = plt.figure(figsize=(4*nrows,4*ncols))
-    labs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    for k in range(1,1+(nrows*ncols)):
-      try:
-         plt.subplot(nrows,ncols,k)
-         x = eval(vars[k-1]+'_trueT')
-         y = eval(vars[k-1]+'_predT')
-
-         z = np.polyfit(y,x, 1)
-         Z.append(z)
-
-         y = np.polyval(z,y)
-         y = np.abs(y)
-
-         plt.plot(x, y, 'ko', markersize=5)
-         # plt.plot(x, y, 'ko', markersize=5)
-         plt.plot([ np.min(np.hstack((x,y))),  np.max(np.hstack((x,y)))],
-                  [ np.min(np.hstack((x,y))),  np.max(np.hstack((x,y)))],
-                  'k', lw=2)
-
-         x = eval(vars[k-1]+'_true')
-         y = eval(vars[k-1]+'_pred')
-         y = np.abs(np.polyval(z,y))
-
-         plt.plot(x, y, 'bx', markersize=5)
-
-         plt.text(np.nanmin(x), 0.75*np.max(np.hstack((x,y))),'Test : '+\
-                  str(np.mean(100*(np.abs(eval(vars[k-1]+'_pred') -\
-                  eval(vars[k-1]+'_true')) / eval(vars[k-1]+'_true'))))[:5]+\
-                  ' %',  fontsize=10, color='b')
-         plt.text(np.nanmin(x), 0.7*np.max(np.hstack((x,y))),'Train : '+\
-                  str(np.mean(100*(np.abs(eval(vars[k-1]+'_predT') -\
-                  eval(vars[k-1]+'_trueT')) / eval(vars[k-1]+'_trueT'))))[:5]+\
-                  ' %', fontsize=10)
-         plt.title(r''+labs[k-1]+') '+vars[k-1], fontsize=8, loc='left')
-
-         varstring = ''.join([str(k)+'_' for k in vars])
-      except:
-          pass
-    if type(SM) == list:
-       plt.savefig(weights_path[0].replace('.hdf5', '_skill_ensemble.png').\
-                replace('batch','_'.join(np.asarray(BATCH_SIZE, dtype='str'))),
-                dpi=300, bbox_inches='tight')
-       joblib.dump(Z, weights_path[0].replace('.hdf5','_bias.pkl').\
-                replace('batch','_'.join(np.asarray(BATCH_SIZE, dtype='str'))))
-
-    else:
-       plt.savefig(weights_path.replace('.hdf5', '_skill.png'),
-                dpi=300, bbox_inches='tight')
-       joblib.dump(Z, weights_path.replace('.hdf5','_bias.pkl'))
-
-    plt.close()
-    del fig
-
-
-###===================================================
-def tidy(res_folder):
-    """
-    This function moves training outputs to a specific folder
-    """
-
-    pngfiles = glob('*.png')
-    jsonfiles = glob('*.json')
-    hfiles = glob('*.hdf5')
-    tfiles = glob('*.txt')
-    pfiles = glob('*.pkl')
-
-    try:
-       [shutil.move(k, res_folder) for k in pngfiles]
-       [shutil.move(k, res_folder) for k in hfiles]
-       [shutil.move(k, res_folder) for k in jsonfiles]
-       [shutil.move(k, res_folder) for k in tfiles]
-       [shutil.move(k, res_folder) for k in pfiles]
-    except:
-       pass
-
+### PLOT CONFUSION MATRIX FUNCTIONS
 
 ###===================================================
 def plot_confusion_matrix(cm, classes,
@@ -1368,6 +780,587 @@ def plot_confmat(y_pred, y_true, prefix, classes):
    plot_confusion_matrix(cm, classes=classes)
 
 
+
+###===================================================
+### PREDICTION FUNCTIONS
+
+def predict_test_train_cat(train_df, test_df, train_idx, test_idx, var, SM,
+                           classes, weights_path, greyscale, name, do_aug):
+   """
+   This function creates makes predictions on test and train data,
+   prints a classification report, and prints confusion matrices
+   """
+   if type(SM) == list:
+      counter = 0
+      for s,wp in zip(SM, weights_path):
+         exec('SM[counter].load_weights(wp)')
+      counter += 1
+   else:
+     SM.load_weights(weights_path)
+
+   ##==============================================
+   ## make predictions on training data
+   train_gen = get_data_generator_1image(train_df, train_idx, False,
+               len(classes), var, np.min((200, len(train_idx))), greyscale, do_aug)
+   x_train, (trueT)= next(train_gen)
+
+   PT = []
+
+   if type(SM) == list:
+       #counter = 0
+       for s in SM:
+           tmp=s.predict(x_train, batch_size=8)
+           exec(
+              'PT.append(np.asarray(np.squeeze(tmp)))'
+           )
+           del tmp
+
+       predT = np.median(PT, axis=0)
+       del PT
+       K.clear_session()
+       gc.collect()
+
+   else:
+     predT = SM.predict(x_train, batch_size=8)
+
+   del train_gen, x_train
+
+   if test_df is not None:
+       ## make predictions on testing data
+       test_gen = get_data_generator_1image(test_df, test_idx, False,
+                  len(classes), var, np.min((200, len(test_idx))), greyscale, False) #no augmentation on validation data
+       x_test, (true)= next(test_gen)
+
+       PT = []
+
+       if type(SM) == list:
+           #counter = 0
+           for s in SM:
+               tmp=s.predict(x_test, batch_size=8)
+               exec(
+                  'PT.append(np.asarray(np.squeeze(tmp)))'
+               )
+               del tmp
+
+           pred = np.median(PT, axis=0)
+           del PT
+           K.clear_session()
+           gc.collect()
+
+       else:
+
+           pred = SM.predict(x_test, batch_size=8) #1)
+
+       del test_gen, x_test
+
+   trueT = np.squeeze(np.asarray(trueT).argmax(axis=-1) )
+   predT = np.squeeze(np.asarray(predT).argmax(axis=-1))#[0])
+
+   if test_df is not None:
+       pred = np.squeeze(np.asarray(pred).argmax(axis=-1))#[0])
+       true = np.squeeze(np.asarray(true).argmax(axis=-1) )
+
+   ##==============================================
+   ## print a classification report to screen, showing f1, precision, recall and accuracy
+   print("==========================================")
+   print("Classification report for "+var)
+   print(classification_report(true, pred))
+
+   fig = plt.figure()
+   ##==============================================
+   ## create figures showing confusion matrices for train and test data sets
+   if type(SM) == list:
+      if test_df is not None:
+          plot_confmat(pred, true, var, classes)
+          plt.savefig(weights_path[0].replace('.hdf5','_cm.png').\
+                   replace('batch','_'.join(np.asarray(BATCH_SIZE, dtype='str'))),
+                   dpi=300, bbox_inches='tight')
+          plt.close('all')
+
+      plot_confmat(predT, trueT, var+'T',classes)
+      plt.savefig(weights_path[0].replace('.hdf5','_cmT.png').\
+               replace('batch','_'.join(np.asarray(BATCH_SIZE, dtype='str'))),
+               dpi=300, bbox_inches='tight')
+      plt.close('all')
+
+   else:
+      if test_df is not None:
+          plot_confmat(pred, true, var, classes)
+          plt.savefig(weights_path.replace('.hdf5','_cm.png'),
+                   dpi=300, bbox_inches='tight')
+          plt.close('all')
+
+      plot_confmat(predT, trueT, var+'T',classes)
+      plt.savefig(weights_path.replace('.hdf5','_cmT.png'),
+               dpi=300, bbox_inches='tight')
+      plt.close('all')
+
+   plt.close()
+   del fig
+
+###===================================================
+def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
+                                 SM, weights_path, name, mode, greyscale,
+                                 CS, dropout, scale, do_aug):
+    """
+    This function creates makes predcitions on test and train data
+    """
+    ##==============================================
+    ## make predictions on training data
+    if type(SM) == list:
+        counter = 0
+        for s,wp in zip(SM, weights_path):
+           exec('SM[counter].load_weights(wp)')
+        counter += 1
+    else:
+        SM.load_weights(weights_path)
+
+
+    train_gen = get_data_generator_Nvars_siso_simo(train_df, train_idx, False,
+                vars, np.min((400, len(train_idx))), greyscale, CS, False) #
+    x_train, tmp = next(train_gen)
+
+    if scale == True:
+
+        if len(vars)>1:
+           counter = 0
+           for v in vars:
+              exec(
+              v+\
+              '_trueT = np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1)))'
+              )
+              counter +=1
+        else:
+           exec(
+           vars[0]+\
+           '_trueT = np.squeeze(CS[0].inverse_transform(tmp[0].reshape(-1,1)))'
+           )
+
+    else:
+        if len(vars)>1:
+           counter = 0
+           for v in vars:
+              exec(
+              v+\
+              '_trueT = np.squeeze(tmp[counter])'
+              )
+              counter +=1
+        else:
+           exec(
+           vars[0]+\
+           '_trueT = np.squeeze(tmp)'
+           )
+
+    del tmp
+
+    for v in vars:
+       exec(v+'_PT = []')
+
+    if scale == True:
+
+        if type(SM) == list:
+            counter = 0 #model iterator
+            for s in SM:
+                tmp=s.predict(x_train, batch_size=8)
+
+                if len(vars)>1:
+                   counter2 = 0 #variable iterator
+                   for v in vars:
+                      exec(
+                      v+\
+                      '_PT.append(np.squeeze(CS[counter].inverse_transform(tmp[counter2].reshape(-1,1))))'
+                      )
+                      counter2 +=1
+                else:
+                   exec(
+                   vars[0]+\
+                   '_PT.append(np.asarray(np.squeeze(CS[0].inverse_transform(tmp.reshape(-1,1)))))'
+                   )
+
+                del tmp
+
+            if len(vars)>1:
+               for v in vars:
+                  exec(
+                  v+\
+                  '_PT = np.median('+v+'_PT, axis=0)'
+                  )
+            else:
+               exec(
+               vars[0]+\
+               '_PT = np.median('+v+'_PT, axis=0)'
+               )
+
+        else:
+            tmp = SM.predict(x_train, batch_size=8) #128)
+
+            if len(vars)>1:
+               counter = 0
+               for v in vars:
+                  exec(
+                  v+\
+                  '_PT.append(np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1))))'
+                  )
+                  counter +=1
+            else:
+               exec(
+               vars[0]+\
+               '_PT.append(np.asarray(np.squeeze(CS[0].inverse_transform(tmp.reshape(-1,1)))))'
+               )
+
+            del tmp
+
+    else:
+
+        if type(SM) == list:
+            for s in SM:
+                tmp=s.predict(x_train, batch_size=8)
+
+                if len(vars)>1:
+                   counter2 = 0
+                   for v in vars:
+                      exec(
+                      v+\
+                      '_PT.append(np.squeeze(tmp[counter2]))'
+                      )
+                      counter2 +=1
+                else:
+                   exec(
+                   vars[0]+\
+                   '_PT.append(np.asarray(tmp))'
+                   )
+
+                del tmp
+
+            if len(vars)>1:
+               for v in vars:
+                  exec(
+                  v+\
+                  '_PT = np.median('+v+'_PT, axis=0)'
+                  )
+            else:
+               exec(
+               vars[0]+\
+               '_PT = np.median('+v+'_PT, axis=0)'
+               )
+
+        else:
+            tmp = SM.predict(x_train, batch_size=8) #128)
+
+            if len(vars)>1:
+               counter = 0
+               for v in vars:
+                  exec(
+                  v+\
+                  '_PT.append(np.squeeze(tmp[counter]))'
+                  )
+                  counter +=1
+            else:
+               exec(
+               vars[0]+\
+               '_PT.append(np.asarray(np.squeeze(tmp)))'
+               )
+
+            del tmp
+
+
+
+    if len(vars)>1:
+       for k in range(len(vars)):
+          exec(vars[k]+'_predT = np.squeeze(np.asarray('+vars[k]+'_PT))')
+    else:
+       exec(vars[0]+'_predT = np.squeeze(np.asarray('+vars[0]+'_PT))')
+
+
+    for v in vars:
+       exec('del '+v+'_PT')
+
+
+    del train_gen, x_train
+
+    ## make predictions on testing data
+    if test_df is not None:
+        test_gen = get_data_generator_Nvars_siso_simo(test_df, test_idx, False,
+                   vars, np.min((400, len(test_idx))), greyscale, CS, False) #
+
+        x_test, tmp = next(test_gen)
+
+        if scale == True:
+
+            if len(vars)>1:
+               counter = 0
+               for v in vars:
+                  exec(
+                  v+\
+                  '_true = np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1)))'
+                  )
+                  counter +=1
+            else:
+               exec(
+               vars[0]+\
+               '_true = np.squeeze(CS[0].inverse_transform(tmp[0].reshape(-1,1)))'
+               )
+
+        else:
+            if len(vars)>1:
+               counter = 0
+               for v in vars:
+                  exec(
+                  v+\
+                  '_true = np.squeeze(tmp[counter])'
+                  )
+                  counter +=1
+            else:
+               exec(
+               vars[0]+\
+               '_true = np.squeeze(tmp)'
+               )
+
+
+        del tmp
+
+        for v in vars:
+           exec(v+'_P = []')
+
+        if scale == True:
+
+            if type(SM) == list:
+                #counter = 0
+                for s in SM:
+                    tmp=s.predict(x_test, batch_size=8)
+
+                    if len(vars)>1:
+                       counter = 0
+                       for v in vars:
+                          exec(
+                          v+\
+                          '_P.append(np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1))))'
+                          )
+                          counter +=1
+                    else:
+                       exec(
+                       vars[0]+\
+                       '_P.append(np.asarray(np.squeeze(CS[0].inverse_transform(tmp.reshape(-1,1)))))'
+                       )
+
+                    del tmp
+
+                if len(vars)>1:
+                   for v in vars:
+                      exec(
+                      v+\
+                      '_P = np.median('+v+'_P, axis=0)'
+                      )
+                else:
+                   exec(
+                   vars[0]+\
+                   '_P = np.median('+v+'_P, axis=0)'
+                   )
+
+            else:
+
+                tmp = SM.predict(x_test, batch_size=8) #128)
+                if len(vars)>1:
+                   counter = 0
+                   for v in vars:
+                      exec(
+                      v+\
+                      '_P.append(np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1))))'
+                      )
+                      counter +=1
+                else:
+                   exec(
+                   vars[0]+\
+                   '_P.append(np.asarray(np.squeeze(CS[0].inverse_transform(tmp.reshape(-1,1)))))'
+                   )
+
+                del tmp
+
+
+        else:
+            if type(SM) == list:
+                counter = 0
+                for s in SM:
+                    tmp=s.predict(x_test, batch_size=8)
+
+                    if len(vars)>1:
+                       counter = 0
+                       for v in vars:
+                          exec(
+                          v+\
+                          '_P.append(np.squeeze(tmp[counter]))'
+                          )
+                          counter +=1
+                    else:
+                       exec(
+                       vars[0]+\
+                       '_P.append(np.asarray(np.squeeze(tmp)))'
+                       )
+
+                    del tmp
+
+                if len(vars)>1:
+                   for v in vars:
+                      exec(
+                      v+\
+                      '_P = np.median('+v+'_P, axis=0)'
+                      )
+                else:
+                   exec(
+                   vars[0]+\
+                   '_P = np.median('+v+'_P, axis=0)'
+                   )
+
+            else:
+
+                tmp = SM.predict(x_test, batch_size=8) #128)
+                if len(vars)>1:
+                   counter = 0
+                   for v in vars:
+                      exec(
+                      v+\
+                      '_P.append(np.squeeze(tmp[counter]))'
+                      )
+                      counter +=1
+                else:
+                   exec(
+                   vars[0]+\
+                   '_P.append(np.asarray(np.squeeze(tmp)))'
+                   )
+
+                del tmp
+
+
+        del test_gen, x_test
+
+        if len(vars)>1:
+           for k in range(len(vars)):
+              exec(vars[k]+'_pred = np.squeeze(np.asarray('+vars[k]+'_P))')
+        else:
+           exec(vars[0]+'_pred = np.squeeze(np.asarray('+vars[0]+'_P))')
+
+        for v in vars:
+           exec('del '+v+'_P')
+
+        ## write out results to text files
+        if len(vars)>1:
+           for k in range(len(vars)):
+              exec('np.savetxt("'+name+'_test'+vars[k]+'.txt", ('+vars[k]+'_pred))') #','+vars[k]+'_true))')
+              exec('np.savetxt("'+name+'_train'+vars[k]+'.txt", ('+vars[k]+'_predT))') #,'+vars[k]+'_trueT))')
+           np.savetxt(name+"_test_files.txt", np.asarray(test_df.files.values), fmt="%s")
+           np.savetxt(name+"_train_files.txt", np.asarray(train_df.files.values), fmt="%s")
+
+        else:
+           exec('np.savetxt("'+name+'_test'+vars[0]+'.txt", ('+vars[0]+'_pred))') #','+vars[k]+'_true))')
+           exec('np.savetxt("'+name+'_train'+vars[0]+'.txt", ('+vars[0]+'_predT))') #,'+vars[k]+'_trueT))')
+           np.savetxt(name+"_test_files.txt", np.asarray(test_df.files.values), fmt="%s")
+           np.savetxt(name+"_train_files.txt", np.asarray(train_df.files.values), fmt="%s")
+
+    if len(vars)==9:
+       nrows = 3; ncols = 3
+    elif len(vars)==8:
+       nrows = 2; ncols = 4
+    elif len(vars)==7:
+       nrows = 3; ncols = 3
+    elif len(vars)==6:
+       nrows = 3; ncols = 2
+    elif len(vars)==5:
+       nrows = 3; ncols = 2
+    elif len(vars)==4:
+       nrows = 2; ncols = 2
+    elif len(vars)==3:
+       nrows = 2; ncols = 2
+    elif len(vars)==2:
+       nrows = 1; ncols = 2
+    elif len(vars)==1:
+       nrows = 1; ncols = 1
+
+    Z = []
+
+    ## make a plot
+    fig = plt.figure(figsize=(6*nrows,4*ncols))
+    labs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    for k in range(1,1+(nrows*ncols)):
+      try:
+         plt.subplot(nrows,ncols,k)
+         x1 = eval(vars[k-1]+'_trueT')
+         y1 = eval(vars[k-1]+'_predT')
+
+         z = np.polyfit(y1,x1, 1)
+         Z.append(z)
+
+         y1 = np.polyval(z,y1)
+         y1 = np.abs(y1)
+
+         plt.plot(x1, y1, 'ko', markersize=5)
+         plt.plot([ np.min(np.hstack((x1,y1))),  np.max(np.hstack((x1,y1)))],
+                  [ np.min(np.hstack((x1,y1))),  np.max(np.hstack((x1,y1)))],
+                  'k', lw=2)
+
+         if test_df is not None:
+             x2 = eval(vars[k-1]+'_true')
+             y2 = eval(vars[k-1]+'_pred')
+             y2 = np.abs(np.polyval(z,y2))
+
+             plt.plot(x2, y2, 'bx', markersize=5)
+
+         if test_df is not None:
+             plt.text(np.nanmin(x2), 0.75*np.max(np.hstack((x2,y2))),'Test : '+\
+                      str(np.mean(100*(np.abs(y2-x2) / x2)))[:5]+\
+                      ' %',  fontsize=10, color='b')
+             plt.text(np.nanmin(x1), 0.7*np.max(np.hstack((x1,y1))),'Train : '+\
+                      str(np.mean(100*(np.abs(y1-x1) / x1)))[:5]+\
+                      ' %', fontsize=10)
+         else:
+             plt.text(np.nanmin(x1), 0.7*np.max(np.hstack((x1,y1))),''+\
+                      str(np.mean(100*(np.abs(y1-x1) / x1)))[:5]+\
+                      ' %', fontsize=10)
+         plt.title(r''+labs[k-1]+') '+vars[k-1], fontsize=8, loc='left')
+
+         #varstring = ''.join([str(k)+'_' for k in vars])
+         varstring = str(len(vars))+'vars'
+
+      except:
+          pass
+    if type(SM) == list:
+       plt.savefig(weights_path[0].replace('.hdf5', '_skill_ensemble.png').\
+                replace('batch','_'.join(np.asarray(BATCH_SIZE, dtype='str'))),
+                dpi=300, bbox_inches='tight')
+       joblib.dump(Z, weights_path[0].replace('.hdf5','_bias.pkl').\
+                replace('batch','_'.join(np.asarray(BATCH_SIZE, dtype='str'))))
+
+    else:
+       plt.savefig(weights_path.replace('.hdf5', '_skill.png'),
+                dpi=300, bbox_inches='tight')
+       joblib.dump(Z, weights_path.replace('.hdf5','_bias.pkl'))
+
+    plt.close()
+    del fig
+
+
+###===================================================
+### MISC. UTILITIES
+
+def tidy(name,res_folder):
+    """
+    This function moves training outputs to a specific folder
+    """
+
+    pngfiles = glob('*'+name+'*.png')
+    jsonfiles = glob('*'+name+'*.json')
+    hfiles = glob('*'+name+'*.hdf5')
+    tfiles = glob('*'+name+'*.txt')
+    pfiles = glob('*'+name+'*.pkl')
+
+    try:
+       [shutil.move(k, res_folder) for k in pngfiles]
+       [shutil.move(k, res_folder) for k in hfiles]
+       [shutil.move(k, res_folder) for k in jsonfiles]
+       [shutil.move(k, res_folder) for k in tfiles]
+       [shutil.move(k, res_folder) for k in pfiles]
+    except:
+       pass
+
 ###===================================================
 def get_df(csvfile):
     """
@@ -1385,32 +1378,6 @@ def get_df(csvfile):
     np.random.seed(2019)
     return np.random.permutation(len(df)), df
 
-###===================================================
-def  plot_train_history_1var_mae(history):
-   """
-   This function plots loss and accuracy curves from the model training
-   """
-   print(history.history.keys())
-
-   fig, axes = plt.subplots(1, 2, figsize=(10, 10))
-
-   axes[0].plot(np.log(history.history['loss']), label='Log Training loss')
-   axes[0].plot(np.log(history.history['val_loss']),
-                label='Log Validation loss')
-   axes[0].set_xlabel('Epochs')
-   axes[0].legend()
-
-   try:
-      axes[1].plot(history.history['mean_absolute_error'],
-                   label='pop train MAE')
-      axes[1].plot(history.history['val_mean_absolute_error'],
-                   label='pop test MAE')
-   except:
-      axes[1].plot(history.history['mae'], label='pop train MAE')
-      axes[1].plot(history.history['val_mae'], label='pop test MAE')
-
-   axes[1].set_xlabel('Epochs')
-   axes[1].legend()
 
 
 #
@@ -1449,7 +1416,7 @@ def  plot_train_history_1var_mae(history):
 #        exec(v+'_PT = []')
 #
 #     del tmp
-#     tmp = SM.predict(x_train, batch_size=32) #128)
+#     tmp = SM.predict(x_train, batch_size=8) #128)
 #     if len(vars)>1:
 #        counter = 0
 #        for v in vars:
@@ -1499,7 +1466,7 @@ def  plot_train_history_1var_mae(history):
 #        exec(v+'_P = []')
 #
 #     del tmp
-#     tmp = SM.predict(x_test, batch_size=32) #128)
+#     tmp = SM.predict(x_test, batch_size=8) #128)
 #     if len(vars)>1:
 #        counter = 0
 #        for v in vars:

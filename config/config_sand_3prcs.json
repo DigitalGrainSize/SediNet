@@ -1,6 +1,7 @@
 {
-  "train_csvfile" : "data_generic_sand_train.csv",
-  "test_csvfile" : "data_generic_sand_test.csv",
+  "train_csvfile" : "sand_all2_train.csv",
+  "test_csvfile" : "sand_all2_test.csv",
+  "csvfile" : "sand_all2.csv",  
   "P10": "P10",
   "P50": "P50",
   "P90": "P90",
@@ -9,5 +10,4 @@
   "dropout": 0.25,
   "greyscale": true,
   "scale": false
-  
 }

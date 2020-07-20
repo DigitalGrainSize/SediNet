@@ -1,6 +1,7 @@
 {
   "train_csvfile" : "data_pescadero_sieve_train.csv",
   "test_csvfile" : "data_pescadero_sieve_test.csv",
+  "csvfile": "data_pescadero_sieve.csv",  
   "sieve" : "sieve",
   "P16" : "P16",
   "P25" : "P25",
@@ -11,6 +12,5 @@
   "name"  : "sievesand_sieve_plus",
   "dropout": 0.25,
   "greyscale": true,
-  "scale": false
-  
+  "scale": true
 }

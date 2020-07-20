@@ -29,10 +29,6 @@ def get_data_generator(df, indices, greyscale, batch_size=16):
             im = im.resize((IM_HEIGHT, IM_HEIGHT))
             im = np.array(im) / 255.0
 
-            if np.ndim(im)==2:
-               im = np.dstack((im, im , im))
-            im = im[:,:,:3]
-
             if greyscale==True:
                images.append(np.expand_dims(im[:,:,0], axis=2))
             else:
@@ -54,10 +50,6 @@ def get_data_generator_1vars(df, indices, for_training, vars, greyscale, batch_s
         for i in indices:
             r = df.iloc[i]
             file, p1 = r['files'], r[vars[0]]
-            #im = Image.open(file).convert('LA')
-            #im = im.resize((IM_HEIGHT, IM_HEIGHT))
-            #im = np.array(im) / 255.0
-            #im2 = np.rot90(im)
 
             if greyscale==True:
                im = Image.open(file).convert('LA')
@@ -65,14 +57,6 @@ def get_data_generator_1vars(df, indices, for_training, vars, greyscale, batch_s
                im = Image.open(file)
             im = im.resize((IM_HEIGHT, IM_HEIGHT))
             im = np.array(im) / 255.0
-
-            if np.ndim(im)==2:
-               im = np.dstack((im, im , im)) ##np.expand_dims(im[:,:,0], axis=2)
-            #print(file)
-            #print(im.shape)
-            im = im[:,:,:3]
-
-            #images.append(np.expand_dims(np.hstack((im[:,:,0], im2[:,:,0])),axis=2))
 
             if greyscale==True:
                images.append(np.expand_dims(im[:,:,0], axis=2))
@@ -87,352 +71,113 @@ def get_data_generator_1vars(df, indices, for_training, vars, greyscale, batch_s
             break
 
 ###===================================================
-def estimate_categorical(vars, csvfile, res_folder, dropout, numclass, greyscale, weights_path):
+def estimate_categorical(vars, csvfile, res_folder, dropout,
+                         numclass, greyscale, name, mode):
    """
    This function uses a SediNet model for categorical prediction
    """
 
    ID_MAP = dict(zip(np.arange(numclass), [str(k) for k in range(numclass)]))
 
-   ###===================================================
-   ## read the data set in, clean and modify the pathnames so they are absolute
-   df = pd.read_csv(csvfile)
-   df['files'] = [k.strip() for k in df['files']]
-   df['files'] = [os.getcwd()+os.sep+f.replace('\\',os.sep) for f in df['files']]
+   ##======================================
+   ## this randomly selects imagery for training and testing imagery sets
+   ## while also making sure that both training and tetsing sets have
+   ## at least 3 examples of each category
+   test_idx, test_df = get_df(csvfile)
 
-   train_idx = np.arange(len(df))
+   # for 16GB RAM, used maximum of 200 samples to test on
+   # need to change batch gnerator into a better keras one
 
-   train_gen = get_data_generator_1vars(df, train_idx, True, vars, greyscale, len(df))
+   valid_gen = get_data_generator_1image(test_df, test_idx, True, ID_MAP,
+                vars[0], np.min((200, len(train_idx))), greyscale, False)
 
-   #models = []
-   #for base in [base-2,base,base+2]:
-   #weights_path = var+"_model_checkpoint.hdf5"
-   ##==============================================
-   ## create a SediNet model to estimate sediment category
+   if SHALLOW is True:
+      if DO_AUG is True:
+          weights_path = name+"_"+mode+"_batch"+str(BATCH_SIZE)+"_im"+str(IM_HEIGHT)+\
+                   "_"+str(IM_WIDTH)+"_shallow_"+vars[0]+"_"+CAT_LOSS+"_aug.hdf5"
+      else:
+          weights_path = name+"_"+mode+"_batch"+str(BATCH_SIZE)+"_im"+str(IM_HEIGHT)+\
+                   "_"+str(IM_WIDTH)+"_shallow_"+vars[0]+"_"+CAT_LOSS+"_noaug.hdf5"
+   else:
+      if DO_AUG is True:
+           weights_path = name+"_"+mode+"_batch"+str(BATCH_SIZE)+"_im"+str(IM_HEIGHT)+\
+                   "_"+str(IM_WIDTH)+"_"+vars[0]+"_"+CAT_LOSS+"_aug.hdf5"
+      else:
+           weights_path = name+"_"+mode+"_batch"+str(BATCH_SIZE)+"_im"+str(IM_HEIGHT)+\
+                   "_"+str(IM_WIDTH)+"_"+vars[0]+"_"+CAT_LOSS+"_noaug.hdf5"
+
+
+   if not os.path.exists(weights_path):
+       weights_path = res_folder + os.sep+ weights_path
+       print("Using %s" % (weights_path))
+
+   if numclass>0:
+      ID_MAP = dict(zip(np.arange(numclass), [str(k) for k in range(numclass)]))
+
    SM = make_cat_sedinet(ID_MAP, dropout)
-   SM.load_weights(os.getcwd()+os.sep+weights_path)
 
    if type(BATCH_SIZE)==list:
-      s = make_cat_sedinet(ID_MAP, dropout)
-      s.load_weights(os.getcwd()+os.sep+weights_path)
+       predict_test_train_cat(test_df, None, test_idx, None, vars[0],
+                         SMs, [i for i in ID_MAP.keys()], weights_path, greyscale,
+                         name, DO_AUG)
+   else:
+       predict_test_train_cat(test_df, None, test_idx, None, vars[0],
+                         SM, [i for i in ID_MAP.keys()], weights_path, greyscale,
+                         name, DO_AUG)
 
-   x_train, (trueT)= next(train_gen)
-   trueT = trueT[0] #np.squeeze(np.asarray(trueT).argmax(axis=-1) )
+   K.clear_session()
 
-   #P = []; PT = []
-   #for model in models:
-   predT = SM.predict(x_train, batch_size=1)
-
-   del x_train, train_gen
-
-   predT = np.asarray(predT).argmax(axis=-1)
-   #PT.append(predT)
-
-   #predT = np.squeeze(mode(np.asarray(PT), axis=0)[0])
-
-   ##==============================================
-   try:
-      ## print a classification report to screen, showing f1, precision, recall and accuracy
-      print("==========================================")
-      print("Classification report for "+vars[0])
-      print(classification_report(trueT, predT))
-   except:
-      pass
-
-   classes = np.arange(len(ID_MAP))
-   ##==============================================
-   ## create figures showing confusion matrices for data set
-   plot_confmat(predT, trueT, vars[0]+'T',classes)
-   plt.savefig(weights_path.replace('.hdf5','_cm_predict.png'), dpi=300, bbox_inches='tight')
-   plt.close('all')
-
+   ##===================================
+   ## move model files and plots to the results folder
+   tidy(name, res_folder)
 
 
 ###===================================================
-def estimate_siso_simo(vars, csvfile, greyscale, weights_path, dropout):
+def estimate_siso_simo(vars, csvfile, greyscale,
+                       dropout, numclass, scale, name, mode, res_folder, batch_size, weights_path): #,
    """
    This function uses a sedinet model for continuous prediction
    """
-   ###===================================================
-   ## read the data set in, clean and modify the pathnames so they are absolute
-   df = pd.read_csv(csvfile)
-   df['files'] = [k.strip() for k in df['files']]
 
-   train_idx = np.arange(len(df))
+   if not os.path.exists(weights_path):
+       weights_path = res_folder + os.sep+ weights_path
+       print("Using %s" % (weights_path))
 
-   CS = joblib.load(weights_path.replace('.hdf5','_scaler.pkl'))
-
-   varstring = ''.join([str(k)+'_' for k in vars])
-
-   ##==============================================
-   ## create a sedinet model to estimate category
-   model = make_sedinet_siso_simo(vars, greyscale, dropout)
-   model.load_weights(os.getcwd()+os.sep+weights_path)
-
-   Z = joblib.load(weights_path.replace('.hdf5','_bias.pkl'))
-
-   if len(df.keys())>1:  # # "seen" samples
-      train_gen = get_data_generator_Nvars_siso_simo(df, train_idx, False, vars, len(df), greyscale, CS)
-
-      try:
-         x_train, tmp = next(train_gen)
-
-         if len(vars)>1:
-            counter = 0
-            for v in vars:
-               exec(v+'_trueT = np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1)))')
-               counter +=1
-         else:
-            exec(vars[0]+'_trueT = np.squeeze(CS[0].inverse_transform(tmp[0].reshape(-1,1)))')
-
-      except:
-         df['files'] = [os.getcwd()+os.sep+f.replace('\\',os.sep) for f in df['files']]
-         train_gen = get_data_generator_Nvars_siso_simo(df, train_idx, False, vars, len(df), greyscale, CS) #
-         x_train, tmp = next(train_gen)
-
-         if len(vars)>1:
-            counter = 0
-            for v in vars:
-               exec(v+'_trueT = np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1)))')
-               counter +=1
-         else:
-            exec(vars[0]+'_trueT = np.squeeze(CS[0].inverse_transform(tmp[0].reshape(-1,1)))')
-
-
-      for v in vars:
-         exec(v+'_PT = []')
-
-      tmp = model.predict(x_train, batch_size=1)
-
-      if len(vars)>1:
-         counter = 0
-         for v in vars:
-            exec(v+'_PT.append(np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1))))')
-            counter +=1
-      else:
-         exec(vars[0]+'_PT.append(np.asarray(np.squeeze(CS[0].inverse_transform(tmp.reshape(-1,1)))))')
-
-
-      if len(vars)>1:
-         for k in range(len(vars)):
-            exec(vars[k]+'_predT = np.squeeze(np.mean(np.asarray('+vars[k]+'_PT), axis=0))')
-      else:
-         exec(vars[0]+'_predT = np.squeeze(np.mean(np.asarray('+vars[0]+'_PT), axis=0))')
-
-      if len(vars)==9:
-         nrows = 3; ncols = 3
-      elif len(vars)==8:
-         nrows = 4; ncols = 2
-      elif len(vars)==7:
-         nrows = 3; ncols = 3
-      elif len(vars)==6:
-         nrows = 3; ncols = 2
-      elif len(vars)==5:
-         nrows = 3; ncols = 2
-      elif len(vars)==4:
-         nrows = 2; ncols = 2
-      elif len(vars)==3:
-         nrows = 1; ncols = 3
-      elif len(vars)==2:
-         nrows = 2; ncols = 1
-      elif len(vars)==1:
-         nrows = 1; ncols = 1
-
-      ## make a plot
-      fig = plt.figure()
-      labs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-      for k in range(1,1+(nrows*ncols)):
-         try:
-            plt.subplot(nrows,ncols,k)
-            x = eval(vars[k-1]+'_trueT')
-            y = eval(vars[k-1]+'_predT')
-
-            y = np.polyval(Z[k-1],y) #apply bias correction
-            y = np.abs(y) #make sure no negative values
-
-            plt.plot(x, y, 'ko', markersize=5)
-
-            plt.plot([ np.min(np.hstack((x,y))),  np.max(np.hstack((x,y)))], [ np.min(np.hstack((x,y))),  np.max(np.hstack((x,y)))], 'k', lw=2)
-
-            plt.text(1.02*np.min(np.hstack((x,y))), 0.98*np.max(np.hstack((x,y))),'Test : '+str(np.mean(100*(np.abs(eval(vars[k-1]+'_predT') - eval(vars[k-1]+'_trueT')) / eval(vars[k-1]+'_trueT'))))[:5]+' %', fontsize=8)
-
-            plt.title(r''+labs[k-1]+') '+vars[k-1], fontsize=8, loc='left')
-            plt.xlabel('Actual '+vars[k-1])
-            plt.ylabel('Estimated '+vars[k-1])
-         except:
-            pass
-
-      plt.savefig(weights_path.replace('.hdf5', '_predict.png'), dpi=300, bbox_inches='tight')
-      plt.close()
-      del fig
-
-   else:  # "unseen" samples
-
-      train_gen = get_data_generator(df, train_idx, greyscale, batch_size=1)
-
-      for v in vars:
-         exec(v+'_PT = []')
-
-      try:
-         batch_counter = 0
-         while True:
-            print("Estimating image %i ..." % (batch_counter))
-            x_train = next(train_gen)
-            tmp = model.predict(x_train, batch_size=1)
-
-            if len(vars)>1:
-               counter = 0
-               for v in vars:
-                  exec(v+'_PT.append(np.squeeze(CS[counter].inverse_transform(tmp[counter].reshape(-1,1))))')
-                  counter +=1
-            else:
-               exec(vars[0]+'_PT.append(np.asarray(np.squeeze(CS[0].inverse_transform(tmp.reshape(-1,1)))))')
-
-            batch_counter += 1
-      except:
-         pass
-
-      if len(vars)>1:
-         for k in range(len(vars)):
-            exec(vars[k]+'_predT = np.squeeze(np.asarray('+vars[k]+'_PT))')
-      else:
-         exec(vars[0]+'_predT = np.squeeze(np.asarray('+vars[0]+'_PT))')
-
-      if len(vars)>1:
-         for k in range(len(vars)):
-            exec(vars[k]+'_predT = np.abs(np.polyval(Z[k],'+vars[k]+'_predT))')
-      else:
-         exec(vars[0]+'_predT = np.abs(np.polyval(Z[0],'+vars[0]+'_predT))')
-
-      fig = plt.figure()
-      plt.figure(figsize=(16,4))
-      plt.plot(eval(vars[0]+'_predT'))
-      plt.xticks(np.arange(1,len(df),5))
-      plt.gca().set_xticklabels(df.files.values[::5], fontsize=4, rotation=45)
-      plt.title(str(vars[0]))
-      plt.savefig(weights_path.replace('.hdf5', '_predict_unseen.png'), dpi=300, bbox_inches='tight')
-      plt.close()
-      del fig
-
-      d = {'files': df.files.values}
-      if len(vars)>1:
-         for k in range(len(vars)):
-            exec('d[\''+vars[k]+'\'] ='+vars[k]+'_predT')
-      else:
-         exec('d[\''+vars[0]+'\'] ='+vars[0]+'_predT')
-
-      out_df = pd.DataFrame(data=d)
-      out_df.to_csv(csvfile.replace('.csv','_results.csv'))
-
-
-#   if len(vars)>1:
-#      counter = 0
-#      for v in vars:
-#         exec(v+'_trueT = np.squeeze(tmp[counter])')
-#         counter +=1
-#   else:
-#      exec(vars[0]+'_trueT = np.squeeze(tmp)')
-
-#   if len(vars)>1:
-#      counter = 0
-#      for v in vars:
-#         exec(v+'_PT.append(np.squeeze(tmp[counter]))')
-#         counter +=1
-#   else:
-#      exec(vars[0]+'_PT.append(np.asarray(np.squeeze(tmp)))')
-
-
-###===================================================
-def estimate_miso_mimo(vars, test_csvfile, greyscale, auxin, weights_path):
-   """
-   This function uses a sedinet model for continuous prediction
-   """
-   test_idx, test_df = get_df(test_csvfile)
-
-   if greyscale==True:
-       valid_gen = ImageDataGenerator(rescale=1./255).flow_from_dataframe(
-           test_df, x_col='files', shuffle=False, class_mode=None, color_mode='grayscale',
-           target_size=(IM_WIDTH, IM_HEIGHT), batch_size=len(test_df))
-
-   else:
-       valid_gen = ImageDataGenerator(rescale=1./255).flow_from_dataframe(
-           test_df, x_col='files', shuffle=False, class_mode=None, color_mode='rgb',
-           target_size=(IM_WIDTH, IM_HEIGHT), batch_size=len(test_df))
-
-   testImagesX = next(valid_gen)
-
-   ##==============================================
-
-   if len(vars)>1:
-      counter = 0
-      for v in vars:
-         exec(v+'_trueT = np.squeeze(tmp[counter])')
-         counter +=1
-   else:
-      exec(vars[0]+'_trueT = np.squeeze(tmp)')
-
-   varstring = ''.join([str(k)+'_' for k in vars])
+   ##======================================
+   ## this randomly selects imagery for training and testing imagery sets
+   ## while also making sure that both training and tetsing sets have
+   ## at least 3 examples of each category
+   test_idx, test_df = get_df(csvfile)
 
    ##==============================================
    ## create a sedinet model to estimate category
-   model = make_sedinet_miso_mimo(False)
-   model.load_weights(os.getcwd()+os.sep+weights_path)
+   SM = make_sedinet_siso_simo(vars, greyscale, dropout)
 
-   for v in vars:
-      exec(v+'_PT = []')
-
-   tmp = model.predict(testImagesX, batch_size=128)
-   if len(vars)>1:
-      counter = 0
-      for v in vars:
-         exec(v+'_PT.append(np.squeeze(tmp[counter]))')
-         counter +=1
+   if scale==True:
+       CS = []
+       for var in vars:
+          cs = RobustScaler() #MinMaxScaler()
+          cs.fit_transform(
+            np.r_[test_df[var].values].reshape(-1,1)
+            )
+          CS.append(cs)
+          del cs
    else:
-      exec(vars[0]+'_PT.append(np.asarray(np.squeeze(tmp)))')
+       CS = []
 
-   if len(vars)>1:
-      for k in range(len(vars)):
-         exec(vars[k]+'_predT = np.squeeze(np.mean(np.asarray('+vars[k]+'_PT), axis=0))')
+   # test model
+   # if numclass==0:
+   if type(BATCH_SIZE)==list:
+       predict_test_train_siso_simo(test_df, None, test_idx, None, vars,
+                            SMs, weights_path, name, mode, greyscale, CS,
+                            dropout, scale, DO_AUG)
    else:
-      exec(vars[0]+'_predT = np.squeeze(np.mean(np.asarray('+vars[0]+'_PT), axis=0))')
+       predict_test_train_siso_simo(test_df, None, test_idx, None, vars,
+                            SM, weights_path, name, mode, greyscale, CS,
+                            dropout, scale, DO_AUG)
 
+   K.clear_session()
 
-   if len(vars)==9:
-      nrows = 3; ncols = 3
-   elif len(vars)==8:
-      nrows = 4; ncols = 2
-   elif len(vars)==7:
-      nrows = 4; ncols = 2
-   elif len(vars)==6:
-      nrows = 3; ncols = 2
-   elif len(vars)==5:
-      nrows = 3; ncols = 2
-   elif len(vars)==4:
-      nrows = 2; ncols = 2
-   elif len(vars)==3:
-      nrows = 1; ncols = 3
-   elif len(vars)==2:
-      nrows = 2; ncols = 1
-   elif len(vars)==1:
-      nrows = 1; ncols = 1
-
-   ## make a plot
-   fig = plt.figure()
-   labs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-   for k in range(1,1+(nrows*ncols)):
-      plt.subplot(nrows,ncols,k)
-      x = eval(vars[k-1]+'_trueT')
-      y = eval(vars[k-1]+'_predT')
-      plt.plot(x, y, 'ko', markersize=5)
-      plt.plot([ np.min(np.hstack((x,y))),  np.max(np.hstack((x,y)))], [ np.min(np.hstack((x,y))),  np.max(np.hstack((x,y)))], 'k', lw=2)
-
-      plt.text(1.02*np.min(np.hstack((x,y))), 0.98*np.max(np.hstack((x,y))),'Test : '+str(np.mean(100*(np.abs(eval(vars[k-1]+'_predT') - eval(vars[k-1]+'_trueT')) / eval(vars[k-1]+'_trueT'))))[:5]+' %', fontsize=8)
-
-      plt.title(r''+labs[k-1]+') '+vars[k-1], fontsize=8, loc='left')
-      plt.xlabel('Actual '+vars[k-1])
-      plt.ylabel('Estimated '+vars[k-1])
-
-   varstring = ''.join([str(k)+'_' for k in vars])
-   plt.savefig(weights_path.replace('.hdf5', '_predict.png'), dpi=300, bbox_inches='tight')
-   plt.close()
-   del fig
+   ##===================================
+   ## move model files and plots to the results folder
+   tidy(name, res_folder)
