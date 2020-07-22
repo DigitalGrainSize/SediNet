@@ -28,7 +28,7 @@ def run_training_siso_simo(vars, train_csvfile, test_csvfile, name, res_folder,
    ##==============================================
    ## create a sedinet model to estimate category
    if numclass>0:
-      SM = make_cat_sedinet(ID_MAP, dropout)
+      SM = make_cat_sedinet(ID_MAP, dropout, greyscale)
    else:
       SM = make_sedinet_siso_simo(vars, greyscale, dropout)
 
@@ -290,7 +290,7 @@ def train_sedinet_siso_simo(SM, train_df, test_df, train_idx, test_idx, name,
                    "_"+str(IM_WIDTH)+"_"+varstring+"_"+CONT_LOSS+"_noaug_scale.hdf5"
           else:
               weights_path = name+"_"+mode+"_batch"+str(batch_size)+"_im"+str(IM_HEIGHT)+\
-                   "_"+varstring+"_"+CONT_LOSS+"_noaug.hdf5"
+                   "_"+str(IM_WIDTH)+"_"+varstring+"_"+CONT_LOSS+"_noaug.hdf5"
 
     # if it already exists, skip training
     if os.path.exists(weights_path):

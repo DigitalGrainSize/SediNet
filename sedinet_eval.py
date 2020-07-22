@@ -89,7 +89,7 @@ def estimate_categorical(vars, csvfile, res_folder, dropout,
    # need to change batch gnerator into a better keras one
 
    valid_gen = get_data_generator_1image(test_df, test_idx, True, ID_MAP,
-                vars[0], np.min((200, len(train_idx))), greyscale, False)
+                vars[0], np.min((200, len(test_idx))), greyscale, False)
 
    if SHALLOW is True:
       if DO_AUG is True:
@@ -114,7 +114,16 @@ def estimate_categorical(vars, csvfile, res_folder, dropout,
    if numclass>0:
       ID_MAP = dict(zip(np.arange(numclass), [str(k) for k in range(numclass)]))
 
-   SM = make_cat_sedinet(ID_MAP, dropout)
+
+   if type(BATCH_SIZE)==list:
+      SMs = []; 
+      for batch_size, valid_batch_size, wp in zip(BATCH_SIZE, VALID_BATCH_SIZE, weights_path):
+         sm = make_cat_sedinet(ID_MAP, dropout, greyscale)
+         sm.load_weights(wp)
+         SMs.append(sm)
+
+   else:
+     SM = make_cat_sedinet(ID_MAP, dropout, greyscale)
 
    if type(BATCH_SIZE)==list:
        predict_test_train_cat(test_df, None, test_idx, None, vars[0],
@@ -139,9 +148,9 @@ def estimate_siso_simo(vars, csvfile, greyscale,
    This function uses a sedinet model for continuous prediction
    """
 
-   if not os.path.exists(weights_path):
-       weights_path = res_folder + os.sep+ weights_path
-       print("Using %s" % (weights_path))
+   # if not os.path.exists(weights_path):
+   #     weights_path = res_folder + os.sep+ weights_path
+   #     print("Using %s" % (weights_path))
 
    ##======================================
    ## this randomly selects imagery for training and testing imagery sets
@@ -151,6 +160,12 @@ def estimate_siso_simo(vars, csvfile, greyscale,
 
    ##==============================================
    ## create a sedinet model to estimate category
+   # if type(BATCH_SIZE)==list:
+   #     SMs = []
+   #     for k in BATCH_SIZE:
+   #         SMs.append(make_sedinet_siso_simo(vars, greyscale, dropout))
+   #
+   # else:
    SM = make_sedinet_siso_simo(vars, greyscale, dropout)
 
    if scale==True:
@@ -169,7 +184,7 @@ def estimate_siso_simo(vars, csvfile, greyscale,
    # if numclass==0:
    if type(BATCH_SIZE)==list:
        predict_test_train_siso_simo(test_df, None, test_idx, None, vars,
-                            SMs, weights_path, name, mode, greyscale, CS,
+                            SM, weights_path, name, mode, greyscale, CS,
                             dropout, scale, DO_AUG)
    else:
        predict_test_train_siso_simo(test_df, None, test_idx, None, vars,

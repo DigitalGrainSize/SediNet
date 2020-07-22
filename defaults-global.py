@@ -16,10 +16,10 @@ IM_WIDTH = IM_HEIGHT #1024 #IM_HEIGHT
 
 # number of images to feed the network per step in epoch #suggested: 4 --16
 # integer
-#BATCH_SIZE = 7
+#BATCH_SIZE = 12
 
 #use an ensemble of batch sizes like this
-BATCH_SIZE = [4,6,8]
+BATCH_SIZE = [12,13,14]
 
 # if True, use a smaller (shallower) network architecture
 ##True or False ##False=larger network
@@ -27,7 +27,7 @@ SHALLOW = False #True
 
 ## if True, carry out data augmentation. 2 x number of images used in training
 ##True or False
-DO_AUG = False #True
+DO_AUG = False # True
 
 # maximum learning rate ##1e-1 -- 1e-4
 MAX_LR = 1e-3

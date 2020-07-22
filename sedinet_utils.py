@@ -585,14 +585,26 @@ def get_data_generator_1image(df, indices, for_training, ID_MAP,
 
             if greyscale==True:
                im = Image.open(file).convert('LA')
+               if np.ndim(im)==3:
+                   im = im[:,:,0]
+               im = im.resize((IM_HEIGHT, IM_HEIGHT))
+               im = np.array(im)[:,:,0]
             else:
                im = Image.open(file)
+               if np.ndim(im)==2:
+                  im = np.array(im)
+                  im = np.dstack((im, im , im))
+                  im = Image.fromarray(im)
+
             im = im.resize((IM_HEIGHT, IM_HEIGHT))
             im = np.array(im) / 255.0
 
-            # if np.ndim(im)==2:
-            #    im = np.dstack((im, im , im)) ##np.expand_dims(im[:,:,0], axis=2)
-            # im = im[:,:,:3]
+            if greyscale==False:
+                if np.ndim(im)==3:
+                    pass
+            else:
+                if np.ndim(im)==2:
+                    pass
 
             if greyscale==True:
                if do_aug==True:
@@ -611,6 +623,7 @@ def get_data_generator_1image(df, indices, for_training, ID_MAP,
                    pops.append(to_categorical(pop, len(ID_MAP2)))
 
             try:
+
                if do_aug==True:
                   if len(images) >= batch_size:
                      if greyscale==False:
@@ -625,6 +638,7 @@ def get_data_generator_1image(df, indices, for_training, ID_MAP,
                   if len(images) >= batch_size:
                      yield np.squeeze(np.array(images)),np.array(pops) #[np.array(pops)]
                      images, pops = [], []
+
             except GeneratorExit:
                print(" ") #pass
 
@@ -860,11 +874,11 @@ def predict_test_train_cat(train_df, test_df, train_idx, test_idx, var, SM,
        pred = np.squeeze(np.asarray(pred).argmax(axis=-1))#[0])
        true = np.squeeze(np.asarray(true).argmax(axis=-1) )
 
-   ##==============================================
-   ## print a classification report to screen, showing f1, precision, recall and accuracy
-   print("==========================================")
-   print("Classification report for "+var)
-   print(classification_report(true, pred))
+       ##==============================================
+       ## print a classification report to screen, showing f1, precision, recall and accuracy
+       print("==========================================")
+       print("Classification report for "+var)
+       print(classification_report(true, pred))
 
    fig = plt.figure()
    ##==============================================
@@ -1242,19 +1256,25 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
         for v in vars:
            exec('del '+v+'_P')
 
-        ## write out results to text files
-        if len(vars)>1:
-           for k in range(len(vars)):
-              exec('np.savetxt("'+name+'_test'+vars[k]+'.txt", ('+vars[k]+'_pred))') #','+vars[k]+'_true))')
-              exec('np.savetxt("'+name+'_train'+vars[k]+'.txt", ('+vars[k]+'_predT))') #,'+vars[k]+'_trueT))')
-           np.savetxt(name+"_test_files.txt", np.asarray(test_df.files.values), fmt="%s")
-           np.savetxt(name+"_train_files.txt", np.asarray(train_df.files.values), fmt="%s")
+        # ## write out results to text files
+        # if len(vars)>1:
+        #    for k in range(len(vars)):
+        #       exec('np.savetxt("'+name+'_test'+vars[k]+'_pred.txt", ('+vars[k]+'_pred))')
+        #       exec('np.savetxt("'+name+'_train'+vars[k]+'_predT.txt", ('+vars[k]+'_predT))')
+        #       exec('np.savetxt("'+name+'_test'+vars[k]+'_true.txt", ('+vars[k]+'_true))')
+        #       exec('np.savetxt("'+name+'_train'+vars[k]+'_trueT.txt", ('+vars[k]+'_trueT))')
+        #    np.savetxt(name+"_test_files.txt", np.asarray(test_df.files.values), fmt="%s")
+        #    np.savetxt(name+"_train_files.txt", np.asarray(train_df.files.values), fmt="%s")
+        #
+        # else:
+        #    exec('np.savetxt("'+name+'_test'+vars[0]+'.txt", ('+vars[0]+'_pred))')
+        #    exec('np.savetxt("'+name+'_train'+vars[0]+'.txt", ('+vars[0]+'_predT))')
+        #    exec('np.savetxt("'+name+'_test'+vars[0]+'_true.txt", ('+vars[0]+'_true))')
+        #    exec('np.savetxt("'+name+'_train'+vars[0]+'_trueT.txt", ('+vars[0]+'_trueT))')
+        #    np.savetxt(name+"_test_files.txt", np.asarray(test_df.files.values), fmt="%s")
+        #    np.savetxt(name+"_train_files.txt", np.asarray(train_df.files.values), fmt="%s")
 
-        else:
-           exec('np.savetxt("'+name+'_test'+vars[0]+'.txt", ('+vars[0]+'_pred))') #','+vars[k]+'_true))')
-           exec('np.savetxt("'+name+'_train'+vars[0]+'.txt", ('+vars[0]+'_predT))') #,'+vars[k]+'_trueT))')
-           np.savetxt(name+"_test_files.txt", np.asarray(test_df.files.values), fmt="%s")
-           np.savetxt(name+"_train_files.txt", np.asarray(train_df.files.values), fmt="%s")
+
 
     if len(vars)==9:
        nrows = 3; ncols = 3
@@ -1292,6 +1312,12 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
          y1 = np.polyval(z,y1)
          y1 = np.abs(y1)
 
+         # if k==4: #for k in range(len(vars)):
+         #    ind = np.where(100*np.abs(x1-y1)/x1)[0] < 50
+         #    exec('np.savetxt("'+name+'_train'+vars[k]+'_predT.txt", (y1[ind]))')
+         #    exec('np.savetxt("'+name+'_train'+vars[k]+'_trueT.txt", (x1[ind]))')
+         #    np.savetxt(name+"_train_files"+vars[k]+"_.txt", np.asarray(train_df.files.values)[ind], fmt="%s")
+
          plt.plot(x1, y1, 'ko', markersize=5)
          plt.plot([ np.min(np.hstack((x1,y1))),  np.max(np.hstack((x1,y1)))],
                   [ np.min(np.hstack((x1,y1))),  np.max(np.hstack((x1,y1)))],
@@ -1301,6 +1327,12 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
              x2 = eval(vars[k-1]+'_true')
              y2 = eval(vars[k-1]+'_pred')
              y2 = np.abs(np.polyval(z,y2))
+
+             # if k==4: #for k in range(len(vars)):
+             #    ind = np.where(100*np.abs(x2-y2)/x2)[0] < 50
+             #    exec('np.savetxt("'+name+'_test'+vars[k]+'_pred.txt", (y2[ind]))')
+             #    exec('np.savetxt("'+name+'_test'+vars[k]+'_true.txt", (x2[ind]))')
+             #    np.savetxt(name+"_test_files"+vars[k]+"_.txt", np.asarray(train_df.files.values)[ind], fmt="%s")
 
              plt.plot(x2, y2, 'bx', markersize=5)
 
@@ -1336,6 +1368,10 @@ def predict_test_train_siso_simo(train_df, test_df, train_idx, test_idx, vars,
 
     plt.close()
     del fig
+
+
+
+
 
 
 ###===================================================

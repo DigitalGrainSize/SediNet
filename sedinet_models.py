@@ -27,19 +27,26 @@ def conv_block2(inp, filters=32, bn=True, pool=True, drop=True):
    return _
 
 ###===================================================
-def make_cat_sedinet(ID_MAP, dropout):
+def make_cat_sedinet(ID_MAP, dropout, greyscale):
     """
     This function creates an implementation of SediNet for estimating
 	sediment category
     """
 
     base = BASE_CAT ##30
+    if greyscale==True:
+       input_layer = Input(shape=(IM_HEIGHT, IM_WIDTH, 1))
+    else:
+       input_layer = Input(shape=(IM_HEIGHT, IM_WIDTH, 3))
 
-    input_layer = Input(shape=(IM_HEIGHT, IM_WIDTH, 3))
     _ = conv_block2(input_layer, filters=base, bn=False, pool=False, drop=False) #x #
     _ = conv_block2(_, filters=base*2, bn=False, pool=True,drop=False)
     _ = conv_block2(_, filters=base*3, bn=False, pool=True,drop=False)
     _ = conv_block2(_, filters=base*4, bn=False, pool=True,drop=False)
+
+    if not SHALLOW:
+       _ = conv_block2(_, filters=base*5, bn=False, pool=True,drop=False)
+       _ = conv_block2(_, filters=base*6, bn=False, pool=True,drop=False)
 
     bottleneck = GlobalMaxPool2D()(_)
     bottleneck = Dropout(dropout)(bottleneck)

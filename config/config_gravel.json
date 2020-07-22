@@ -1,7 +1,7 @@
 {
-  "train_csvfile" : "gravel_all2_train.csv",
-  "test_csvfile" : "gravel_all2_test.csv",
-  "csvfile" : "gravel_all2.csv",
+  "train_csvfile" : "gravel_all4_train.csv",
+  "test_csvfile" : "gravel_all4_test.csv",
+  "csvfile" : "gravel_all4.csv",
   "P5" : "P5",
   "P10": "P10",
   "P16": "P16",
