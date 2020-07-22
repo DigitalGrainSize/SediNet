@@ -1,4 +1,4 @@
-# Warning, good things are coming. Major upgrade in progress. Listen to announcements on twitter or when this message disappears
+<!-- # Warning, good things are coming. Major upgrade in progress. Listen to announcements on twitter (`@magic_walnut`) or when this message disappears -->
 
 # SediNet: Build your own sediment descriptor
 
@@ -20,7 +20,7 @@ A configurable machine-learning framework for estimating either (or both) contin
 
 For more details, please see the paper:
 
-Buscombe, D. (2019). SediNet: a configurable deep learning model for mixed qualitative and quantitative optical granulometry. Earth Surface Processes and Landforms. https://onlinelibrary.wiley.com/doi/abs/10.1002/esp.4760
+Buscombe, D. (2019). SediNet: a configurable deep learning model for mixed qualitative and quantitative optical granulometry. Earth Surface Processes and Landforms 45 (3), 638-651. https://onlinelibrary.wiley.com/doi/abs/10.1002/esp.4760
 
 Free Earth ArXiv preprint [here](https://eartharxiv.org/fwsnp/)
 
@@ -176,9 +176,9 @@ python sedinet_train.py -c config/config_pop.json
 Subsequently predict using:
 
 ```
-python sedinet_predict.py -c config/config_pop.json -1 -2 -3
+python sedinet_predict.py -c config/config_pop.json -1 grain_population/res/grain_population_siso_batch3_im768_768_pop_focal_noaug.hdf5 -2 grain_population/res/grain_population_siso_batch4_im768_768_pop_focal_noaug.hdf5 -3 grain_population/res/grain_population_siso_batch6_im768_768_pop_focal_noaug.hdf5 -4 grain_population/res/grain_population_siso_batch8_im768_768_pop_focal_noaug.hdf5
 ```
-The above model has been trained with multiple batch size of 4, 6 and 8, with 768x768 pixel imagery, no augmentation, and no variable scaling (by default for categorical variables)
+The above model has been trained with multiple batch size of 3, 4, and 6, with 768x768 pixel imagery, no augmentation, and no variable scaling (by default for categorical variables)
 
 
 ##### Train SediNet for sediment shape prediction
@@ -209,6 +209,7 @@ Subsequently predict using:
 python sedinet_predict.py -c config/config_gravel.json -w grain_size_gravel_generic/res/gravel_generic_9prcs_simo_batch6_im768_768_9vars_pinball_aug.hdf5
 ```
 
+The above model has been trained with a batch size of 6, with 768x768 pixel imagery, augmentation, and no variable scaling
 
 ##### Train SediNet for sediment grain size prediction (9 percentiles of the cumulative distribution) on sand images
 
@@ -220,6 +221,8 @@ Subsequently predict using:
 ```
 python sedinet_predict.py -c config/config_sand.json -w grain_size_sand_generic/res_9prcs/sand_generic_9prcs_simo_batch12_im768_768_9vars_pinball_noaug_scale.hdf5
 ```
+
+The above model has been trained with a batch size of 12, with 768x768 pixel imagery, no augmentation, and variable scaling
 
 
 ##### Train SediNet for sediment grain size prediction (3 percentiles of the cumulative distribution) on sand images
@@ -233,6 +236,8 @@ Subsequently predict using:
 python sedinet_predict.py -c config/config_sand_3prcs.json -w grain_size_sand_generic/res_3prcs/sand_generic_3prcs_simo_batch12_im768_768_3vars_pinball_noaug_scale.hdf5
 ```
 
+The above model has been trained with a batch size of 12, with 768x768 pixel imagery, no augmentation, and variable scaling
+
 
 ##### Train SediNet for estimating mean size and sorting from images of mixed sand and gravel
 
@@ -245,6 +250,8 @@ Subsequently predict using:
 ```
 python sedinet_predict.py -c config/config_mattole.json -w mattole/res/mattole_simo_batch7_im512_512_2vars_pinball_aug.hdf5
 ```
+
+The above model has been trained with a batch size of 7, with 768x768 pixel imagery, augmentation, and no variable scaling
 
 --------------------------------------------------------------------------------
 ## More details about inputs and using this tool on your own data
@@ -424,7 +431,6 @@ and continuous ...
 python sedinet_predict.py -c config/config_custom_4prcs.json
 ``` -->
 
-
 --------------------------------------------------------------------------------
 
 ## Release notes
@@ -483,12 +489,14 @@ python sedinet_predict.py -c config/config_custom_4prcs.json
 24) variables in `defaults.py` based on consideration of accuracy across many datasets, both included and not included as pat of the SediNet package
 25) categorical models also have a shallow and false option
 26) `predict_all.sh` is a fully worked example of using the framework to predict on all continuous datasets
+27) simplified yml conda env, and a requirements.txt
 
 > The most important changes area
 * depthwise separable convolution layers
 * exponentially decreasing learning rate scheduler
 * pinball loss for continuous variables
 * focal loss and "shallow=False" for categorical variables
+* training and prediction using model ensembles trained with up to 4 different batch sizes
 
 --------------------------------------------------------------------------------
 ## Other things
@@ -532,7 +540,6 @@ In order of trial:
 3. use smaller imagery (`IM_WIDTH` and `IM_HEIGHT` in `defaults.py`)
 4. use a bigger GPU
 
-
 --------------------------------------------------------------------------------
 ## Notes for developers
 
@@ -551,13 +558,17 @@ SediNet is organized as follows:
 
 2. Model prediction
 
-  * Given a provided `config` file, `csv_file` and `weights_file`, use the model defined in the config file, load the weights, and estimate the variables on the images listed in the csv file
+  * Given a provided `config` file, `csv_file` and `weights_file` (or up to 4 weights files), use the model defined in the config file, load the weights, and estimate the variables on the images listed in the csv file
   * When `sedinet_predict.py` is called, it first sets an operating system environmental variable that controls the use or otherwise of the GPU. It uses GPU 0 if use_GPU=True, otherwise GPU -1 (shorthand for CPU)
   * it imports everything in `sedinet_eval` which import everything in `sedinet_models`, so on for `sedinet_utils`, and finally `imports`
   * `imports` sets global variables and reads the `defaults.py`
   * then `sedinet_predict.py` reads the specified (at the command line) `config` file, and weights file, organizes the config variables, and finally calls `estimate_siso_simo` or `estimate_categorical` from `sedinet_eval`
   * `estimate_siso_simo` runs `make_sedinet_siso_simo` to make a continuous model. `estimate_categorical` runs `make_cat_sedinet` to make a categorical model  (both called from `sedinet_models`)
   * then `predict_test_train_siso_simo` for continuous model training, or `predict_test_train_cat` for categorical (both called from `sedinet_utils`) and finally `tidy` moves the files into the `res_folder`, specified in the `config` file
+
+3. Model prediction on sample imagery
+
+  * coming soon .... a script to point a model to an image folder, resulting in a csv file of requested outputs per image
 
 
 ### Contribute
@@ -617,10 +628,11 @@ where ```IP``` is the static IP of the VM that you noted earlier.
 
 --------------------------------------------------------------------------------
 ## Future plans
-
+* redo and reinstate the jupyter notebooks
 * predict on folder of sample images script
 *  change batch generators into a better keras ones that will allow augmentation etc e.g [this](https://www.kaggle.com/amyjang/tensorflow-cnn-data-augmentation-prostate-cancer) or [this](https://www.kaggle.com/amyjang/tensorflow-pneumonia-classification-on-x-rays)
 * multiple input, using pyDGS output perhaps? (unsupervised prior / covariate )
 * k-folds cross-val for training
 * transfer learning  
 * aggregate over other hyperparameters besides batch size, such as loss function
+* more example data / use case examples

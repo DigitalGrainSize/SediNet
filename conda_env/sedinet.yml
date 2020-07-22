@@ -13,14 +13,11 @@ dependencies:
   - pandas
   - pip
   - requests
-  - jupyter
   - scikit-learn
   - tqdm
   - joblib
   - tensorflow-gpu
-  - tensorflow-addons
   - scikit-image
   - pip:
     - Image
-    - pydot
-    - graphviz
+    - tensorflow-addons    

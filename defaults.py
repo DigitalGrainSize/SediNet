@@ -16,10 +16,10 @@ IM_WIDTH = IM_HEIGHT #1024 #IM_HEIGHT
 
 # number of images to feed the network per step in epoch #suggested: 4 --16
 # integer
-#BATCH_SIZE = 7
+BATCH_SIZE = 8
 
 #use an ensemble of batch sizes like this
-BATCH_SIZE = [4,6,8]
+#BATCH_SIZE = [4,6,8]
 
 # if True, use a smaller (shallower) network architecture
 ##True or False ##False=larger network

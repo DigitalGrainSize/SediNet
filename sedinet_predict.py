@@ -32,9 +32,9 @@ if __name__ == '__main__':
 
     argv = sys.argv[1:]
     try:
-        opts, args = getopt.getopt(argv,"h:c:w:1:2:3:")
+        opts, args = getopt.getopt(argv,"h:c:w:1:2:3:4:")
     except getopt.GetoptError:
-        print('python sedinet_predict.py -c configfile.json {-w weightsfile.hdf5} OR {-1 weightsfile_batch1.hdf5 -2 weightsfile_batch2.hdf5 -3 weightsfile_batch3.hdf5}')
+        print('python sedinet_predict.py -c configfile.json {-w weightsfile.hdf5} OR {-1 weightsfile_batch1.hdf5 -2 weightsfile_batch2.hdf5 -3 weightsfile_batch3.hdf5 -4 weightsfile_batch4.hdf5}')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
@@ -54,6 +54,8 @@ if __name__ == '__main__':
             weights_path2 = arg
         elif opt in ("-3"):
             weights_path3 = arg
+        elif opt in ("-4"):
+            weights_path4 = arg
 
     if 'weights_path1' not in locals():
         if not os.path.isfile(os.getcwd()+os.sep+weights_path):
@@ -90,6 +92,16 @@ if __name__ == '__main__':
                weights_path.append(weights_path3)
         else:
            weights_path.append(weights_path3)
+
+    if 'weights_path4' in locals():
+        if not os.path.isfile(os.getcwd()+os.sep+weights_path4):
+            if not os.path.isfile(weights_path4):
+               print("Weights path 4 does not exist ... exiting")
+               sys.exit()
+            else:
+               weights_path.append(weights_path4)
+        else:
+           weights_path.append(weights_path4)
 
     try:
        # load the user configs
@@ -159,8 +171,8 @@ if __name__ == '__main__':
 
     if (mode=='siso' or mode=='simo'):
        if numclass>0:
-          estimate_categorical(vars, csvfile, res_folder,
-                               dropout, numclass, greyscale, name, mode)
+          estimate_categorical(vars, csvfile, res_folder, dropout,
+                                   numclass, greyscale, name, mode, weights_path)
        else:
           if type(BATCH_SIZE) is list:
               for batch_size,wp in zip(BATCH_SIZE, weights_path):

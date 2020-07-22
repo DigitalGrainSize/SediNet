@@ -72,7 +72,7 @@ def get_data_generator_1vars(df, indices, for_training, vars, greyscale, batch_s
 
 ###===================================================
 def estimate_categorical(vars, csvfile, res_folder, dropout,
-                         numclass, greyscale, name, mode):
+                         numclass, greyscale, name, mode, wp):
    """
    This function uses a SediNet model for categorical prediction
    """
@@ -85,38 +85,41 @@ def estimate_categorical(vars, csvfile, res_folder, dropout,
    ## at least 3 examples of each category
    test_idx, test_df = get_df(csvfile)
 
-   # for 16GB RAM, used maximum of 200 samples to test on
+   # for 16GB RAM, used maximum of 400 samples to test on
    # need to change batch gnerator into a better keras one
 
    valid_gen = get_data_generator_1image(test_df, test_idx, True, ID_MAP,
-                vars[0], np.min((200, len(test_idx))), greyscale, False)
+                vars[0], np.min((400, len(test_idx))), greyscale, False)
 
-   if SHALLOW is True:
-      if DO_AUG is True:
-          weights_path = name+"_"+mode+"_batch"+str(BATCH_SIZE)+"_im"+str(IM_HEIGHT)+\
-                   "_"+str(IM_WIDTH)+"_shallow_"+vars[0]+"_"+CAT_LOSS+"_aug.hdf5"
-      else:
-          weights_path = name+"_"+mode+"_batch"+str(BATCH_SIZE)+"_im"+str(IM_HEIGHT)+\
-                   "_"+str(IM_WIDTH)+"_shallow_"+vars[0]+"_"+CAT_LOSS+"_noaug.hdf5"
+   if type(wp)==list:
+       weights_path = wp
    else:
-      if DO_AUG is True:
-           weights_path = name+"_"+mode+"_batch"+str(BATCH_SIZE)+"_im"+str(IM_HEIGHT)+\
-                   "_"+str(IM_WIDTH)+"_"+vars[0]+"_"+CAT_LOSS+"_aug.hdf5"
-      else:
-           weights_path = name+"_"+mode+"_batch"+str(BATCH_SIZE)+"_im"+str(IM_HEIGHT)+\
-                   "_"+str(IM_WIDTH)+"_"+vars[0]+"_"+CAT_LOSS+"_noaug.hdf5"
+       if SHALLOW is True:
+          if DO_AUG is True:
+              weights_path = name+"_"+mode+"_batch"+str(BATCH_SIZE)+"_im"+str(IM_HEIGHT)+\
+                       "_"+str(IM_WIDTH)+"_shallow_"+vars[0]+"_"+CAT_LOSS+"_aug.hdf5"
+          else:
+              weights_path = name+"_"+mode+"_batch"+str(BATCH_SIZE)+"_im"+str(IM_HEIGHT)+\
+                       "_"+str(IM_WIDTH)+"_shallow_"+vars[0]+"_"+CAT_LOSS+"_noaug.hdf5"
+       else:
+          if DO_AUG is True:
+               weights_path = name+"_"+mode+"_batch"+str(BATCH_SIZE)+"_im"+str(IM_HEIGHT)+\
+                       "_"+str(IM_WIDTH)+"_"+vars[0]+"_"+CAT_LOSS+"_aug.hdf5"
+          else:
+               weights_path = name+"_"+mode+"_batch"+str(BATCH_SIZE)+"_im"+str(IM_HEIGHT)+\
+                       "_"+str(IM_WIDTH)+"_"+vars[0]+"_"+CAT_LOSS+"_noaug.hdf5"
 
 
-   if not os.path.exists(weights_path):
-       weights_path = res_folder + os.sep+ weights_path
-       print("Using %s" % (weights_path))
+       if not os.path.exists(weights_path):
+           weights_path = res_folder + os.sep+ weights_path
+           print("Using %s" % (weights_path))
 
    if numclass>0:
       ID_MAP = dict(zip(np.arange(numclass), [str(k) for k in range(numclass)]))
 
 
    if type(BATCH_SIZE)==list:
-      SMs = []; 
+      SMs = [];
       for batch_size, valid_batch_size, wp in zip(BATCH_SIZE, VALID_BATCH_SIZE, weights_path):
          sm = make_cat_sedinet(ID_MAP, dropout, greyscale)
          sm.load_weights(wp)
