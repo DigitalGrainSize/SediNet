@@ -125,6 +125,33 @@ The following examples have been selected to demonstrate the range of options yo
 
 #### Continuous
 
+
+##### Train SediNet for sediment grain size prediction (9 percentiles of the cumulative distribution) on a large population of 400 images
+
+```
+python sedinet_train.py -c config/config_9percentiles.json
+```
+
+Subsequently predict using:
+```
+python sedinet_predict.py -c config/config_9percentiles.json -1 grain_size_global/res/global_9prcs_simo_batch12_im768_768_9vars_pinball_noaug.hdf5 -2 grain_size_global/res/global_9prcs_simo_batch13_im768_768_9vars_pinball_noaug.hdf5 -3 grain_size_global/res/global_9prcs_simo_batch14_im768_768_9vars_pinball_noaug.hdf5
+```
+
+The above model has been trained with multiple batch size of 12, 13 and 14, with 768x768 pixel imagery, no augmentation, and no variable scaling
+
+
+To use the model to predict on a single image:
+
+```
+python sedinet_predict1image.py -c config/config_9percentiles.json -i images/Cal_16.tif -1 grain_size_global/res/global_9prcs_simo_batch12_im768_768_9vars_pinball_noaug.hdf5 -2 grain_size_global/res/global_9prcs_simo_batch13_im768_768_9vars_pinball_noaug.hdf5 -3 grain_size_global/res/global_9prcs_simo_batch14_im768_768_9vars_pinball_noaug.hdf5
+```
+
+To use the model to predict on all images in a folder:
+
+```
+python sedinet_predictfolder.py -c config/config_9percentiles.json -w grain_size_global/res/global_9prcs_simo_batch14_im768_768_9vars_pinball_noaug.hdf5 -i images/
+```
+
 ##### Train SediNet for sediment grain size prediction (4 percentiles of the cumulative distribution plus sieve size) on a small population of beach sands
 
 ```
@@ -137,6 +164,13 @@ python sedinet_predict.py -c config/config_sievedsand_sieve_plus.json -w grain_s
 ```
 
 The above model has been trained with a single batch size of 8, with 768x768 pixel imagery, augmentation, and scaling
+
+To use the model to predict on a single image:
+
+```
+python sedinet_predict1image.py -c config/config_sievedsand_sieve_plus.json -w grain_size_sieved_sands/res_sieve_plus/sievesand_sieve_plus_simo_batch8_im512_512_6vars_pinball_aug_scale.hdf5 -i images/IMG_0214.JPG
+```
+
 
 ##### Train SediNet for sediment mid sieve size on a small population of beach sands
 
@@ -151,19 +185,13 @@ python sedinet_predict.py -c config/config_sievedsand_sieve.json -w grain_size_s
 
 The above model has been trained with a single batch size of 8, with 768x768 pixel imagery, augmentation, and scaling
 
-
-##### Train SediNet for sediment grain size prediction (9 percentiles of the cumulative distribution) on a large population of 400 images
+To use the model to predict on a single image:
 
 ```
-python sedinet_train.py -c config/config_9percentiles.json
+python sedinet_predict1image.py -c config/config_sievedsand_sieve.json -w grain_size_sieved_sands/res_sieve/sievesand_sieve_siso_batch7_im512_512_1vars_pinball_aug_scale.hdf5 -i images/IMG_0214.JPG
 ```
 
-Subsequently predict using:
-```
-python sedinet_predict.py -c config/config_9percentiles.json -1 grain_size_global/res/global_9prcs_simo_batch12_im768_768_9vars_pinball_noaug.hdf5 -2 grain_size_global/res/global_9prcs_simo_batch13_im768_768_9vars_pinball_noaug.hdf5 -3 grain_size_global/res/global_9prcs_simo_batch14_im768_768_9vars_pinball_noaug.hdf5
-```
 
-The above model has been trained with multiple batch size of 12, 13 and 14, with 768x768 pixel imagery, no augmentation, and no variable scaling
 
 #### Categorical
 
@@ -180,6 +208,12 @@ python sedinet_predict.py -c config/config_pop.json -1 grain_population/res/grai
 ```
 The above model has been trained with multiple batch size of 3, 4, and 6, with 768x768 pixel imagery, no augmentation, and no variable scaling (by default for categorical variables)
 
+To use the model to predict on a single image:
+
+```
+python sedinet_predict1image.py -i images/um125_179_1.jpg -c config/config_pop.json -w grain_population/res/grain_population_siso_batch3_im768_768_pop_focal_noaug.hdf5
+```
+
 
 ##### Train SediNet for sediment shape prediction
 
@@ -194,8 +228,14 @@ python sedinet_predict.py -c config/config_shape.json -1 grain_shape/res/grain_s
 ```
 The above model has been trained with multiple batch size of 6, 8 and 10, with 768x768 pixel imagery, no augmentation, and no variable scaling (by default for categorical variables)
 
-### Other examples
+To use the model to predict on a single image (remember to change the `BATCH_SIZE` to a list):
 
+```
+python sedinet_predict1image.py -c config/config_shape.json -i images/Cal_16.tif -1 grain_shape/res/grain_shape_siso_batch6_im768_768_shape_focal_noaug.hdf5 -2 grain_shape/res/grain_shape_siso_batch8_im768_768_shape_focal_noaug.hdf5 -3 grain_shape/res/grain_shape_siso_batch10_im768_768_shape_focal_noaug.hdf5
+```
+
+
+### Other examples
 
 ##### Train SediNet for sediment grain size prediction (9 percentiles of the cumulative distribution) on gravel images
 
@@ -211,6 +251,12 @@ python sedinet_predict.py -c config/config_gravel.json -w grain_size_gravel_gene
 
 The above model has been trained with a batch size of 6, with 768x768 pixel imagery, augmentation, and no variable scaling
 
+To use the model to predict on a single image:
+
+```
+python sedinet_predict1image.py -c config/config_gravel.json -i images/Cal_16.tif -w grain_size_gravel_generic/res/gravel_generic_9prcs_simo_batch6_im768_768_9vars_pinball_aug.hdf5
+```
+
 ##### Train SediNet for sediment grain size prediction (9 percentiles of the cumulative distribution) on sand images
 
 ```
@@ -223,6 +269,12 @@ python sedinet_predict.py -c config/config_sand.json -w grain_size_sand_generic/
 ```
 
 The above model has been trained with a batch size of 12, with 768x768 pixel imagery, no augmentation, and variable scaling
+
+To use the model to predict on a single image:
+
+```
+python sedinet_predict1image.py -c config/config_sand.json -i images/IMG_1591_1400microns.JPG -w grain_size_sand_generic/res_9prcs/sand_generic_9prcs_simo_batch12_im768_768_9vars_pinball_noaug_scale.hdf5
+```
 
 
 ##### Train SediNet for sediment grain size prediction (3 percentiles of the cumulative distribution) on sand images
@@ -238,6 +290,12 @@ python sedinet_predict.py -c config/config_sand_3prcs.json -w grain_size_sand_ge
 
 The above model has been trained with a batch size of 12, with 768x768 pixel imagery, no augmentation, and variable scaling
 
+To use the model to predict on a single image:
+
+```
+python sedinet_predict1image.py -c config/config_sand_3prcs.json -i images/IMG_1591_1400microns.JPG -w grain_size_sand_generic/res_3prcs/sand_generic_3prcs_simo_batch12_im768_768_3vars_pinball_noaug_scale.hdf5
+```
+
 
 ##### Train SediNet for estimating mean size and sorting from images of mixed sand and gravel
 
@@ -252,6 +310,13 @@ python sedinet_predict.py -c config/config_mattole.json -w mattole/res/mattole_s
 ```
 
 The above model has been trained with a batch size of 7, with 768x768 pixel imagery, augmentation, and no variable scaling
+
+To use the model to predict on a single image:
+
+```
+python sedinet_predict1image.py -c config/config_mattole.json -i images/mattole_images/all/DSCN3521c.JPG -w mattole/res/mattole_simo_batch7_im512_512_2vars_pinball_aug.hdf5
+```
+
 
 --------------------------------------------------------------------------------
 ## More details about inputs and using this tool on your own data
@@ -490,6 +555,7 @@ python sedinet_predict.py -c config/config_custom_4prcs.json
 25) categorical models also have a shallow and false option
 26) `predict_all.sh` is a fully worked example of using the framework to predict on all continuous datasets
 27) simplified yml conda env, and a requirements.txt
+28) added `sedinet_predict1image.py` for making predictions on a single image
 
 > The most important changes area
 * depthwise separable convolution layers
@@ -568,7 +634,7 @@ SediNet is organized as follows:
 
 3. Model prediction on sample imagery
 
-  * coming soon .... a script to point a model to an image folder, resulting in a csv file of requested outputs per image
+  * early versions of `sedinet_predict_1image.py` and `sedinet_predictfolder.py` are now provided. These scripts allow you to point a model to an image or image folder, resulting in a csv file of requested outputs per image
 
 
 ### Contribute
@@ -636,3 +702,7 @@ where ```IP``` is the static IP of the VM that you noted earlier.
 * transfer learning  
 * aggregate over other hyperparameters besides batch size, such as loss function
 * more example data / use case examples
+
+
+<!--
+python sedinet_predict1image.py -c sandsnap/config_usace_july2020_set2_3.json -i sandsnap_images/3RodantheDune/20191010_135004_3c.jpg -w sandsnap/res/sandsnap_july2020_set2_3_simo_batch13_im768_8vars_pinball_noaug.hdf5 -->

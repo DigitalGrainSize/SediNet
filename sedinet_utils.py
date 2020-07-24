@@ -804,18 +804,18 @@ def predict_test_train_cat(train_df, test_df, train_idx, test_idx, var, SM,
    This function creates makes predictions on test and train data,
    prints a classification report, and prints confusion matrices
    """
-   if type(SM) == list:
-      counter = 0
-      for s,wp in zip(SM, weights_path):
-         exec('SM[counter].load_weights(wp)')
-      counter += 1
-   else:
-     SM.load_weights(weights_path)
+   # if type(SM) == list:
+   #    counter = 0
+   #    for s,wp in zip(SM, weights_path):
+   #       exec('SM[counter].load_weights(wp)')
+   #    counter += 1
+   # else:
+   #   SM.load_weights(weights_path)
 
    ##==============================================
    ## make predictions on training data
    train_gen = get_data_generator_1image(train_df, train_idx, False,
-               len(classes), var, np.min((200, len(train_idx))), greyscale, do_aug)
+               len(classes), var, np.min((1000, len(train_idx))), greyscale, do_aug)
    x_train, (trueT)= next(train_gen)
 
    PT = []
@@ -842,7 +842,7 @@ def predict_test_train_cat(train_df, test_df, train_idx, test_idx, var, SM,
    if test_df is not None:
        ## make predictions on testing data
        test_gen = get_data_generator_1image(test_df, test_idx, False,
-                  len(classes), var, np.min((200, len(test_idx))), greyscale, False) #no augmentation on validation data
+                  len(classes), var, np.min((1000, len(test_idx))), greyscale, False) #no augmentation on validation data
        x_test, (true)= next(test_gen)
 
        PT = []
