@@ -556,6 +556,7 @@ python sedinet_predict.py -c config/config_custom_4prcs.json
 26) `predict_all.sh` is a fully worked example of using the framework to predict on all continuous datasets
 27) simplified yml conda env, and a requirements.txt
 28) added `sedinet_predict1image.py` for making predictions on a single image
+28) added `sedinet_predictfolder.py` for making predictions on a folder of images
 
 > The most important changes area
 * depthwise separable convolution layers
