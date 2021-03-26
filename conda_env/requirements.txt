@@ -60,7 +60,7 @@ PySocks==1.7.1
 python-dateutil==2.8.1
 pytz==2020.1
 PyWavelets==1.1.1
-PyYAML==5.3.1
+PyYAML==5.4
 requests @ file:///home/conda/feedstock_root/build_artifacts/requests_1592425495151/work
 requests-oauthlib @ file:///home/conda/feedstock_root/build_artifacts/requests-oauthlib_1595412712578/work
 rsa @ file:///home/conda/feedstock_root/build_artifacts/rsa_1591996208734/work
