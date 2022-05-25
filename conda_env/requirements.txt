@@ -53,7 +53,7 @@ pyasn1==0.4.8
 pyasn1-modules==0.2.7
 pycparser @ file:///home/conda/feedstock_root/build_artifacts/pycparser_1593275161868/work
 Pygments==2.6.1
-PyJWT==1.7.1
+PyJWT==2.4.0
 pyOpenSSL==19.1.0
 pyparsing==2.4.7
 PySocks==1.7.1
