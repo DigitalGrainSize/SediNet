@@ -47,7 +47,7 @@ pexpect==4.8.0
 pickleshare==0.7.5
 Pillow @ file:///home/conda/feedstock_root/build_artifacts/pillow_1594213113401/work
 prompt-toolkit @ file:///home/conda/feedstock_root/build_artifacts/prompt-toolkit_1592500439797/work
-protobuf==3.12.3
+protobuf==3.18.3
 ptyprocess==0.6.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.7
