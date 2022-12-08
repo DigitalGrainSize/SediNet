@@ -6,7 +6,7 @@ backcall @ file:///home/conda/feedstock_root/build_artifacts/backcall_1592338393
 blinker==1.4
 brotlipy==0.7.0
 cachetools @ file:///home/conda/feedstock_root/build_artifacts/cachetools_1593420445823/work
-certifi==2020.6.20
+certifi==2022.12.7
 cffi==1.14.0
 chardet==3.0.4
 click==7.1.2
